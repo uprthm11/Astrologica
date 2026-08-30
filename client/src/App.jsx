@@ -1,150 +1,77 @@
 import React, { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import axios from 'axios'
+import BlueprintForm from './components/BlueprintForm'
 
-function Home() {
-  const [apiStatus, setApiStatus] = useState({ loading: true, data: null, error: null })
+export default function App() {
+  const [backendStatus, setBackendStatus] = useState({ online: false, checking: true })
 
   useEffect(() => {
-    const checkBackend = async () => {
+    const checkServer = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/health', { timeout: 3000 })
-        setApiStatus({ loading: false, data: response.data, error: null })
+        await axios.get('http://localhost:8000/api/health', { timeout: 2500 })
+        setBackendStatus({ online: true, checking: false })
       } catch (err) {
-        setApiStatus({
-          loading: false,
-          data: null,
-          error: 'Backend offline (run `uvicorn main:app --reload` inside server/)'
-        })
+        setBackendStatus({ online: false, checking: false })
       }
     }
-    checkBackend()
+    checkServer()
   }, [])
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="w-full max-w-3xl text-center space-y-8"
-      >
-        <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold tracking-wider text-purple-400 uppercase bg-purple-950/60 border border-purple-500/30 rounded-full">
-          FARM Stack Scaffolded
-        </div>
+    <div className="relative min-h-screen flex flex-col justify-between bg-slate-950 text-slate-100 selection:bg-purple-500 selection:text-white overflow-hidden">
+      {/* Background Starry / Nebula Ambience */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-purple-900/15 rounded-full blur-[140px]" />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-indigo-900/10 rounded-full blur-[120px]" />
+      </div>
 
-        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-purple-400 via-indigo-300 to-pink-400 bg-clip-text text-transparent">
-          Personality Application
-        </h1>
-
-        <p className="text-lg sm:text-xl text-slate-400 max-w-xl mx-auto">
-          FastAPI + React + MongoDB architecture with Vite, Tailwind CSS, Framer Motion, and Axios.
-        </p>
-
-        {/* Status Card */}
-        <motion.div 
-          whileHover={{ scale: 1.02 }}
-          className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl backdrop-blur-sm text-left"
-        >
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
-            <span className="text-sm font-medium text-slate-400">Backend Connection</span>
-            {apiStatus.loading ? (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                Checking...
-              </span>
-            ) : apiStatus.data ? (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                Connected
-              </span>
-            ) : (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                Offline
-              </span>
-            )}
+      {/* Top Navigation / Brand Header */}
+      <header className="relative z-10 w-full max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center font-bold text-lg shadow-lg shadow-purple-900/40">
+            ✦
           </div>
-
-          <div className="text-sm text-slate-300">
-            {apiStatus.loading && <p>Pinging FastAPI server at <code className="text-purple-300">http://localhost:8000</code>...</p>}
-            {apiStatus.data && (
-              <pre className="p-3 bg-slate-950 rounded-lg text-emerald-400 text-xs overflow-x-auto">
-                {JSON.stringify(apiStatus.data, null, 2)}
-              </pre>
-            )}
-            {apiStatus.error && (
-              <p className="text-rose-400 text-xs">{apiStatus.error}</p>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Stack Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
-          <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800/80">
-            <h3 className="font-semibold text-purple-400 text-sm">FastAPI</h3>
-            <p className="text-xs text-slate-400 mt-1">Python async backend with PyMongo</p>
-          </div>
-          <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800/80">
-            <h3 className="font-semibold text-cyan-400 text-sm">React + Vite</h3>
-            <p className="text-xs text-slate-400 mt-1">Fast frontend with HMR</p>
-          </div>
-          <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800/80">
-            <h3 className="font-semibold text-emerald-400 text-sm">MongoDB</h3>
-            <p className="text-xs text-slate-400 mt-1">AsyncMongoClient persistence</p>
-          </div>
-          <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800/80">
-            <h3 className="font-semibold text-pink-400 text-sm">Tailwind + Motion</h3>
-            <p className="text-xs text-slate-400 mt-1">Modern UI & smooth animations</p>
+          <div>
+            <h1 className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-purple-300 via-slate-100 to-indigo-300 bg-clip-text text-transparent">
+              Astrologica
+            </h1>
+            <p className="text-[10px] text-slate-500 uppercase tracking-widest -mt-1 font-semibold">
+              FARM Personality Stack
+            </p>
           </div>
         </div>
 
-        <div className="flex justify-center gap-4 pt-4">
-          <Link
-            to="/about"
-            className="px-5 py-2.5 rounded-xl font-medium text-sm text-slate-200 bg-slate-800 hover:bg-slate-700 transition"
-          >
-            About Application
-          </Link>
+        {/* Server Status Badge */}
+        <div className="flex items-center gap-2">
+          {backendStatus.checking ? (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+              API: Connecting...
+            </span>
+          ) : backendStatus.online ? (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-950/60 border border-emerald-500/30 text-emerald-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              API: Online (8000)
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-950/60 border border-rose-500/30 text-rose-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+              API: Offline
+            </span>
+          )}
         </div>
-      </motion.div>
+      </header>
+
+      {/* Main Content Area: Centered BlueprintForm */}
+      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-8">
+        <BlueprintForm />
+      </main>
+
+      {/* Footer */}
+      <footer className="relative z-10 w-full max-w-6xl mx-auto px-6 py-6 text-center text-xs text-slate-600">
+        Astrologica &bull; FastAPI + React 19 + MongoDB + Flatlib Swiss Ephemeris
+      </footer>
     </div>
-  )
-}
-
-function About() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-slate-950 text-slate-100">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-lg p-8 rounded-2xl bg-slate-900 border border-slate-800 space-y-6 text-left"
-      >
-        <h2 className="text-2xl font-bold text-slate-100">About the Architecture</h2>
-        <p className="text-slate-400 text-sm leading-relaxed">
-          This workspace is configured with a modular FARM stack architecture:
-        </p>
-        <ul className="space-y-2 text-sm text-slate-300 list-disc list-inside">
-          <li><strong className="text-purple-300">Client:</strong> Vite, React Router, Tailwind CSS, Framer Motion, Axios</li>
-          <li><strong className="text-purple-300">Server:</strong> FastAPI, Async PyMongo, Flatlib, Pydantic</li>
-          <li><strong className="text-purple-300">CORS:</strong> Configured for Vite dev server (<code className="text-xs bg-slate-950 px-1.5 py-0.5 rounded">http://localhost:5173</code>)</li>
-        </ul>
-        <Link 
-          to="/"
-          className="inline-block px-4 py-2 text-sm font-medium text-purple-300 bg-purple-950/60 border border-purple-500/30 rounded-lg hover:bg-purple-900/50 transition"
-        >
-          &larr; Back to Home
-        </Link>
-      </motion.div>
-    </div>
-  )
-}
-
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-      </Routes>
-    </BrowserRouter>
   )
 }
