@@ -1,10 +1,11 @@
-# Personality Application (FARM Stack)
+# 🌌 Astrologica: The Cosmic & Cognitive Blueprint
 
-A modern full-stack personality application built with the **FARM** stack:
-- **F**astAPI (Python 3.11+ async backend)
-- **A**sync PyMongo (MongoDB driver with `AsyncMongoClient`)
-- **R**eact 19 + Vite (Modern, fast frontend with Tailwind CSS v4, Framer Motion, Axios, and React Router)
-- **M**ongoDB (NoSQL database)
+A full-stack web application built with the **FARM** stack that synthesizes precise astronomical calculations and MBTI psychological profiling into unique, shareable personality dossiers.
+
+- **F**astAPI (Python 3.11+ async backend with `flatlib` for celestial calculations)
+- **A**sync PyMongo (MongoDB Atlas cloud driver with `AsyncMongoClient`)
+- **R**eact 19 + Vite (Modern frontend with Tailwind CSS, Framer Motion, Axios, and React Router)
+- **M**ongoDB (NoSQL database with dynamic UUID routing for shared profiles)
 
 ---
 
