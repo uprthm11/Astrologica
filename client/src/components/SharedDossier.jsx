@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import axios from 'axios'
 import API_BASE_URL from '../config/api'
+import DualAstroView from './DualAstroView'
 
 const ZODIAC_SYMBOLS = {
   Aries: '♈',
@@ -25,6 +26,7 @@ export default function SharedDossier() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [viewDetails, setViewDetails] = useState(false)
 
   useEffect(() => {
     const fetchBlueprint = async () => {
@@ -84,17 +86,45 @@ export default function SharedDossier() {
   }
 
   const { astrology, mbti, created_at } = data
-  const sun = astrology?.sun || {}
-  const moon = astrology?.moon || {}
-  const meta = astrology?.meta || {}
+  const isDual = Boolean(astrology?.western && astrology?.vedic)
+
+  // Extract core astronomical points for card header
+  let sunSign = 'Cosmic'
+  let moonSign = 'Cosmic'
+  let siderealSunRashi = ''
+  let siderealMoonRashi = ''
+  let sunDegrees = 0
+  let moonDegrees = 0
+  let meta = astrology?.meta || {}
+
+  if (isDual) {
+    const sunW = astrology.western.planets?.find((p) => p.id === 'sun')
+    const moonW = astrology.western.planets?.find((p) => p.id === 'moon')
+    const sunV = astrology.vedic.planets?.find((p) => p.id === 'sun')
+    const moonV = astrology.vedic.planets?.find((p) => p.id === 'moon')
+
+    sunSign = sunW?.sign || 'Cosmic'
+    moonSign = moonW?.sign || 'Cosmic'
+    sunDegrees = sunW?.degrees || 0
+    moonDegrees = moonW?.degrees || 0
+
+    siderealSunRashi = sunV?.rashi ? `${sunV.sanskrit_rashi || sunV.rashi} (${sunV.rashi})` : ''
+    siderealMoonRashi = moonV?.rashi ? `${moonV.sanskrit_rashi || moonV.rashi} (${moonV.rashi})` : ''
+  } else {
+    sunSign = astrology?.sun?.sign || 'Cosmic'
+    moonSign = astrology?.moon?.sign || 'Cosmic'
+    sunDegrees = astrology?.sun?.degrees || 0
+    moonDegrees = astrology?.moon?.degrees || 0
+  }
+
   const breakdown = mbti?.breakdown || {}
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.92, y: 30 }}
+      initial={{ opacity: 0, scale: 0.94, y: 25 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.6, type: 'spring', bounce: 0.2 }}
-      className="w-full max-w-2xl mx-auto"
+      transition={{ duration: 0.5, type: 'spring', bounce: 0.2 }}
+      className="w-full max-w-3xl mx-auto space-y-6"
     >
       {/* --- Cosmic Holographic Trading Card --- */}
       <div className="relative rounded-[2.5rem] p-1 bg-gradient-to-b from-purple-500 via-indigo-500/40 to-cyan-500 shadow-[0_0_50px_rgba(168,85,247,0.25)]">
@@ -114,7 +144,11 @@ export default function SharedDossier() {
             </div>
             {created_at && (
               <span className="text-[11px] font-mono text-slate-500">
-                {new Date(created_at).toLocaleDateString()} {new Date(created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {new Date(created_at).toLocaleDateString()}{' '}
+                {new Date(created_at).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
               </span>
             )}
           </div>
@@ -122,24 +156,24 @@ export default function SharedDossier() {
           {/* Archetype Title & Hero Badge */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-purple-950/80 to-indigo-950/80 border border-purple-400/30 text-purple-200 mb-3 shadow-inner">
-              ✦ Unified Personality Synthesis
+              ✦ Full-Spectrum Personality Synthesis
             </div>
-            
+
             <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white mb-2">
-              The {sun.sign || 'Cosmic'} {mbti.archetype ? mbti.archetype.replace('The ', '') : 'Architect'}
+              The {sunSign} {mbti.archetype ? mbti.archetype.replace('The ', '') : 'Architect'}
             </h2>
 
-            <div className="flex items-center justify-center gap-2 mt-2">
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
               <span className="px-3 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 font-mono font-bold text-sm tracking-wider">
                 {mbti.mbti_type || 'MBTI'}
               </span>
               <span className="text-slate-500">&bull;</span>
               <span className="text-sm font-semibold text-amber-300">
-                {sun.sign} Sun
+                {sunSign} Sun
               </span>
               <span className="text-slate-500">&bull;</span>
               <span className="text-sm font-semibold text-indigo-300">
-                {moon.sign} Moon
+                {moonSign} Moon
               </span>
             </div>
 
@@ -148,44 +182,48 @@ export default function SharedDossier() {
             </p>
           </div>
 
-          {/* Astrological Core Dual Card */}
+          {/* Dual Astrological Comparison Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             {/* Sun Card */}
             <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-950/30 via-slate-900/80 to-slate-950 border border-amber-500/30 shadow-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
-                  ☀️ Sun Sign
+                  ☀️ Sun Sign Placement
                 </span>
-                <span className="text-2xl">{ZODIAC_SYMBOLS[sun.sign] || '☀️'}</span>
+                <span className="text-2xl">{ZODIAC_SYMBOLS[sunSign] || '☀️'}</span>
               </div>
-              <div className="text-2xl font-black text-amber-100">{sun.sign}</div>
+              <div className="text-2xl font-black text-amber-100">{sunSign}</div>
               <div className="mt-2 flex items-center justify-between text-xs font-mono text-amber-200/80">
-                <span>Degree:</span>
-                <span className="font-bold">{sun.degrees}°</span>
+                <span>Tropical:</span>
+                <span className="font-bold">{sunDegrees}° {sunSign}</span>
               </div>
-              <div className="mt-0.5 flex items-center justify-between text-xs font-mono text-slate-400">
-                <span>Ecliptic:</span>
-                <span>{sun.total_degrees}°</span>
-              </div>
+              {siderealSunRashi && (
+                <div className="mt-1 flex items-center justify-between text-xs font-mono text-purple-300">
+                  <span>Sidereal (Surya):</span>
+                  <span>{siderealSunRashi}</span>
+                </div>
+              )}
             </div>
 
             {/* Moon Card */}
             <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-950/30 via-slate-900/80 to-slate-950 border border-indigo-500/30 shadow-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-                  🌙 Moon Sign
+                  🌙 Moon Sign Placement
                 </span>
-                <span className="text-2xl">{ZODIAC_SYMBOLS[moon.sign] || '🌙'}</span>
+                <span className="text-2xl">{ZODIAC_SYMBOLS[moonSign] || '🌙'}</span>
               </div>
-              <div className="text-2xl font-black text-indigo-100">{moon.sign}</div>
+              <div className="text-2xl font-black text-indigo-100">{moonSign}</div>
               <div className="mt-2 flex items-center justify-between text-xs font-mono text-indigo-200/80">
-                <span>Degree:</span>
-                <span className="font-bold">{moon.degrees}°</span>
+                <span>Tropical:</span>
+                <span className="font-bold">{moonDegrees}° {moonSign}</span>
               </div>
-              <div className="mt-0.5 flex items-center justify-between text-xs font-mono text-slate-400">
-                <span>Ecliptic:</span>
-                <span>{moon.total_degrees}°</span>
-              </div>
+              {siderealMoonRashi && (
+                <div className="mt-1 flex items-center justify-between text-xs font-mono text-cyan-300">
+                  <span>Sidereal (Chandra):</span>
+                  <span>{siderealMoonRashi}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -229,7 +267,7 @@ export default function SharedDossier() {
 
           {/* Coordinates & Metadata Footer Bar */}
           {meta?.date && (
-            <div className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 text-xs text-slate-400 flex flex-wrap items-center justify-between gap-2 mb-8">
+            <div className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 text-xs text-slate-400 flex flex-wrap items-center justify-between gap-2 mb-6">
               <span>🗓️ Birth: {meta.date} at {meta.time}</span>
               <span>📍 {meta.lat}°N, {meta.lon}°E ({meta.utc_offset})</span>
             </div>
@@ -256,15 +294,35 @@ export default function SharedDossier() {
               )}
             </motion.button>
 
+            {isDual && (
+              <button
+                onClick={() => setViewDetails(!viewDetails)}
+                className="py-3.5 px-6 rounded-2xl font-semibold text-sm text-purple-200 bg-purple-950/60 hover:bg-purple-900/60 border border-purple-500/40 transition flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>{viewDetails ? 'Hide Deep Ephemeris' : '✦ View Charts & Matrix'}</span>
+              </button>
+            )}
+
             <Link
               to="/"
               className="py-3.5 px-6 rounded-2xl font-semibold text-sm text-slate-300 bg-slate-900 hover:bg-slate-800 border border-slate-700 transition flex items-center justify-center gap-2"
             >
-              <span>↺ Create New Blueprint</span>
+              <span>↺ New Blueprint</span>
             </Link>
           </div>
         </div>
       </div>
+
+      {/* Expanded Deep Astrological Ephemeris & Visual Charts */}
+      {isDual && viewDetails && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full pt-4"
+        >
+          <DualAstroView dualData={astrology} />
+        </motion.div>
+      )}
     </motion.div>
   )
 }

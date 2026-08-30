@@ -2,22 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 import API_BASE_URL from '../config/api'
-
-// Astrological Zodiac Symbols
-const ZODIAC_SYMBOLS = {
-  Aries: '♈',
-  Taurus: '♉',
-  Gemini: '♊',
-  Cancer: '♋',
-  Leo: '♌',
-  Virgo: '♍',
-  Libra: '♎',
-  Scorpio: '♏',
-  Sagittarius: '♐',
-  Capricorn: '♑',
-  Aquarius: '♒',
-  Pisces: '♓'
-}
+import DualAstroView from './DualAstroView'
 
 export default function BlueprintForm({ onComplete, completedData }) {
   // Initial state variables as requested
@@ -25,6 +10,8 @@ export default function BlueprintForm({ onComplete, completedData }) {
   const [time, setTime] = useState('12:00')
   const [lat, setLat] = useState(22.7196)
   const [lon, setLon] = useState(75.8577)
+  const [ayanamsha, setAyanamsha] = useState('lahiri')
+  const [houseSystem, setHouseSystem] = useState('placidus')
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -36,22 +23,23 @@ export default function BlueprintForm({ onComplete, completedData }) {
     }
   }, [completedData])
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const calculateChart = async (ay = ayanamsha, hsys = houseSystem) => {
     setLoading(true)
     setError(null)
 
     const payload = {
       date: date.trim(),
       time: time.trim(),
-      utc_offset: '+05:30', // Hardcoded as requested
+      utc_offset: '+05:30', // Default UTC offset
       lat: parseFloat(lat),
-      lon: parseFloat(lon)
+      lon: parseFloat(lon),
+      ayanamsha: ay,
+      house_system: hsys
     }
 
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/api/calculate-blueprint`,
+        `${API_BASE_URL}/api/calculate/dual`,
         payload
       )
       setResult(response.data)
@@ -69,13 +57,28 @@ export default function BlueprintForm({ onComplete, completedData }) {
     }
   }
 
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    calculateChart(ayanamsha, houseSystem)
+  }
+
+  const handleSettingChange = (key, value) => {
+    if (key === 'ayanamsha') {
+      setAyanamsha(value)
+      calculateChart(value, houseSystem)
+    } else if (key === 'house_system') {
+      setHouseSystem(value)
+      calculateChart(ayanamsha, value)
+    }
+  }
+
   const handleReset = () => {
     setResult(null)
     setError(null)
   }
 
   return (
-    <div className="w-full max-w-xl mx-auto">
+    <div className="w-full mx-auto">
       <AnimatePresence mode="wait">
         {!result ? (
           /* --- Input Form Card --- */
@@ -85,7 +88,7 @@ export default function BlueprintForm({ onComplete, completedData }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="relative p-8 rounded-3xl bg-slate-900/90 border border-purple-500/20 shadow-2xl backdrop-blur-xl"
+            className="relative max-w-xl mx-auto p-8 rounded-3xl bg-slate-900/90 border border-purple-500/20 shadow-2xl backdrop-blur-xl"
           >
             {/* Ambient Background Glow */}
             <div className="absolute -top-24 -left-24 w-48 h-48 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
@@ -93,31 +96,21 @@ export default function BlueprintForm({ onComplete, completedData }) {
 
             <div className="relative text-center mb-8">
               <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold tracking-wider text-purple-400 uppercase bg-purple-950/60 border border-purple-500/30 rounded-full mb-3">
-                ✧ Astrological Blueprint
+                ✧ Full-Spectrum Astrological Engine
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Calculate Your Signs
+                Calculate Your Blueprint
               </h2>
-              <p className="text-sm text-slate-400 mt-1">
-                Enter your birth details to generate your celestial blueprint
+              <p className="text-sm text-slate-400 mt-2">
+                Synthesizing Western Tropical Ephemeris and Vedic Sidereal Jyotish
               </p>
             </div>
 
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mb-6 p-4 rounded-xl bg-rose-950/50 border border-rose-500/30 text-rose-300 text-xs sm:text-sm"
-              >
-                ⚠️ {error}
-              </motion.div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Date Input */}
                 <div>
-                  <label className="block text-xs font-medium text-purple-300 mb-1.5 uppercase tracking-wide">
+                  <label className="block text-xs font-medium uppercase tracking-wider text-slate-300 mb-1.5 text-left">
                     Birth Date (YYYY/MM/DD)
                   </label>
                   <input
@@ -126,13 +119,13 @@ export default function BlueprintForm({ onComplete, completedData }) {
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                     placeholder="2003/06/11"
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-100 placeholder-slate-600 text-sm transition outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-slate-100 placeholder-slate-600 text-sm transition outline-none"
                   />
                 </div>
 
                 {/* Time Input */}
                 <div>
-                  <label className="block text-xs font-medium text-purple-300 mb-1.5 uppercase tracking-wide">
+                  <label className="block text-xs font-medium uppercase tracking-wider text-slate-300 mb-1.5 text-left">
                     Birth Time (24h HH:MM)
                   </label>
                   <input
@@ -141,14 +134,14 @@ export default function BlueprintForm({ onComplete, completedData }) {
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
                     placeholder="12:00"
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-100 placeholder-slate-600 text-sm transition outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-slate-100 placeholder-slate-600 text-sm transition outline-none"
                   />
                 </div>
 
                 {/* Latitude Input */}
                 <div>
-                  <label className="block text-xs font-medium text-purple-300 mb-1.5 uppercase tracking-wide">
-                    Latitude (°N)
+                  <label className="block text-xs font-medium uppercase tracking-wider text-slate-300 mb-1.5 text-left">
+                    Latitude (Decimal)
                   </label>
                   <input
                     type="number"
@@ -157,14 +150,14 @@ export default function BlueprintForm({ onComplete, completedData }) {
                     value={lat}
                     onChange={(e) => setLat(e.target.value)}
                     placeholder="22.7196"
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-100 placeholder-slate-600 text-sm transition outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-slate-100 placeholder-slate-600 text-sm transition outline-none"
                   />
                 </div>
 
                 {/* Longitude Input */}
                 <div>
-                  <label className="block text-xs font-medium text-purple-300 mb-1.5 uppercase tracking-wide">
-                    Longitude (°E)
+                  <label className="block text-xs font-medium uppercase tracking-wider text-slate-300 mb-1.5 text-left">
+                    Longitude (Decimal)
                   </label>
                   <input
                     type="number"
@@ -173,24 +166,59 @@ export default function BlueprintForm({ onComplete, completedData }) {
                     value={lon}
                     onChange={(e) => setLon(e.target.value)}
                     placeholder="75.8577"
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-100 placeholder-slate-600 text-sm transition outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-slate-100 placeholder-slate-600 text-sm transition outline-none"
                   />
+                </div>
+
+                {/* Ayanamsha Selector */}
+                <div>
+                  <label className="block text-xs font-medium uppercase tracking-wider text-slate-300 mb-1.5 text-left">
+                    Vedic Ayanamsha
+                  </label>
+                  <select
+                    value={ayanamsha}
+                    onChange={(e) => setAyanamsha(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-slate-100 text-sm transition outline-none cursor-pointer"
+                  >
+                    <option value="lahiri">Lahiri (Chitrapaksha)</option>
+                    <option value="raman">B.V. Raman</option>
+                    <option value="kp">Krishnamurti Paddhati (KP)</option>
+                  </select>
+                </div>
+
+                {/* House System Selector */}
+                <div>
+                  <label className="block text-xs font-medium uppercase tracking-wider text-slate-300 mb-1.5 text-left">
+                    Western House System
+                  </label>
+                  <select
+                    value={houseSystem}
+                    onChange={(e) => setHouseSystem(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-slate-100 text-sm transition outline-none cursor-pointer"
+                  >
+                    <option value="placidus">Placidus</option>
+                    <option value="whole_sign">Whole Sign</option>
+                  </select>
                 </div>
               </div>
 
-              {/* Timezone Note */}
-              <div className="flex items-center justify-between text-xs text-slate-500 px-1">
-                <span>Timezone Offset</span>
-                <span className="font-mono text-purple-400">+05:30 (IST)</span>
-              </div>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/30 text-rose-300 text-xs text-left"
+                >
+                  ⚠️ {error}
+                </motion.div>
+              )}
 
               {/* Submit Button */}
               <motion.button
                 type="submit"
                 disabled={loading}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full py-3.5 px-6 rounded-xl font-semibold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 shadow-lg shadow-purple-900/30 border border-purple-400/30 transition duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className="w-full mt-6 py-3.5 px-6 rounded-xl font-bold text-sm sm:text-base text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 shadow-lg shadow-purple-900/30 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loading ? (
                   <>
@@ -214,124 +242,34 @@ export default function BlueprintForm({ onComplete, completedData }) {
                         d="M4 12a8 8 0 018-8v8H4z"
                       ></path>
                     </svg>
-                    <span>Calculating Celestial Blueprint...</span>
+                    <span>Calculating High-Precision Ephemeris...</span>
                   </>
                 ) : (
                   <>
-                    <span>Generate Blueprint</span>
-                    <span>✨</span>
+                    <span>✦</span>
+                    <span>Generate Astrological Blueprint</span>
                   </>
                 )}
               </motion.button>
             </form>
           </motion.div>
         ) : (
-          /* --- Animated Result Card --- */
+          /* --- Full Dual Astrological Result View --- */
           <motion.div
-            key="result-card"
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -20 }}
-            transition={{ duration: 0.5, type: 'spring', bounce: 0.25 }}
-            className="relative p-8 rounded-3xl bg-slate-900/95 border border-purple-500/30 shadow-2xl backdrop-blur-xl overflow-hidden"
+            key="result-view"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+            className="w-full"
           >
-            {/* Cosmic Ambient Lights */}
-            <div className="absolute -top-32 -left-32 w-64 h-64 bg-purple-500/25 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="text-center mb-8">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: 'spring' }}
-                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold tracking-wider text-amber-300 uppercase bg-amber-950/60 border border-amber-500/30 rounded-full mb-3"
-              >
-                ☀️ Celestial Blueprint Generated
-              </motion.div>
-              <h2 className="text-3xl font-extrabold text-white tracking-tight">
-                Your Astrological Signature
-              </h2>
-              <p className="text-sm text-slate-400 mt-1">
-                Calculated via Swiss Ephemeris for {result.meta?.date} at {result.meta?.time}
-              </p>
-            </div>
-
-            {/* Sun & Moon Display Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-              {/* Sun Sign Card */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-                whileHover={{ y: -4 }}
-                className="p-6 rounded-2xl bg-gradient-to-br from-amber-950/40 via-slate-950/60 to-slate-900 border border-amber-500/30 shadow-lg text-left"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
-                    Sun Sign
-                  </span>
-                  <span className="text-2xl">
-                    {ZODIAC_SYMBOLS[result.sun?.sign] || '☀️'}
-                  </span>
-                </div>
-                <div className="text-2xl sm:text-3xl font-black text-amber-200">
-                  {result.sun?.sign}
-                </div>
-                <div className="mt-2 text-xs font-mono text-amber-300/80 flex items-center justify-between">
-                  <span>Sign Degree:</span>
-                  <span className="font-bold text-amber-100">{result.sun?.degrees}°</span>
-                </div>
-                <div className="mt-1 text-xs font-mono text-slate-400 flex items-center justify-between">
-                  <span>Ecliptic Longitude:</span>
-                  <span>{result.sun?.total_degrees}°</span>
-                </div>
-              </motion.div>
-
-              {/* Moon Sign Card */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-                whileHover={{ y: -4 }}
-                className="p-6 rounded-2xl bg-gradient-to-br from-indigo-950/40 via-slate-950/60 to-slate-900 border border-indigo-500/30 shadow-lg text-left"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-                    Moon Sign
-                  </span>
-                  <span className="text-2xl">
-                    {ZODIAC_SYMBOLS[result.moon?.sign] || '🌙'}
-                  </span>
-                </div>
-                <div className="text-2xl sm:text-3xl font-black text-indigo-200">
-                  {result.moon?.sign}
-                </div>
-                <div className="mt-2 text-xs font-mono text-indigo-300/80 flex items-center justify-between">
-                  <span>Sign Degree:</span>
-                  <span className="font-bold text-indigo-100">{result.moon?.degrees}°</span>
-                </div>
-                <div className="mt-1 text-xs font-mono text-slate-400 flex items-center justify-between">
-                  <span>Ecliptic Longitude:</span>
-                  <span>{result.moon?.total_degrees}°</span>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Coordinates Summary */}
-            <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-400 flex flex-wrap items-center justify-between gap-2 mb-6">
-              <span>📍 Coordinates: {result.meta?.lat}°N, {result.meta?.lon}°E</span>
-              <span>⏰ Offset: {result.meta?.utc_offset}</span>
-            </div>
-
-            {/* Back / Recalculate Button */}
-            <motion.button
-              onClick={handleReset}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full py-3 px-6 rounded-xl font-medium text-sm text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <span>← Edit Birth Coordinates</span>
-            </motion.button>
+            <DualAstroView
+              dualData={result}
+              onRecalculate={handleReset}
+              onSettingChange={handleSettingChange}
+              currentAyanamsha={ayanamsha}
+              currentHouseSystem={houseSystem}
+            />
           </motion.div>
         )}
       </AnimatePresence>
