@@ -1,7 +1,9 @@
 import os
+import uuid
 import logging
+from datetime import datetime
 from contextlib import asynccontextmanager
-from typing import Union, List
+from typing import Union, List, Dict, Any, Optional
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -12,25 +14,26 @@ from flatlib.geopos import GeoPos
 from flatlib.chart import Chart
 from flatlib import const
 
-from database import connect_to_mongo, close_mongo_connection, ping_database
+from database import connect_to_mongo, close_mongo_connection, ping_database, get_database
 
 logger = logging.getLogger("uvicorn.error")
+
+# Fallback store in memory to ensure resilience in local/degraded dev environments
+IN_MEMORY_BLUEPRINTS: Dict[str, Any] = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifecycle events for FastAPI application."""
-    # Startup: connect to MongoDB
     logger.info("Application startup: Initializing database connection...")
     await connect_to_mongo()
     yield
-    # Shutdown: close MongoDB connection
     logger.info("Application shutdown: Closing database connection...")
     await close_mongo_connection()
 
 app = FastAPI(
     title="Astrologica Personality API",
-    description="FARM Stack Backend with FastAPI, PyMongo AsyncMongoClient, Flatlib calculations, and MBTI assessment.",
-    version="1.1.0",
+    description="FARM Stack Backend with FastAPI, PyMongo AsyncMongoClient, Flatlib calculations, MBTI assessment, and Blueprint synthesis.",
+    version="1.2.0",
     lifespan=lifespan
 )
 
@@ -119,31 +122,11 @@ MBTI_ARCHETYPES = {
 # --- Pydantic Models ---
 
 class BlueprintRequest(BaseModel):
-    date: str = Field(
-        ...,
-        description="Date of birth in YYYY/MM/DD or YYYY-MM-DD format",
-        example="1995/10/24"
-    )
-    time: str = Field(
-        ...,
-        description="Time of birth in HH:MM or HH:MM:SS format (24-hour)",
-        example="14:30"
-    )
-    utc_offset: str = Field(
-        ...,
-        description="UTC time offset string, e.g. '+05:30', '-04:00', '+00:00'",
-        example="+05:30"
-    )
-    lat: Union[float, str] = Field(
-        ...,
-        description="Latitude of birth location in decimal degrees",
-        example=19.0760
-    )
-    lon: Union[float, str] = Field(
-        ...,
-        description="Longitude of birth location in decimal degrees",
-        example=72.8777
-    )
+    date: str = Field(..., description="Date of birth in YYYY/MM/DD or YYYY-MM-DD format", example="1995/10/24")
+    time: str = Field(..., description="Time of birth in HH:MM or HH:MM:SS format", example="14:30")
+    utc_offset: str = Field(..., description="UTC offset, e.g. '+05:30'", example="+05:30")
+    lat: Union[float, str] = Field(..., description="Latitude in decimal degrees", example=19.0760)
+    lon: Union[float, str] = Field(..., description="Longitude in decimal degrees", example=72.8777)
 
 class CelestialSignInfo(BaseModel):
     sign: str
@@ -158,11 +141,7 @@ class BlueprintResponse(BaseModel):
     meta: dict
 
 class MBTIRequest(BaseModel):
-    answers: List[int] = Field(
-        ...,
-        description="Array of 4 integers representing answers to the 4 personality questions",
-        example=[1, -1, 1, -1]
-    )
+    answers: List[int] = Field(..., description="Array of 4 integers representing answers to the 4 personality questions", example=[1, -1, 1, -1])
 
 class MBTIResponse(BaseModel):
     status: str = "success"
@@ -171,6 +150,15 @@ class MBTIResponse(BaseModel):
     description: str
     breakdown: dict
 
+class SaveBlueprintRequest(BaseModel):
+    astrology: Dict[str, Any] = Field(..., description="Calculated Astrology data (Sun, Moon, degrees, meta)")
+    mbti: Dict[str, Any] = Field(..., description="Calculated MBTI data (mbti_type, archetype, description, breakdown)")
+
+class SaveBlueprintResponse(BaseModel):
+    status: str = "success"
+    id: str
+    message: str = "Blueprint saved successfully"
+
 # --- Endpoints ---
 
 @app.get("/")
@@ -178,12 +166,14 @@ async def root():
     return {
         "app": "Astrologica Personality API",
         "status": "online",
-        "version": "1.1.0",
+        "version": "1.2.0",
         "endpoints": {
             "docs": "/docs",
             "health": "/api/health",
             "calculate_blueprint": "/api/calculate-blueprint",
-            "calculate_mbti": "/api/calculate-mbti"
+            "calculate_mbti": "/api/calculate-mbti",
+            "save_blueprint": "/api/save-blueprint",
+            "get_blueprint": "/api/blueprint/{id}"
         }
     }
 
@@ -271,13 +261,7 @@ async def calculate_mbti(request: MBTIRequest):
             detail="MBTI assessment requires exactly 4 answers for the 4 personality axes."
         )
     
-    # Map 4 integer scores to 4 axes:
-    # 1. Energy: E (score > 0) vs I (score <= 0)
-    # 2. Mind: S (score > 0) vs N (score <= 0)
-    # 3. Nature: T (score > 0) vs F (score <= 0)
-    # 4. Tactics: J (score > 0) vs P (score <= 0)
     a1, a2, a3, a4 = request.answers[0], request.answers[1], request.answers[2], request.answers[3]
-    
     letter_e_i = "E" if a1 > 0 else "I"
     letter_s_n = "S" if a2 > 0 else "N"
     letter_t_f = "T" if a3 > 0 else "F"
@@ -303,6 +287,68 @@ async def calculate_mbti(request: MBTIRequest):
             "nature": {"letter": letter_t_f, "trait": "Thinking" if letter_t_f == "T" else "Feeling"},
             "tactics": {"letter": letter_j_p, "trait": "Judging (Structured)" if letter_j_p == "J" else "Prospecting (Spontaneous)"}
         }
+    )
+
+@app.post("/api/save-blueprint", response_model=SaveBlueprintResponse, status_code=status.HTTP_200_OK)
+async def save_blueprint(request: SaveBlueprintRequest):
+    """
+    Synthesizes and stores a combined Astrology & MBTI profile into MongoDB.
+    Generates a unique 8-character hex identifier.
+    """
+    short_id = uuid.uuid4().hex[:8]
+    timestamp = datetime.utcnow().isoformat()
+    
+    doc = {
+        "id": short_id,
+        "blueprint_id": short_id,
+        "astrology": request.astrology,
+        "mbti": request.mbti,
+        "created_at": timestamp
+    }
+    
+    # Store in memory cache/fallback
+    IN_MEMORY_BLUEPRINTS[short_id] = doc
+    
+    # Store in MongoDB collection 'blueprints'
+    db = await get_database()
+    if db is not None:
+        try:
+            mongo_doc = doc.copy()
+            # Use short_id as MongoDB _id
+            mongo_doc["_id"] = short_id
+            await db["blueprints"].insert_one(mongo_doc)
+            logger.info(f"Saved blueprint {short_id} to MongoDB.")
+        except Exception as exc:
+            logger.warning(f"MongoDB storage fallback notice: {exc}")
+    
+    return SaveBlueprintResponse(
+        status="success",
+        id=short_id,
+        message="Blueprint saved successfully"
+    )
+
+@app.get("/api/blueprint/{blueprint_id}", status_code=status.HTTP_200_OK)
+async def get_blueprint(blueprint_id: str):
+    """
+    Fetches saved cosmic blueprint profile by unique 8-character ID.
+    """
+    db = await get_database()
+    if db is not None:
+        try:
+            doc = await db["blueprints"].find_one({"$or": [{"_id": blueprint_id}, {"id": blueprint_id}, {"blueprint_id": blueprint_id}]})
+            if doc:
+                doc["_id"] = str(doc.get("_id", blueprint_id))
+                return doc
+        except Exception as exc:
+            logger.warning(f"MongoDB fetch query notice: {exc}")
+    
+    # Fallback to in-memory store
+    if blueprint_id in IN_MEMORY_BLUEPRINTS:
+        return IN_MEMORY_BLUEPRINTS[blueprint_id]
+    
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Blueprint with ID '{blueprint_id}' not found."
     )
 
 if __name__ == "__main__":

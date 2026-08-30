@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 
@@ -93,12 +93,18 @@ const QUESTIONS = [
   }
 ]
 
-export default function MBTIQuiz() {
+export default function MBTIQuiz({ onComplete, completedData }) {
   const [currentStep, setCurrentStep] = useState(0)
   const [answers, setAnswers] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [result, setResult] = useState(null)
+  const [result, setResult] = useState(completedData || null)
+
+  useEffect(() => {
+    if (completedData) {
+      setResult(completedData)
+    }
+  }, [completedData])
 
   const handleSelectOption = async (value) => {
     const updatedAnswers = [...answers, value]
@@ -116,6 +122,9 @@ export default function MBTIQuiz() {
           { answers: updatedAnswers }
         )
         setResult(response.data)
+        if (onComplete) {
+          onComplete(response.data)
+        }
       } catch (err) {
         console.error('MBTI Assessment Error:', err)
         setError(

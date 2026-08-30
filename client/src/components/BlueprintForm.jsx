@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 
@@ -18,7 +18,7 @@ const ZODIAC_SYMBOLS = {
   Pisces: '♓'
 }
 
-export default function BlueprintForm() {
+export default function BlueprintForm({ onComplete, completedData }) {
   // Initial state variables as requested
   const [date, setDate] = useState('2003/06/11')
   const [time, setTime] = useState('12:00')
@@ -27,7 +27,13 @@ export default function BlueprintForm() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [result, setResult] = useState(null)
+  const [result, setResult] = useState(completedData || null)
+
+  useEffect(() => {
+    if (completedData) {
+      setResult(completedData)
+    }
+  }, [completedData])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -48,6 +54,9 @@ export default function BlueprintForm() {
         payload
       )
       setResult(response.data)
+      if (onComplete) {
+        onComplete(response.data)
+      }
     } catch (err) {
       console.error('Calculation Error:', err)
       const errorMsg =
@@ -320,7 +329,7 @@ export default function BlueprintForm() {
               whileTap={{ scale: 0.98 }}
               className="w-full py-3 px-6 rounded-xl font-medium text-sm text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>← Calculate Another Blueprint</span>
+              <span>← Edit Birth Coordinates</span>
             </motion.button>
           </motion.div>
         )}
