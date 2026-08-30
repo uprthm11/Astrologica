@@ -1,105 +1,235 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 import API_BASE_URL from '../config/api'
+import ClarityBars from './ClarityBars'
+import CognitiveStack from './CognitiveStack'
 
-const QUESTIONS = [
+// 24-Item Fallback Question Bank
+const FALLBACK_QUESTIONS = [
+  // --- Axis 1: Energy (E vs I) ---
   {
     id: 1,
-    axis: 'Energy Axis (E vs I)',
-    title: 'How do you recharge your energy?',
-    subtitle: 'Where do you naturally direct your attention and gain vitality?',
-    options: [
-      {
-        text: 'In a lively crowd surrounded by people, dynamic conversations & active engagement',
-        value: 1,
-        label: 'Extraverted (+1)',
-        icon: '⚡',
-        accentColor: 'from-amber-500/20 to-orange-500/20 border-amber-500/40 hover:border-amber-400 hover:bg-amber-500/10'
-      },
-      {
-        text: 'In quiet solitude with personal space, calm reflection & deep individual focus',
-        value: -1,
-        label: 'Introverted (-1)',
-        icon: '🌙',
-        accentColor: 'from-indigo-500/20 to-purple-500/20 border-indigo-500/40 hover:border-indigo-400 hover:bg-indigo-500/10'
-      }
-    ]
+    axis: 'EI',
+    axis_name: 'Energy Orientation (Extraversion vs Introversion)',
+    prompt: 'When facing a high-energy social weekend with numerous gatherings:',
+    option_a: { text: 'I feel energized, invigorated, and excited to actively participate and connect with many people.', trait: 'E', val: 1 },
+    option_b: { text: 'I feel the need to preserve personal space and recharge in quiet solitude with focused activities.', trait: 'I', val: -1 }
   },
   {
     id: 2,
-    axis: 'Perception Axis (S vs N)',
-    title: 'How do you process information?',
-    subtitle: 'What kind of details do you intuitively trust and notice first?',
-    options: [
-      {
-        text: 'Focusing on concrete facts, tangible evidence, practical realities & present moments',
-        value: 1,
-        label: 'Observant / Sensing (+1)',
-        icon: '🔍',
-        accentColor: 'from-emerald-500/20 to-teal-500/20 border-emerald-500/40 hover:border-emerald-400 hover:bg-emerald-500/10'
-      },
-      {
-        text: 'Exploring abstract theories, imaginative possibilities, symbols & future trends',
-        value: -1,
-        label: 'Intuitive (-1)',
-        icon: '🔮',
-        accentColor: 'from-cyan-500/20 to-blue-500/20 border-cyan-500/40 hover:border-cyan-400 hover:bg-cyan-500/10'
-      }
-    ]
+    axis: 'EI',
+    axis_name: 'Energy Orientation (Extraversion vs Introversion)',
+    prompt: 'When working through a complex, unfamiliar challenge:',
+    option_a: { text: 'I prefer to talk it through out loud, brainstorm dynamically with peers, and externalize my thoughts.', trait: 'E', val: 1 },
+    option_b: { text: 'I prefer to contemplate it internally in depth before presenting a refined conclusion.', trait: 'I', val: -1 }
   },
   {
     id: 3,
-    axis: 'Decision Axis (T vs F)',
-    title: 'How do you make major decisions?',
-    subtitle: 'What guiding principle drives your choices and problem solving?',
-    options: [
-      {
-        text: 'Using objective logic, critical analysis, hard metrics & impartial fairness',
-        value: 1,
-        label: 'Thinking (+1)',
-        icon: '⚖️',
-        accentColor: 'from-blue-500/20 to-indigo-500/20 border-blue-500/40 hover:border-blue-400 hover:bg-blue-500/10'
-      },
-      {
-        text: 'Guided by core values, emotional empathy, personal impact & interpersonal harmony',
-        value: -1,
-        label: 'Feeling (-1)',
-        icon: '💖',
-        accentColor: 'from-rose-500/20 to-pink-500/20 border-rose-500/40 hover:border-rose-400 hover:bg-rose-500/10'
-      }
-    ]
+    axis: 'EI',
+    axis_name: 'Energy Orientation (Extraversion vs Introversion)',
+    prompt: 'In your daily environment and professional rhythm, you feel most in your element when:',
+    option_a: { text: 'Engaged in multiple active conversations, collaborative initiatives, and dynamic stimuli.', trait: 'E', val: 1 },
+    option_b: { text: 'Immersed in sustained deep-focus sessions with minimal external interruptions.', trait: 'I', val: -1 }
   },
   {
     id: 4,
-    axis: 'Lifestyle Axis (J vs P)',
-    title: 'How do you organize your life & tasks?',
-    subtitle: 'How do you prefer to manage your environment and commitments?',
-    options: [
-      {
-        text: 'With structured plans, established deadlines, organized checklists & decided routines',
-        value: 1,
-        label: 'Judging / Structured (+1)',
-        icon: '📋',
-        accentColor: 'from-violet-500/20 to-purple-500/20 border-violet-500/40 hover:border-violet-400 hover:bg-violet-500/10'
-      },
-      {
-        text: 'With spontaneous adaptability, flexible improvisation, curiosity & open-ended options',
-        value: -1,
-        label: 'Prospecting / Spontaneous (-1)',
-        icon: '🌊',
-        accentColor: 'from-fuchsia-500/20 to-pink-500/20 border-fuchsia-500/40 hover:border-fuchsia-400 hover:bg-fuchsia-500/10'
-      }
-    ]
+    axis: 'EI',
+    axis_name: 'Energy Orientation (Extraversion vs Introversion)',
+    prompt: 'When entering a room of unfamiliar people, your natural inclination is to:',
+    option_a: { text: 'Introduce yourself freely, initiate lively rapport, and seek out new connections.', trait: 'E', val: 1 },
+    option_b: { text: 'Observe the atmosphere quietly, wait for organic openings, or connect deeply with one or two individuals.', trait: 'I', val: -1 }
+  },
+  {
+    id: 5,
+    axis: 'EI',
+    axis_name: 'Energy Orientation (Extraversion vs Introversion)',
+    prompt: 'Regarding your circle of friends and intellectual collaborators:',
+    option_a: { text: 'I maintain a broad, diverse network of acquaintances across varied walks of life.', trait: 'E', val: 1 },
+    option_b: { text: 'I invest deeply in a select, intimate inner circle built on profound trust and mutual understanding.', trait: 'I', val: -1 }
+  },
+  {
+    id: 6,
+    axis: 'EI',
+    axis_name: 'Energy Orientation (Extraversion vs Introversion)',
+    prompt: 'After a long, demanding week of intense work, what truly restores your vitality?',
+    option_a: { text: 'Meeting friends for dinner, attending an event, or engaging in active external stimulation.', trait: 'E', val: 1 },
+    option_b: { text: 'A calm, quiet evening at home with a book, personal project, or restful atmosphere.', trait: 'I', val: -1 }
+  },
+
+  // --- Axis 2: Information (S vs N) ---
+  {
+    id: 7,
+    axis: 'SN',
+    axis_name: 'Information Processing (Sensing vs Intuition)',
+    prompt: 'When learning a new subject or evaluating an opportunity, you first gravitate toward:',
+    option_a: { text: 'Concrete facts, verified data, tangible applications, and immediate practical details.', trait: 'S', val: 1 },
+    option_b: { text: 'Underlying theories, future possibilities, abstract frameworks, and symbolic patterns.', trait: 'N', val: -1 }
+  },
+  {
+    id: 8,
+    axis: 'SN',
+    axis_name: 'Information Processing (Sensing vs Intuition)',
+    prompt: 'When describing an event or experience to others, you naturally focus on:',
+    option_a: { text: 'Chronological, sequential accuracy and vivid sensory descriptions of what actually occurred.', trait: 'S', val: 1 },
+    option_b: { text: 'The overall thematic impression, underlying meaning, and symbolic significance.', trait: 'N', val: -1 }
+  },
+  {
+    id: 9,
+    axis: 'SN',
+    axis_name: 'Information Processing (Sensing vs Intuition)',
+    prompt: 'When presented with a novel, unorthodox idea, your instinctive instinct is to:',
+    option_a: { text: 'Examine whether it has proven precedent, realistic viability, and immediate utility.', trait: 'S', val: 1 },
+    option_b: { text: 'Envision how it could disrupt existing paradigms and branch into uncharted future territory.', trait: 'N', val: -1 }
+  },
+  {
+    id: 10,
+    axis: 'SN',
+    axis_name: 'Information Processing (Sensing vs Intuition)',
+    prompt: 'In your daily perspective, you tend to see the world primarily through the lens of:',
+    option_a: { text: 'What is concrete, present, observable, and measurable in current reality.', trait: 'S', val: 1 },
+    option_b: { text: 'What could be, speculative potential, hidden implications, and future trajectories.', trait: 'N', val: -1 }
+  },
+  {
+    id: 11,
+    axis: 'SN',
+    axis_name: 'Information Processing (Sensing vs Intuition)',
+    prompt: 'When solving practical problems, you feel most confident when relying on:',
+    option_a: { text: 'Proven methodologies, established best practices, and direct sensory verification.', trait: 'S', val: 1 },
+    option_b: { text: 'Original intuitive hunches, conceptual models, and novel lateral connections.', trait: 'N', val: -1 }
+  },
+  {
+    id: 12,
+    axis: 'SN',
+    axis_name: 'Information Processing (Sensing vs Intuition)',
+    prompt: 'You are more naturally admired for being:',
+    option_a: { text: 'Grounded, realistic, accurate, and deeply attuned to tangible detail.', trait: 'S', val: 1 },
+    option_b: { text: 'Visionary, conceptual, innovative, and attuned to the bigger picture.', trait: 'N', val: -1 }
+  },
+
+  // --- Axis 3: Decisions (T vs F) ---
+  {
+    id: 13,
+    axis: 'TF',
+    axis_name: 'Decision Making (Thinking vs Feeling)',
+    prompt: 'When making an important critical decision, your ultimate benchmark is:',
+    option_a: { text: 'Objective logic, rigorous consistency, impartial fairness, and empirical efficacy.', trait: 'T', val: 1 },
+    option_b: { text: 'Human empathy, core personal values, relational impact, and individual authenticity.', trait: 'F', val: -1 }
+  },
+  {
+    id: 14,
+    axis: 'TF',
+    axis_name: 'Decision Making (Thinking vs Feeling)',
+    prompt: 'When someone close to you shares a distressing problem, your first natural response is to:',
+    option_a: { text: 'Analyze the root cause and systematically formulate an actionable, rational solution.', trait: 'T', val: 1 },
+    option_b: { text: 'Offer warm emotional presence, active validation, and deep empathetic understanding.', trait: 'F', val: -1 }
+  },
+  {
+    id: 15,
+    axis: 'TF',
+    axis_name: 'Decision Making (Thinking vs Feeling)',
+    prompt: 'When evaluating a debate or argument, you are most unsettled by:',
+    option_a: { text: 'Logical fallacies, sloppy reasoning, factual inconsistencies, and flawed premises.', trait: 'T', val: 1 },
+    option_b: { text: 'Cruelty, callousness, disrespect for human dignity, and lack of compassion.', trait: 'F', val: -1 }
+  },
+  {
+    id: 16,
+    axis: 'TF',
+    axis_name: 'Decision Making (Thinking vs Feeling)',
+    prompt: 'In teamwork and leadership, you believe it is more vital to be:',
+    option_a: { text: 'Direct, fair, and uncompromising in pursuing high standards of competence.', trait: 'T', val: 1 },
+    option_b: { text: 'Encouraging, supportive, and dedicated to building emotional safety and harmony.', trait: 'F', val: -1 }
+  },
+  {
+    id: 17,
+    axis: 'TF',
+    axis_name: 'Decision Making (Thinking vs Feeling)',
+    prompt: 'When providing feedback to a colleague or collaborator:',
+    option_a: { text: 'I prioritize clear, frank critique focused on optimizing performance and fixing errors.', trait: 'T', val: 1 },
+    option_b: { text: 'I carefully cushion my observations with encouragement to protect morale and connection.', trait: 'F', val: -1 }
+  },
+  {
+    id: 18,
+    axis: 'TF',
+    axis_name: 'Decision Making (Thinking vs Feeling)',
+    prompt: 'When a rule or policy conflicts with an individual’s unique emotional circumstances:',
+    option_a: { text: 'The rule must be upheld impartially to maintain justice and systematic integrity.', trait: 'T', val: 1 },
+    option_b: { text: 'Compassion and individual extenuating circumstances should allow for flexible grace.', trait: 'F', val: -1 }
+  },
+
+  // --- Axis 4: Lifestyle (J vs P) ---
+  {
+    id: 19,
+    axis: 'JP',
+    axis_name: 'Lifestyle & Execution (Judging vs Perceiving)',
+    prompt: 'When organizing your schedule, vacations, or projects, you prefer:',
+    option_a: { text: 'A clear, well-structured plan with defined milestones, deadlines, and booked itineraries.', trait: 'J', val: 1 },
+    option_b: { text: 'A flexible, open-ended framework that allows for spontaneous changes and unexpected detours.', trait: 'P', val: -1 }
+  },
+  {
+    id: 20,
+    axis: 'JP',
+    axis_name: 'Lifestyle & Execution (Judging vs Perceiving)',
+    prompt: 'When working on a major deadline-driven project, your working style tends to be:',
+    option_a: { text: 'Steady, disciplined progression scheduled well in advance to avoid last-minute rush.', trait: 'J', val: 1 },
+    option_b: { text: 'Dynamic bursts of creative adrenaline and intense flow close to the target deadline.', trait: 'P', val: -1 }
+  },
+  {
+    id: 21,
+    axis: 'JP',
+    axis_name: 'Lifestyle & Execution (Judging vs Perceiving)',
+    prompt: 'In your physical space and digital desktop, you feel most at peace with:',
+    option_a: { text: 'Orderly, categorized, tidy environments with designated spaces for everything.', trait: 'J', val: 1 },
+    option_b: { text: 'Organic, dynamic arrangements where ongoing projects remain visibly accessible.', trait: 'P', val: -1 }
+  },
+  {
+    id: 22,
+    axis: 'JP',
+    axis_name: 'Lifestyle & Execution (Judging vs Perceiving)',
+    prompt: 'When a settled decision is unexpectedly reopened for deliberation:',
+    option_a: { text: 'I feel frustrated by the inefficiency and disruption to closure and momentum.', trait: 'J', val: 1 },
+    option_b: { text: 'I welcome the opportunity to explore new data, refine possibilities, and adapt.', trait: 'P', val: -1 }
+  },
+  {
+    id: 23,
+    axis: 'JP',
+    axis_name: 'Lifestyle & Execution (Judging vs Perceiving)',
+    prompt: 'Your ideal lifestyle is best characterized as:',
+    option_a: { text: 'Structured, predictable, deliberate, with clear boundaries and steady commitments.', trait: 'J', val: 1 },
+    option_b: { text: 'Spontaneous, adventurous, adaptable, responsive to emerging opportunities.', trait: 'P', val: -1 }
+  },
+  {
+    id: 24,
+    axis: 'JP',
+    axis_name: 'Lifestyle & Execution (Judging vs Perceiving)',
+    prompt: 'Once you have completed a task or reached a conclusion, your immediate feeling is:',
+    option_a: { text: 'Deep satisfaction at checking it off, settling the matter, and archiving closure.', trait: 'J', val: 1 },
+    option_b: { text: 'Curiosity regarding what interesting new door or avenue this has unlocked next.', trait: 'P', val: -1 }
   }
 ]
 
 export default function MBTIQuiz({ onComplete, completedData }) {
+  const [questions, setQuestions] = useState(FALLBACK_QUESTIONS)
   const [currentStep, setCurrentStep] = useState(0)
   const [answers, setAnswers] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [result, setResult] = useState(completedData || null)
+
+  // Fetch server questions if available
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/mbti/questions`, { timeout: 3000 })
+        if (res.data && res.data.questions && res.data.questions.length === 24) {
+          setQuestions(res.data.questions)
+        }
+      } catch (err) {
+        console.log('Using local questions bank fallback.')
+      }
+    }
+    fetchQuestions()
+  }, [])
 
   useEffect(() => {
     if (completedData) {
@@ -107,36 +237,63 @@ export default function MBTIQuiz({ onComplete, completedData }) {
     }
   }, [completedData])
 
-  const handleSelectOption = async (value) => {
-    const updatedAnswers = [...answers, value]
-    setAnswers(updatedAnswers)
+  const totalQuestions = questions.length
 
-    if (currentStep < QUESTIONS.length - 1) {
-      setCurrentStep(currentStep + 1)
-    } else {
-      // All 4 questions answered -> calculate MBTI
-      setLoading(true)
-      setError(null)
-      try {
-        const response = await axios.post(
-          `${API_BASE_URL}/api/calculate-mbti`,
-          { answers: updatedAnswers }
-        )
-        setResult(response.data)
-        if (onComplete) {
-          onComplete(response.data)
+  const handleSelectOption = useCallback(
+    async (value) => {
+      const updatedAnswers = [...answers, value]
+      setAnswers(updatedAnswers)
+
+      if (currentStep < totalQuestions - 1) {
+        setCurrentStep(currentStep + 1)
+      } else {
+        // Complete -> evaluate 24 responses
+        setLoading(true)
+        setError(null)
+        try {
+          const response = await axios.post(`${API_BASE_URL}/api/mbti/evaluate`, {
+            responses: updatedAnswers
+          })
+          setResult(response.data)
+          if (onComplete) {
+            onComplete(response.data)
+          }
+        } catch (err) {
+          console.error('MBTI Evaluation Error:', err)
+          setError(
+            err.response?.data?.detail ||
+              'Failed to evaluate psychometric assessment. Ensure backend is running.'
+          )
+        } finally {
+          setLoading(false)
         }
-      } catch (err) {
-        console.error('MBTI Assessment Error:', err)
-        setError(
-          err.response?.data?.detail ||
-            'Failed to calculate MBTI archetype. Ensure the backend API is reachable.'
-        )
-      } finally {
-        setLoading(false)
+      }
+    },
+    [answers, currentStep, totalQuestions, onComplete]
+  )
+
+  // Keyboard navigation support: '1' or 'A' for Option A, '2' or 'B' for Option B, Backspace / Left for Previous
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (result || loading) return
+
+      const key = e.key.toUpperCase()
+      if (key === '1' || key === 'A') {
+        e.preventDefault()
+        handleSelectOption(1)
+      } else if (key === '2' || key === 'B') {
+        e.preventDefault()
+        handleSelectOption(-1)
+      } else if ((key === 'ARROWLEFT' || key === 'BACKSPACE') && currentStep > 0) {
+        e.preventDefault()
+        setCurrentStep((prev) => prev - 1)
+        setAnswers((prev) => prev.slice(0, -1))
       }
     }
-  }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [result, loading, currentStep, handleSelectOption])
 
   const handleReset = () => {
     setCurrentStep(0)
@@ -146,84 +303,106 @@ export default function MBTIQuiz({ onComplete, completedData }) {
     setLoading(false)
   }
 
+  const currentQ = questions[currentStep] || FALLBACK_QUESTIONS[0]
+  const progressPct = Math.round(((currentStep + 1) / totalQuestions) * 100)
+
   return (
-    <div className="w-full max-w-xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto">
       <AnimatePresence mode="wait">
         {!result && !loading ? (
-          /* --- Question Card --- */
+          /* --- Interactive Question Card --- */
           <motion.div
             key={`question-${currentStep}`}
-            initial={{ opacity: 0, x: 30, scale: 0.98 }}
+            initial={{ opacity: 0, x: 25, scale: 0.98 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: -30, scale: 0.96 }}
+            exit={{ opacity: 0, x: -25, scale: 0.96 }}
             transition={{ duration: 0.35, ease: 'easeInOut' }}
-            className="relative p-8 rounded-3xl bg-slate-900/90 border border-indigo-500/20 shadow-2xl backdrop-blur-xl"
+            className="relative p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-indigo-500/20 shadow-2xl backdrop-blur-xl text-left"
           >
-            {/* Ambient Lighting */}
+            {/* Ambient Nebula Glow */}
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Progress Header */}
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-950/60 border border-indigo-500/30 px-3 py-1 rounded-full">
-                Question {currentStep + 1} of 4
+            {/* Header: Section + Step Counter */}
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-300 bg-indigo-950/70 border border-indigo-500/30 px-3 py-1 rounded-full">
+                Question {currentStep + 1} of {totalQuestions}
               </span>
-              <span className="text-xs font-medium text-slate-400">
-                {QUESTIONS[currentStep].axis}
+              <span className="text-xs font-semibold text-slate-400">
+                {currentQ.axis_name}
               </span>
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full h-1.5 bg-slate-800 rounded-full mb-6 overflow-hidden">
+            <div className="w-full h-2 bg-slate-950 rounded-full mb-6 overflow-hidden border border-slate-800">
               <motion.div
-                className="h-full bg-gradient-to-r from-indigo-500 to-purple-500"
-                initial={{ width: `${(currentStep / 4) * 100}%` }}
-                animate={{ width: `${((currentStep + 1) / 4) * 100}%` }}
+                className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400"
+                initial={{ width: `${(currentStep / totalQuestions) * 100}%` }}
+                animate={{ width: `${progressPct}%` }}
                 transition={{ duration: 0.3 }}
               />
             </div>
 
-            {/* Question Title */}
-            <div className="text-left mb-6">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                {QUESTIONS[currentStep].title}
+            {/* Question Prompt */}
+            <div className="mb-6">
+              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">
+                {currentQ.prompt}
               </h2>
-              <p className="text-sm text-slate-400 mt-2">
-                {QUESTIONS[currentStep].subtitle}
-              </p>
+              <div className="text-[11px] font-mono text-slate-500 mt-1 flex items-center gap-2">
+                <span>⌨️ Press <strong className="text-indigo-300">1 / A</strong> for Option A, <strong className="text-purple-300">2 / B</strong> for Option B</span>
+              </div>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-950/50 border border-rose-500/30 text-rose-300 text-xs text-left">
+              <div className="mb-4 p-3 rounded-xl bg-rose-950/50 border border-rose-500/30 text-rose-300 text-xs">
                 ⚠️ {error}
               </div>
             )}
 
-            {/* Option Buttons */}
-            <div className="space-y-4">
-              {QUESTIONS[currentStep].options.map((option, idx) => (
-                <motion.button
-                  key={idx}
-                  onClick={() => handleSelectOption(option.value)}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`w-full p-5 rounded-2xl bg-gradient-to-r ${option.accentColor} border text-left transition duration-200 cursor-pointer flex items-start gap-4 shadow-lg`}
-                >
-                  <span className="text-2xl p-2 bg-slate-950/60 rounded-xl border border-slate-800 shrink-0">
-                    {option.icon}
-                  </span>
-                  <div className="flex-1">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
-                      {option.label}
-                    </div>
-                    <div className="text-sm sm:text-base font-medium text-slate-100 leading-snug">
-                      {option.text}
-                    </div>
+            {/* Forced-Choice Option Cards */}
+            <div className="space-y-3.5">
+              {/* Option A */}
+              <motion.button
+                onClick={() => handleSelectOption(1)}
+                whileHover={{ scale: 1.015, y: -2 }}
+                whileTap={{ scale: 0.985 }}
+                className="w-full p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-950/50 via-slate-900 to-slate-950 border border-indigo-500/30 hover:border-indigo-400 text-left transition duration-200 cursor-pointer flex items-start gap-4 shadow-lg group"
+              >
+                <span className="w-8 h-8 rounded-xl bg-indigo-950/80 border border-indigo-500/40 text-indigo-300 font-mono font-black text-sm flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition">
+                  A
+                </span>
+                <div className="flex-1">
+                  <div className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-400 mb-1">
+                    Option A &bull; {currentQ.option_a.trait} Preference
                   </div>
-                </motion.button>
-              ))}
+                  <div className="text-sm sm:text-base font-medium text-slate-100 leading-snug">
+                    {currentQ.option_a.text}
+                  </div>
+                </div>
+              </motion.button>
+
+              {/* Option B */}
+              <motion.button
+                onClick={() => handleSelectOption(-1)}
+                whileHover={{ scale: 1.015, y: -2 }}
+                whileTap={{ scale: 0.985 }}
+                className="w-full p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-950/50 via-slate-900 to-slate-950 border border-purple-500/30 hover:border-purple-400 text-left transition duration-200 cursor-pointer flex items-start gap-4 shadow-lg group"
+              >
+                <span className="w-8 h-8 rounded-xl bg-purple-950/80 border border-purple-500/40 text-purple-300 font-mono font-black text-sm flex items-center justify-center shrink-0 group-hover:bg-purple-600 group-hover:text-white transition">
+                  B
+                </span>
+                <div className="flex-1">
+                  <div className="text-xs font-mono font-bold uppercase tracking-wider text-purple-400 mb-1">
+                    Option B &bull; {currentQ.option_b.trait} Preference
+                  </div>
+                  <div className="text-sm sm:text-base font-medium text-slate-100 leading-snug">
+                    {currentQ.option_b.text}
+                  </div>
+                </div>
+              </motion.button>
             </div>
 
+            {/* Back Button */}
             {currentStep > 0 && (
               <button
                 onClick={() => {
@@ -232,12 +411,12 @@ export default function MBTIQuiz({ onComplete, completedData }) {
                 }}
                 className="mt-6 text-xs text-slate-500 hover:text-slate-300 transition flex items-center gap-1 mx-auto cursor-pointer"
               >
-                ← Previous Question
+                ← Back to Question {currentStep}
               </button>
             )}
           </motion.div>
         ) : loading ? (
-          /* --- Loading Transition --- */
+          /* --- Loading Transition Card --- */
           <motion.div
             key="loading-card"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -249,99 +428,109 @@ export default function MBTIQuiz({ onComplete, completedData }) {
               <span className="text-3xl animate-spin">🔮</span>
             </div>
             <div>
-              <h3 className="text-xl font-bold text-white">Synthesizing Archetype...</h3>
-              <p className="text-xs text-slate-400 mt-1">Analyzing psychological cognitive axes</p>
+              <h3 className="text-xl font-bold text-white">Synthesizing Psychometric Profile...</h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Calculating Preference Clarity Index & Jungian Cognitive Stack
+              </p>
             </div>
           </motion.div>
         ) : (
-          /* --- Stylized MBTI Result Card --- */
+          /* --- Comprehensive Psychometric Result View --- */
           <motion.div
             key="mbti-result-card"
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.92, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -20 }}
-            transition={{ duration: 0.5, type: 'spring', bounce: 0.25 }}
-            className="relative p-8 rounded-3xl bg-slate-900/95 border border-indigo-500/30 shadow-2xl backdrop-blur-xl overflow-hidden"
+            exit={{ opacity: 0, scale: 0.92, y: -20 }}
+            transition={{ duration: 0.5, type: 'spring', bounce: 0.2 }}
+            className="space-y-6 text-left"
           >
-            {/* Ambient Nebula */}
-            <div className="absolute -top-32 -right-32 w-64 h-64 bg-indigo-500/25 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-purple-500/25 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="text-center mb-6">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: 'spring' }}
-                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold tracking-wider text-indigo-300 uppercase bg-indigo-950/60 border border-indigo-500/30 rounded-full mb-3"
-              >
-                🧠 Psychological Assessment Complete
-              </motion.div>
+            {/* Top Archetype Banner */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-indigo-950/90 via-slate-900 to-purple-950/90 border border-indigo-500/30 shadow-2xl backdrop-blur-xl">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-mono font-bold uppercase tracking-wider text-indigo-300 bg-indigo-900/60 border border-indigo-500/30 rounded-full">
+                  🧠 Psychometric Assessment &bull; 24-Item Complete
+                </div>
+                <button
+                  onClick={handleReset}
+                  className="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer"
+                >
+                  ↺ Retake
+                </button>
+              </div>
 
               {/* 4-Letter Code Display */}
-              <div className="flex justify-center items-center gap-2 sm:gap-3 my-4">
+              <div className="flex items-center gap-2 sm:gap-3 my-4">
                 {result.mbti_type.split('').map((letter, idx) => (
                   <motion.div
                     key={idx}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.25 + idx * 0.1, type: 'spring' }}
-                    className="w-14 h-16 sm:w-16 sm:h-20 rounded-2xl bg-gradient-to-b from-indigo-900/80 via-slate-950 to-slate-900 border border-indigo-400/40 shadow-xl flex items-center justify-center font-black text-2xl sm:text-3xl text-indigo-200 tracking-wider"
+                    transition={{ delay: 0.1 + idx * 0.08, type: 'spring' }}
+                    className="w-12 h-14 sm:w-14 sm:h-16 rounded-2xl bg-gradient-to-b from-indigo-800/80 via-slate-950 to-slate-900 border border-indigo-400/40 shadow-xl flex items-center justify-center font-black text-2xl sm:text-3xl text-indigo-200 tracking-wider"
                   >
                     {letter}
                   </motion.div>
                 ))}
+                <div className="ml-2">
+                  <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                    {result.archetype}
+                  </h2>
+                  <div className="text-xs text-purple-300 font-semibold">{result.title}</div>
+                </div>
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                {result.archetype}
-              </h2>
-              <p className="text-sm sm:text-base text-slate-300 mt-2 max-w-md mx-auto leading-relaxed italic">
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed italic border-l-2 border-indigo-500 pl-3 my-4">
                 "{result.description}"
               </p>
+
+              {/* Strengths & Growth Tags */}
+              {result.strengths && (
+                <div className="mt-4 pt-4 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <span className="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">
+                      Core Strengths:
+                    </span>
+                    <ul className="mt-1 space-y-0.5 text-slate-300 list-disc list-inside">
+                      {result.strengths.slice(0, 3).map((s, idx) => (
+                        <li key={idx}>{s}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <span className="font-bold text-amber-400 uppercase tracking-wider text-[10px]">
+                      Growth Frontiers:
+                    </span>
+                    <ul className="mt-1 space-y-0.5 text-slate-300 list-disc list-inside">
+                      {result.growth_areas.slice(0, 2).map((g, idx) => (
+                        <li key={idx}>{g}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Cognitive Axes Breakdown Grid */}
-            {result.breakdown && (
-              <div className="grid grid-cols-2 gap-3 mb-6 text-left">
-                <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
-                  <div className="text-[10px] uppercase font-bold text-slate-500">Energy</div>
-                  <div className="text-xs sm:text-sm font-semibold text-amber-300 mt-0.5">
-                    {result.breakdown.energy?.letter} &bull; {result.breakdown.energy?.trait}
-                  </div>
-                </div>
+            {/* Preference Clarity Index Bipolar Bars */}
+            <div className="p-6 rounded-3xl bg-slate-900/90 border border-purple-500/20 shadow-xl backdrop-blur-xl">
+              <ClarityBars preferenceClarity={result.preference_clarity} />
+            </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
-                  <div className="text-[10px] uppercase font-bold text-slate-500">Mind</div>
-                  <div className="text-xs sm:text-sm font-semibold text-cyan-300 mt-0.5">
-                    {result.breakdown.mind?.letter} &bull; {result.breakdown.mind?.trait}
-                  </div>
-                </div>
+            {/* Jungian Cognitive Architecture Matrix */}
+            <div className="p-6 rounded-3xl bg-slate-900/90 border border-indigo-500/20 shadow-xl backdrop-blur-xl">
+              <CognitiveStack cognitiveStack={result.cognitive_stack} />
+            </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
-                  <div className="text-[10px] uppercase font-bold text-slate-500">Nature</div>
-                  <div className="text-xs sm:text-sm font-semibold text-rose-300 mt-0.5">
-                    {result.breakdown.nature?.letter} &bull; {result.breakdown.nature?.trait}
-                  </div>
+            {/* Astrological Synergy Insight */}
+            {result.astrological_synergy && (
+              <div className="p-5 rounded-2xl bg-gradient-to-r from-purple-950/60 via-slate-900 to-indigo-950/60 border border-purple-500/30 text-xs text-slate-300 space-y-1">
+                <div className="font-bold uppercase tracking-wider text-purple-300">
+                  ✦ Astrological & Cognitive Synergy
                 </div>
-
-                <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
-                  <div className="text-[10px] uppercase font-bold text-slate-500">Tactics</div>
-                  <div className="text-xs sm:text-sm font-semibold text-purple-300 mt-0.5">
-                    {result.breakdown.tactics?.letter} &bull; {result.breakdown.tactics?.trait}
-                  </div>
-                </div>
+                <p className="text-slate-400 leading-relaxed">
+                  {result.astrological_synergy}
+                </p>
               </div>
             )}
-
-            {/* Retake Button */}
-            <motion.button
-              onClick={handleReset}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full py-3 px-6 rounded-xl font-medium text-sm text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <span>↺ Retake Questionnaire</span>
-            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>

@@ -4,6 +4,8 @@ import { motion } from 'framer-motion'
 import axios from 'axios'
 import API_BASE_URL from '../config/api'
 import DualAstroView from './DualAstroView'
+import ClarityBars from './ClarityBars'
+import CognitiveStack from './CognitiveStack'
 
 const ZODIAC_SYMBOLS = {
   Aries: '♈',
@@ -26,7 +28,7 @@ export default function SharedDossier() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [copied, setCopied] = useState(false)
-  const [viewDetails, setViewDetails] = useState(false)
+  const [activeTab, setActiveTab] = useState('overview') // 'overview' | 'cognitive' | 'astronomy'
 
   useEffect(() => {
     const fetchBlueprint = async () => {
@@ -85,7 +87,7 @@ export default function SharedDossier() {
     )
   }
 
-  const { astrology, mbti, created_at } = data
+  const { astrology, mbti, synthesis, created_at } = data
   const isDual = Boolean(astrology?.western && astrology?.vedic)
 
   // Extract core astronomical points for card header
@@ -124,7 +126,7 @@ export default function SharedDossier() {
       initial={{ opacity: 0, scale: 0.94, y: 25 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.5, type: 'spring', bounce: 0.2 }}
-      className="w-full max-w-3xl mx-auto space-y-6"
+      className="w-full max-w-4xl mx-auto space-y-6"
     >
       {/* --- Cosmic Holographic Trading Card --- */}
       <div className="relative rounded-[2.5rem] p-1 bg-gradient-to-b from-purple-500 via-indigo-500/40 to-cyan-500 shadow-[0_0_50px_rgba(168,85,247,0.25)]">
@@ -182,6 +184,16 @@ export default function SharedDossier() {
             </p>
           </div>
 
+          {/* Deep Synthesis Narrative Banner */}
+          {synthesis?.narrative && (
+            <div className="p-5 rounded-2xl bg-gradient-to-r from-purple-950/50 via-slate-900 to-indigo-950/50 border border-purple-500/30 mb-6 text-xs text-slate-300 leading-relaxed shadow-inner">
+              <div className="text-[10px] uppercase font-bold text-purple-400 tracking-wider mb-1">
+                ✦ Cosmic & Cognitive Synthesis
+              </div>
+              <p>{synthesis.narrative}</p>
+            </div>
+          )}
+
           {/* Dual Astrological Comparison Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             {/* Sun Card */}
@@ -227,54 +239,106 @@ export default function SharedDossier() {
             </div>
           </div>
 
-          {/* Cognitive Breakdown Matrix */}
-          {breakdown && (
-            <div className="mb-6">
-              <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
-                🧠 Cognitive Axis Alignment
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-                  <div className="text-[10px] text-slate-500 font-bold uppercase">Energy</div>
-                  <div className="text-xs font-bold text-amber-300 mt-0.5">
-                    {breakdown.energy?.letter} &bull; {breakdown.energy?.trait?.replace(/ \(.*\)/, '')}
-                  </div>
-                </div>
+          {/* Navigation Tabs for Deep Views */}
+          <div className="flex items-center gap-2 mb-6 border-b border-slate-800 pb-3">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                activeTab === 'overview'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              Overview & Axes
+            </button>
+            {mbti.cognitive_stack && (
+              <button
+                onClick={() => setActiveTab('cognitive')}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  activeTab === 'cognitive'
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                🧠 Jungian Cognitive Stack
+              </button>
+            )}
+            {isDual && (
+              <button
+                onClick={() => setActiveTab('astronomy')}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  activeTab === 'astronomy'
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                ✦ Ephemeris & Visual Charts
+              </button>
+            )}
+          </div>
 
-                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-                  <div className="text-[10px] text-slate-500 font-bold uppercase">Mind</div>
-                  <div className="text-xs font-bold text-cyan-300 mt-0.5">
-                    {breakdown.mind?.letter} &bull; {breakdown.mind?.trait?.replace(/ \(.*\)/, '')}
+          {/* --- Tab 1: Overview & PCI Bars --- */}
+          {activeTab === 'overview' && (
+            <div className="space-y-6">
+              {mbti.preference_clarity ? (
+                <ClarityBars preferenceClarity={mbti.preference_clarity} />
+              ) : (
+                breakdown && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                      <div className="text-[10px] text-slate-500 font-bold uppercase">Energy</div>
+                      <div className="text-xs font-bold text-amber-300 mt-0.5">
+                        {breakdown.energy?.letter} &bull; {breakdown.energy?.trait?.replace(/ \(.*\)/, '')}
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                      <div className="text-[10px] text-slate-500 font-bold uppercase">Mind</div>
+                      <div className="text-xs font-bold text-cyan-300 mt-0.5">
+                        {breakdown.mind?.letter} &bull; {breakdown.mind?.trait?.replace(/ \(.*\)/, '')}
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                      <div className="text-[10px] text-slate-500 font-bold uppercase">Nature</div>
+                      <div className="text-xs font-bold text-rose-300 mt-0.5">
+                        {breakdown.nature?.letter} &bull; {breakdown.nature?.trait?.replace(/ \(.*\)/, '')}
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                      <div className="text-[10px] text-slate-500 font-bold uppercase">Tactics</div>
+                      <div className="text-xs font-bold text-purple-300 mt-0.5">
+                        {breakdown.tactics?.letter} &bull; {breakdown.tactics?.trait?.replace(/ \(.*\)/, '')}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )
+              )}
+            </div>
+          )}
 
-                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-                  <div className="text-[10px] text-slate-500 font-bold uppercase">Nature</div>
-                  <div className="text-xs font-bold text-rose-300 mt-0.5">
-                    {breakdown.nature?.letter} &bull; {breakdown.nature?.trait?.replace(/ \(.*\)/, '')}
-                  </div>
-                </div>
+          {/* --- Tab 2: Jungian Cognitive Functions --- */}
+          {activeTab === 'cognitive' && mbti.cognitive_stack && (
+            <div className="space-y-4">
+              <CognitiveStack cognitiveStack={mbti.cognitive_stack} />
+            </div>
+          )}
 
-                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-                  <div className="text-[10px] text-slate-500 font-bold uppercase">Tactics</div>
-                  <div className="text-xs font-bold text-purple-300 mt-0.5">
-                    {breakdown.tactics?.letter} &bull; {breakdown.tactics?.trait?.replace(/ \(.*\)/, '')}
-                  </div>
-                </div>
-              </div>
+          {/* --- Tab 3: Full Astrological Ephemeris & Charts --- */}
+          {activeTab === 'astronomy' && isDual && (
+            <div className="space-y-4 pt-2">
+              <DualAstroView dualData={astrology} />
             </div>
           )}
 
           {/* Coordinates & Metadata Footer Bar */}
           {meta?.date && (
-            <div className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 text-xs text-slate-400 flex flex-wrap items-center justify-between gap-2 mb-6">
+            <div className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 text-xs text-slate-400 flex flex-wrap items-center justify-between gap-2 my-6">
               <span>🗓️ Birth: {meta.date} at {meta.time}</span>
               <span>📍 {meta.lat}°N, {meta.lon}°E ({meta.utc_offset})</span>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-800">
             <motion.button
               onClick={handleCopyLink}
               whileHover={{ scale: 1.02 }}
@@ -294,15 +358,6 @@ export default function SharedDossier() {
               )}
             </motion.button>
 
-            {isDual && (
-              <button
-                onClick={() => setViewDetails(!viewDetails)}
-                className="py-3.5 px-6 rounded-2xl font-semibold text-sm text-purple-200 bg-purple-950/60 hover:bg-purple-900/60 border border-purple-500/40 transition flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>{viewDetails ? 'Hide Deep Ephemeris' : '✦ View Charts & Matrix'}</span>
-              </button>
-            )}
-
             <Link
               to="/"
               className="py-3.5 px-6 rounded-2xl font-semibold text-sm text-slate-300 bg-slate-900 hover:bg-slate-800 border border-slate-700 transition flex items-center justify-center gap-2"
@@ -312,17 +367,6 @@ export default function SharedDossier() {
           </div>
         </div>
       </div>
-
-      {/* Expanded Deep Astrological Ephemeris & Visual Charts */}
-      {isDual && viewDetails && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full pt-4"
-        >
-          <DualAstroView dualData={astrology} />
-        </motion.div>
-      )}
     </motion.div>
   )
 }

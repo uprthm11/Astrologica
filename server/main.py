@@ -12,6 +12,13 @@ from database import connect_to_mongo, close_mongo_connection, ping_database, ge
 from services.astro_western import calculate_western_chart
 from services.astro_vedic import calculate_vedic_chart
 from services.astro_dual import calculate_dual_chart
+from services.mbti_engine import (
+    ASSESSMENT_QUESTIONS,
+    evaluate_psychometric_assessment,
+    synthesize_astrology_and_mbti,
+    calculate_jungian_cognitive_stack,
+    MBTI_ARCHETYPES_DATABASE
+)
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -28,9 +35,9 @@ async def lifespan(app: FastAPI):
     await close_mongo_connection()
 
 app = FastAPI(
-    title="Astrologica Astrological & Personality Engine",
-    description="Full-Spectrum Astrological Engine with Western (Tropical), Vedic (Sidereal / Jyotish), Dual Synthesis, and MBTI Cognitive Assessment.",
-    version="2.0.0",
+    title="Astrologica Astrological & Psychometric Engine",
+    description="Full-Spectrum Astrological Engine with Western (Tropical), Vedic (Sidereal / Jyotish), Dual Synthesis, and 24-Item Jungian Psychometric Cognitive Function Assessment.",
+    version="2.1.0",
     lifespan=lifespan
 )
 
@@ -52,74 +59,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- MBTI Archetypes Knowledge Base ---
-MBTI_ARCHETYPES = {
-    "INTJ": {
-        "archetype": "The Architect",
-        "description": "Strategic, innovative visionaries with a thirst for knowledge and structured plan execution."
-    },
-    "INTP": {
-        "archetype": "The Logician",
-        "description": "Flexible analytical thinkers who love exploring theoretical frameworks and complex problems."
-    },
-    "ENTJ": {
-        "archetype": "The Commander",
-        "description": "Bold, decisive leaders who excel at organizing resources to achieve ambitious long-term goals."
-    },
-    "ENTP": {
-        "archetype": "The Debater",
-        "description": "Quick-witted, curious innovators who thrive on intellectual challenges and brainstorming possibilities."
-    },
-    "INFJ": {
-        "archetype": "The Advocate",
-        "description": "Deeply intuitive idealists driven by strong core values and a passion for helping others grow."
-    },
-    "INFP": {
-        "archetype": "The Mediator",
-        "description": "Empathetic, imaginative dreamers guided by personal values and a quest for authentic self-expression."
-    },
-    "ENFJ": {
-        "archetype": "The Protagonist",
-        "description": "Inspiring, charismatic mentors who empower communities with empathy and visionary leadership."
-    },
-    "ENFP": {
-        "archetype": "The Campaigner",
-        "description": "Enthusiastic, free-spirited creatives who see endless possibilities and inspire others with warmth."
-    },
-    "ISTJ": {
-        "archetype": "The Logistician",
-        "description": "Dependable, practical organizers focused on accuracy, duty, and established standards."
-    },
-    "ISFJ": {
-        "archetype": "The Defender",
-        "description": "Dedicated, warm-hearted protectors who quietly ensure stability and support for those they care for."
-    },
-    "ESTJ": {
-        "archetype": "The Executive",
-        "description": "Efficient, structured administrators who bring order, clear standards, and practical leadership."
-    },
-    "ESFJ": {
-        "archetype": "The Consul",
-        "description": "Caring, social harmony-seekers who prioritize community connection, support, and cooperation."
-    },
-    "ISTP": {
-        "archetype": "The Virtuoso",
-        "description": "Bold, practical experimenters who master tools and solve immediate hands-on challenges calmly."
-    },
-    "ISFP": {
-        "archetype": "The Adventurer",
-        "description": "Gentle, artistic souls who live in the moment with a keen aesthetic sense and quiet empathy."
-    },
-    "ESTP": {
-        "archetype": "The Entrepreneur",
-        "description": "Energetic, action-oriented thrill-seekers who navigate dynamic environments with sharp instincts."
-    },
-    "ESFP": {
-        "archetype": "The Entertainer",
-        "description": "Vibrant, spontaneous enthusiasts who bring joy, energy, and excitement wherever they go."
-    }
-}
-
 # --- Pydantic Models ---
 
 class BaseBirthDataRequest(BaseModel):
@@ -139,19 +78,15 @@ class DualRequest(BaseBirthDataRequest):
     ayanamsha: Optional[str] = Field("lahiri", description="Ayanamsha ('lahiri', 'raman', or 'kp')")
     house_system: Optional[str] = Field("placidus", description="House system ('placidus' or 'whole_sign')")
 
-class MBTIRequest(BaseModel):
-    answers: List[int] = Field(..., description="Array of 4 integers representing answers to the 4 personality questions", example=[1, -1, 1, -1])
+class MBTILegacyRequest(BaseModel):
+    answers: List[Any] = Field(..., description="Array of answers (4 legacy integers or full 24 responses)", example=[1, -1, 1, -1])
 
-class MBTIResponse(BaseModel):
-    status: str = "success"
-    mbti_type: str
-    archetype: str
-    description: str
-    breakdown: dict
+class MBTIEvaluateRequest(BaseModel):
+    responses: List[Any] = Field(..., description="Array of 24 responses (+1/-1 or 'A'/'B')", example=[1]*24)
 
 class SaveBlueprintRequest(BaseModel):
     astrology: Dict[str, Any] = Field(..., description="Astrology data (Western, Vedic, or Dual)")
-    mbti: Dict[str, Any] = Field(..., description="MBTI psychological profile data")
+    mbti: Dict[str, Any] = Field(..., description="MBTI psychometric & cognitive profile data")
     preferences: Optional[Dict[str, Any]] = Field(default_factory=dict, description="User settings/preferences")
 
 class SaveBlueprintResponse(BaseModel):
@@ -164,15 +99,17 @@ class SaveBlueprintResponse(BaseModel):
 @app.get("/")
 async def root():
     return {
-        "app": "Astrologica Astrological & Personality Engine",
+        "app": "Astrologica Astrological & Psychometric Engine",
         "status": "online",
-        "version": "2.0.0",
+        "version": "2.1.0",
         "endpoints": {
             "docs": "/docs",
             "health": "/api/health",
             "calculate_western": "/api/calculate/western",
             "calculate_vedic": "/api/calculate/vedic",
             "calculate_dual": "/api/calculate/dual",
+            "mbti_questions": "/api/mbti/questions",
+            "mbti_evaluate": "/api/mbti/evaluate",
             "calculate_mbti": "/api/calculate-mbti",
             "save_blueprint": "/api/save-blueprint",
             "get_blueprint": "/api/blueprint/{id}"
@@ -186,7 +123,7 @@ async def health_check():
         "status": "healthy" if db_connected else "degraded",
         "database": "connected" if db_connected else "disconnected",
         "framework": "FastAPI",
-        "version": "2.0.0"
+        "version": "2.1.0"
     }
 
 @app.post("/api/calculate/western", status_code=status.HTTP_200_OK)
@@ -295,60 +232,70 @@ async def calculate_blueprint_legacy(request: BaseBirthDataRequest):
             detail=f"Error calculating blueprint: {str(exc)}"
         )
 
-@app.post("/api/calculate-mbti", response_model=MBTIResponse, status_code=status.HTTP_200_OK)
-async def calculate_mbti(request: MBTIRequest):
+# --- Psychometric Assessment Endpoints ---
+
+@app.get("/api/mbti/questions", status_code=status.HTTP_200_OK)
+async def get_mbti_questions():
     """
-    Calculates MBTI archetype from an array of 4 integer scores mapped to the
-    E/I, S/N, T/F, and J/P axes.
+    Returns the structured 24-question psychometric item pool (6 questions per axis).
     """
-    if len(request.answers) < 4:
+    return {
+        "status": "success",
+        "total_questions": len(ASSESSMENT_QUESTIONS),
+        "axes": ["Energy (E/I)", "Information (S/N)", "Decisions (T/F)", "Lifestyle (J/P)"],
+        "questions": ASSESSMENT_QUESTIONS
+    }
+
+@app.post("/api/mbti/evaluate", status_code=status.HTTP_200_OK)
+async def evaluate_mbti(request: MBTIEvaluateRequest):
+    """
+    Evaluates responses to the 24-question psychometric assessment.
+    Returns MBTI type, Preference Clarity Index (PCI), full 8-function Jungian cognitive stack,
+    strengths, growth areas, and astrological synergy.
+    """
+    try:
+        evaluation = evaluate_psychometric_assessment(request.responses)
+        return evaluation
+    except Exception as exc:
+        logger.error(f"MBTI Evaluation Error: {exc}")
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="MBTI assessment requires exactly 4 answers for the 4 personality axes."
+            detail=f"Error evaluating assessment: {str(exc)}"
         )
-    
-    a1, a2, a3, a4 = request.answers[0], request.answers[1], request.answers[2], request.answers[3]
-    letter_e_i = "E" if a1 > 0 else "I"
-    letter_s_n = "S" if a2 > 0 else "N"
-    letter_t_f = "T" if a3 > 0 else "F"
-    letter_j_p = "J" if a4 > 0 else "P"
-    
-    mbti_code = f"{letter_e_i}{letter_s_n}{letter_t_f}{letter_j_p}"
-    archetype_info = MBTI_ARCHETYPES.get(
-        mbti_code,
-        {
-            "archetype": "The Explorer",
-            "description": "A versatile personality archetype balancing dynamic perspective and individual insight."
-        }
-    )
-    
-    return MBTIResponse(
-        status="success",
-        mbti_type=mbti_code,
-        archetype=archetype_info["archetype"],
-        description=archetype_info["description"],
-        breakdown={
-            "energy": {"letter": letter_e_i, "trait": "Extraverted" if letter_e_i == "E" else "Introverted"},
-            "mind": {"letter": letter_s_n, "trait": "Observant (Sensing)" if letter_s_n == "S" else "Intuitive"},
-            "nature": {"letter": letter_t_f, "trait": "Thinking" if letter_t_f == "T" else "Feeling"},
-            "tactics": {"letter": letter_j_p, "trait": "Judging (Structured)" if letter_j_p == "J" else "Prospecting (Spontaneous)"}
-        }
-    )
+
+@app.post("/api/calculate-mbti", status_code=status.HTTP_200_OK)
+async def calculate_mbti_legacy(request: MBTILegacyRequest):
+    """
+    Backward-compatible MBTI evaluation endpoint accepting 4-item or 24-item response arrays.
+    """
+    try:
+        evaluation = evaluate_psychometric_assessment(request.answers)
+        return evaluation
+    except Exception as exc:
+        logger.error(f"Calculate MBTI Error: {exc}")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Error calculating MBTI: {str(exc)}"
+        )
 
 @app.post("/api/save-blueprint", response_model=SaveBlueprintResponse, status_code=status.HTTP_200_OK)
 async def save_blueprint(request: SaveBlueprintRequest):
     """
     Synthesizes and stores a combined multi-system Astrology & MBTI profile into MongoDB.
-    Generates a unique 8-character hex identifier.
+    Generates a unique 8-character hex identifier and performs deep synthesis.
     """
     short_id = uuid.uuid4().hex[:8]
     timestamp = datetime.utcnow().isoformat()
+    
+    # Generate unified Astrology-Psychology synthesis
+    synthesis_report = synthesize_astrology_and_mbti(request.astrology, request.mbti)
     
     doc = {
         "id": short_id,
         "blueprint_id": short_id,
         "astrology": request.astrology,
         "mbti": request.mbti,
+        "synthesis": synthesis_report,
         "preferences": request.preferences,
         "created_at": timestamp
     }
