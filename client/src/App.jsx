@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
+import API_BASE_URL from './config/api'
 import BlueprintForm from './components/BlueprintForm'
 import MBTIQuiz from './components/MBTIQuiz'
 import SharedDossier from './components/SharedDossier'
@@ -30,7 +31,7 @@ function MainAssessment() {
         mbti: mbtiData
       }
       const response = await axios.post(
-        'http://localhost:8000/api/save-blueprint',
+        `${API_BASE_URL}/api/save-blueprint`,
         payload
       )
       const blueprintId = response.data.id
@@ -39,7 +40,7 @@ function MainAssessment() {
       console.error('Save Blueprint Error:', err)
       setSaveError(
         err.response?.data?.detail ||
-          'Failed to save blueprint. Ensure the FastAPI server is running.'
+          'Failed to save blueprint. Ensure the backend API is reachable.'
       )
       setSaving(false)
     }
@@ -201,7 +202,7 @@ export default function App() {
   useEffect(() => {
     const checkServer = async () => {
       try {
-        await axios.get('http://localhost:8000/api/health', { timeout: 2500 })
+        await axios.get(`${API_BASE_URL}/api/health`, { timeout: 3000 })
         setBackendStatus({ online: true, checking: false })
       } catch (err) {
         setBackendStatus({ online: false, checking: false })
@@ -246,7 +247,7 @@ export default function App() {
             ) : backendStatus.online ? (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-950/60 border border-emerald-500/30 text-emerald-300">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                API: Online (8000)
+                API: Online
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-950/60 border border-rose-500/30 text-rose-300">

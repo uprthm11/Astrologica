@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
+import API_BASE_URL from '../config/api'
 
 // Astrological Zodiac Symbols
 const ZODIAC_SYMBOLS = {
@@ -50,7 +51,7 @@ export default function BlueprintForm({ onComplete, completedData }) {
 
     try {
       const response = await axios.post(
-        'http://localhost:8000/api/calculate-blueprint',
+        `${API_BASE_URL}/api/calculate-blueprint`,
         payload
       )
       setResult(response.data)
@@ -61,7 +62,7 @@ export default function BlueprintForm({ onComplete, completedData }) {
       console.error('Calculation Error:', err)
       const errorMsg =
         err.response?.data?.detail ||
-        'Failed to connect to backend server. Make sure the FastAPI server is running on port 8000.'
+        'Failed to connect to backend server. Make sure the backend API is reachable.'
       setError(errorMsg)
     } finally {
       setLoading(false)

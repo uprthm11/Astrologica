@@ -31,21 +31,25 @@ async def lifespan(app: FastAPI):
     await close_mongo_connection()
 
 app = FastAPI(
-    # CORS middleware configuration
+    title="Astrologica Personality API",
+    description="FARM Stack Backend with FastAPI, PyMongo AsyncMongoClient, Flatlib calculations, MBTI assessment, and Blueprint synthesis.",
+    version="1.2.0",
+    lifespan=lifespan
+)
+
+# CORS middleware configuration
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:3000",
     "https://astrologica-swart.vercel.app",
-    "*"
+    "https://astrologica-api-725w.onrender.com"
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
     allow_origins=origins,
+    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.onrender\.com",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

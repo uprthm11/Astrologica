@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
+import API_BASE_URL from '../config/api'
 
 const QUESTIONS = [
   {
@@ -118,7 +119,7 @@ export default function MBTIQuiz({ onComplete, completedData }) {
       setError(null)
       try {
         const response = await axios.post(
-          'http://localhost:8000/api/calculate-mbti',
+          `${API_BASE_URL}/api/calculate-mbti`,
           { answers: updatedAnswers }
         )
         setResult(response.data)
@@ -129,7 +130,7 @@ export default function MBTIQuiz({ onComplete, completedData }) {
         console.error('MBTI Assessment Error:', err)
         setError(
           err.response?.data?.detail ||
-            'Failed to calculate MBTI archetype. Ensure the FastAPI backend is running.'
+            'Failed to calculate MBTI archetype. Ensure the backend API is reachable.'
         )
       } finally {
         setLoading(false)
