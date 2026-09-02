@@ -197,18 +197,34 @@ function MainAssessment() {
 }
 
 export default function App() {
-  const [backendStatus, setBackendStatus] = useState({ online: false, checking: true })
+  const [backendStatus, setBackendStatus] = useState({
+    state: 'checking', // 'checking' | 'waking' | 'online' | 'offline'
+    retries: 0
+  })
 
-  useEffect(() => {
-    const checkServer = async () => {
-      try {
-        await axios.get(`${API_BASE_URL}/api/health`, { timeout: 3000 })
-        setBackendStatus({ online: true, checking: false })
-      } catch (err) {
-        setBackendStatus({ online: false, checking: false })
+  const checkServer = async (attempt = 0) => {
+    try {
+      if (attempt > 0) {
+        setBackendStatus({ state: 'waking', retries: attempt })
+      } else {
+        setBackendStatus({ state: 'checking', retries: 0 })
+      }
+      // 60s timeout to allow Render free tier cold start (~30-50s)
+      await axios.get(`${API_BASE_URL}/api/health`, { timeout: 60000 })
+      setBackendStatus({ state: 'online', retries: 0 })
+    } catch (err) {
+      console.warn(`Health check attempt ${attempt + 1} failed:`, err.message)
+      if (attempt < 5) {
+        setBackendStatus({ state: 'waking', retries: attempt + 1 })
+        setTimeout(() => checkServer(attempt + 1), 6000)
+      } else {
+        setBackendStatus({ state: 'offline', retries: attempt })
       }
     }
-    checkServer()
+  }
+
+  useEffect(() => {
+    checkServer(0)
   }, [])
 
   return (
@@ -237,23 +253,36 @@ export default function App() {
             </div>
           </div>
 
-          {/* Server Status Badge */}
+          {/* Server Status Badge with Cold-Start Awareness */}
           <div className="flex items-center gap-2">
-            {backendStatus.checking ? (
+            {backendStatus.state === 'online' ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 shadow-sm shadow-emerald-900/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                API: Online
+              </span>
+            ) : backendStatus.state === 'waking' ? (
+              <button
+                onClick={() => checkServer(0)}
+                title="Render free tier spinning up"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-950/60 border border-amber-500/40 text-amber-300 cursor-pointer animate-pulse"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                API: Waking Up (Cold Start)...
+              </button>
+            ) : backendStatus.state === 'checking' ? (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
                 API: Connecting...
               </span>
-            ) : backendStatus.online ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-950/60 border border-emerald-500/30 text-emerald-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                API: Online
-              </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-950/60 border border-rose-500/30 text-rose-300">
+              <button
+                onClick={() => checkServer(0)}
+                title="Click to retry connecting to API"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-950/60 border border-rose-500/30 text-rose-300 hover:bg-rose-900/60 transition cursor-pointer"
+              >
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-                API: Offline
-              </span>
+                API: Offline (Click to Retry)
+              </button>
             )}
           </div>
         </header>

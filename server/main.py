@@ -42,12 +42,16 @@ app = FastAPI(
 )
 
 # CORS middleware configuration
+allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "")
+extra_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
+
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "https://astrologica-swart.vercel.app",
-    "https://astrologica-api-725w.onrender.com"
+    "https://astrologica-api-725w.onrender.com",
+    *extra_origins
 ]
 
 app.add_middleware(
@@ -120,9 +124,10 @@ async def root():
 async def health_check():
     db_connected = await ping_database()
     return {
-        "status": "healthy" if db_connected else "degraded",
+        "status": "ok",
+        "timestamp": datetime.utcnow().isoformat(),
         "database": "connected" if db_connected else "disconnected",
-        "framework": "FastAPI",
+        "service": "Astrologica Engine",
         "version": "2.1.0"
     }
 
@@ -346,4 +351,6 @@ async def get_blueprint(blueprint_id: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    host = os.environ.get("HOST", "0.0.0.0")
+    uvicorn.run("main:app", host=host, port=port)
