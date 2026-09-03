@@ -127,62 +127,62 @@ export const SUN_SIGN_DESCRIPTIONS = {
   Aries: {
     archetype: "The Fearless Pioneer",
     elementModality: "Fire · Cardinal",
-    text: "Aries radiates courage, instinctive leadership, and uncompromising initiative. Your solar flame burns with a primal drive to break open uncharted territory, champion bold causes, and ignite momentum wherever complacency reigns."
+    text: "Initiating change and inspiring courage through bold action."
   },
   Taurus: {
     archetype: "The Master Architect",
     elementModality: "Earth · Fixed",
-    text: "Taurus anchors reality with sensory elegance, unshakeable stamina, and enduring values. You possess an innate mastery over material cultivation, creating physical sanctuary, sustainable abundance, and timeless peace."
+    text: "Providing stability and teaching appreciation for enduring pleasures."
   },
   Gemini: {
     archetype: "The Quicksilver Weaver",
     elementModality: "Air · Mutable",
-    text: "Gemini bridges dual worlds through razor-sharp intellect, boundless curiosity, and eloquent expression. Your consciousness thrives on translating complex concepts, synthesizing ideas, and weaving vibrant networks."
+    text: "Connecting minds and facilitating communication through curiosity."
   },
   Cancer: {
     archetype: "The Sovereign Protector",
     elementModality: "Water · Cardinal",
-    text: "Cancer channels emotional depth, sacred ancestry, and fiercely protective intuition. Your solar purpose unfolds through nurturing soulful sanctuaries, preserving heritage, and offering unshakeable empathy to your tribe."
+    text: "Creating emotional security and nurturing unconditional love."
   },
   Leo: {
     archetype: "The Radiant Monarch",
     elementModality: "Fire · Fixed",
-    text: "Leo illuminates the cosmos with sovereign dignity, magnetic warmth, and heart-centered creative genius. You are here to lead with generosity, inspire collective elevation, and express unapologetic joy."
+    text: "Expressing creative authenticity and inspiring others through charisma."
   },
   Virgo: {
     archetype: "The Sacred Alchemist",
     elementModality: "Earth · Mutable",
-    text: "Virgo refines raw reality through exquisite discernment, sacred devotion, and bodily mastery. Your purpose is precision in service—purifying systems, healing the fragmented, and establishing practical harmony."
+    text: "Serving through practical mastery and achieving perfection in details."
   },
   Libra: {
     archetype: "The Cosmic Diplomat",
     elementModality: "Air · Cardinal",
-    text: "Libra orchestrates equilibrium, aesthetic justice, and profound relational harmony. Your solar mission seeks truth through balance, elevating human connection into an art form and harmonizing divergent perspectives."
+    text: "Creating harmony and balance through diplomacy and fairness."
   },
   Scorpio: {
     archetype: "The Phoenix Alchemist",
     elementModality: "Water · Fixed",
-    text: "Scorpio plumbs the deepest subconscious realms with laser perception, raw emotional courage, and unmatched resilience. You thrive in transformative fire, transmuting darkness into spiritual power and sovereign rebirth."
+    text: "Facilitating deep transformation and emotional healing."
   },
   Sagittarius: {
     archetype: "The Visionary Archer",
     elementModality: "Fire · Mutable",
-    text: "Sagittarius shoots arrows toward higher horizons through philosophical truth, boundless optimism, and cosmic exploration. Your journey is an eternal pilgrimage seeking the ultimate unifying principles of existence."
+    text: "Seeking truth and expanding consciousness through adventure."
   },
   Capricorn: {
     archetype: "The Timeless Mountain",
     elementModality: "Earth · Cardinal",
-    text: "Capricorn commands destiny through architectural discipline, ancestral endurance, and masterful executive focus. You construct monuments that withstand centuries, demonstrating that true authority is forged in patience."
+    text: "Building lasting achievements through discipline and responsibility."
   },
   Aquarius: {
     archetype: "The Electric Awakener",
     elementModality: "Air · Fixed",
-    text: "Aquarius channels visionary breakthroughs, collective evolution, and radical originality. Unbound by conventional dogma, your consciousness receives the blueprint of the future to liberate and enlighten humanity."
+    text: "Advancing human evolution through innovation and humanitarian vision."
   },
   Pisces: {
     archetype: "The Mystic Ocean",
     elementModality: "Water · Mutable",
-    text: "Pisces dissolves boundary illusions through oceanic compassion, psychic sensitivity, and transcendent artistry. You channel the collective unconscious, reminding the waking world of the eternal unity underlying all life."
+    text: "Embodying boundless compassion and spiritual intuition through fluid creativity."
   }
 }
 

@@ -242,14 +242,6 @@ function DobStep() {
 
   return (
     <div className="min-h-screen w-full flex flex-col justify-center items-center overflow-hidden px-4 md:px-8 text-center gap-8">
-      <motion.h2
-        variants={fadeUp} custom={0} initial="hidden" animate="visible"
-        style={{ ...TS, color: 'white', fontSize: 'clamp(1.5rem,4vw,2.5rem)',
-          fontWeight: 300, letterSpacing: '0.07em' }}
-      >
-        When did your journey begin?
-      </motion.h2>
-
       <Suspense fallback={null}>
         <CinematicChronologicalInputs onComplete={setChronData} />
       </Suspense>

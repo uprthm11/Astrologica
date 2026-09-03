@@ -208,15 +208,9 @@ export default function CinematicReveal() {
   // ═════════════════════════════════════════════════════════════════════════════
   const SLIDES = [
     // ── Slide 1 (The Sun Sign) ──
-    <div key="slide-1" className="space-y-6 text-center">
-      <div className="text-[11px] font-mono uppercase tracking-[0.4em] text-blue-200/50">
-        Slide 1 of 11 · The Sun Sign
-      </div>
-      <div className="text-2xl md:text-3xl font-light text-white tracking-widest drop-shadow-md">
-        The Core Solar Identity
-      </div>
-      <p className="text-base md:text-lg font-light text-blue-100/75 max-w-lg mx-auto leading-relaxed drop-shadow-md">
-        The Sun sign represents your core identity, conscious ego, and life purpose, acting as the central axis of your personality and the "I AM" statement of your chart.
+    <div key="slide-1" className="space-y-8 text-center max-w-lg mx-auto">
+      <p className="text-base md:text-lg font-light text-blue-100/85 max-w-md mx-auto leading-relaxed drop-shadow-md">
+        Identity, conscious ego, and life purpose central axis of your personality and the 'I AM' statement
       </p>
 
       {/* Dynamic Center Display with Custom Figma SVG */}
@@ -224,37 +218,28 @@ export default function CinematicReveal() {
         <div className={`p-4 rounded-full ${sunGlowClass} transition-transform hover:scale-105 duration-300`}>
           <SunZodiacIcon className="w-24 h-24 md:w-28 md:h-28" />
         </div>
-        <div className="text-3xl md:text-4xl font-light tracking-[0.25em] text-white mt-3">
+        <div className="text-3xl md:text-4xl font-light tracking-[0.25em] text-white mt-4">
           {sunSign.toUpperCase()}
-        </div>
-        <div className="text-xs font-mono uppercase tracking-[0.3em] text-blue-200/60 mt-1">
-          {sunInfo.elementModality} · {sunInfo.archetype}
         </div>
       </div>
 
-      {/* Personalized Narrative Text */}
-      <div className="max-w-lg mx-auto p-4 bg-white/[0.015] border border-blue-200/10 rounded-2xl">
-        <p className="text-base md:text-lg font-light text-white/90 leading-relaxed drop-shadow-md">
+      {/* Personalized Mission Text Floating Cleanly Against Stars */}
+      <div className="max-w-md mx-auto">
+        <p className="text-base md:text-lg font-light text-white/95 leading-relaxed drop-shadow-md">
           {sunInfo.text}
         </p>
       </div>
 
-      <div className="flex items-center justify-center gap-6 pt-2">
+      <div className="flex items-center justify-center gap-6 pt-4">
         <CinematicGhostButton onClick={goBack}>← BACK</CinematicGhostButton>
         <CinematicButton onClick={() => setRevealSlide(1)}>Next →</CinematicButton>
       </div>
     </div>,
 
     // ── Slide 2 (The Moon Sign) ──
-    <div key="slide-2" className="space-y-6 text-center">
-      <div className="text-[11px] font-mono uppercase tracking-[0.4em] text-blue-200/50">
-        Slide 2 of 11 · The Moon Sign
-      </div>
-      <div className="text-2xl md:text-3xl font-light text-white tracking-widest drop-shadow-md">
-        The Subconscious & Emotional Realm
-      </div>
-      <p className="text-base md:text-lg font-light text-blue-100/75 max-w-lg mx-auto leading-relaxed drop-shadow-md">
-        The Western moon sign governs your emotional instincts, subconscious patterns, and inner comfort needs, revealing your private inner world distinct from your public sun sign identity.
+    <div key="slide-2" className="space-y-8 text-center max-w-lg mx-auto">
+      <p className="text-base md:text-lg font-light text-blue-100/85 max-w-md mx-auto leading-relaxed drop-shadow-md">
+        Emotional instincts, subconscious patterns, and inner comfort needs distinct from your public identity
       </p>
 
       {/* Dynamic Center Display with Custom Figma SVG */}
@@ -262,37 +247,28 @@ export default function CinematicReveal() {
         <div className={`p-4 rounded-full ${moonGlowClass} transition-transform hover:scale-105 duration-300`}>
           <MoonZodiacIcon className="w-24 h-24 md:w-28 md:h-28" />
         </div>
-        <div className="text-3xl md:text-4xl font-light tracking-[0.25em] text-white mt-3">
+        <div className="text-3xl md:text-4xl font-light tracking-[0.25em] text-white mt-4">
           {moonSign.toUpperCase()}
-        </div>
-        <div className="text-xs font-mono uppercase tracking-[0.3em] text-blue-200/60 mt-1">
-          {moonInfo.elementGroup} · {moonInfo.subconsciousNeed}
         </div>
       </div>
 
-      {/* Personalized Narrative Text */}
-      <div className="max-w-lg mx-auto p-4 bg-white/[0.015] border border-blue-200/10 rounded-2xl">
-        <p className="text-base md:text-lg font-light text-white/90 leading-relaxed drop-shadow-md">
+      {/* Personalized Subconscious Text Floating Cleanly Against Stars */}
+      <div className="max-w-md mx-auto">
+        <p className="text-base md:text-lg font-light text-white/95 leading-relaxed drop-shadow-md">
           {moonInfo.text}
         </p>
       </div>
 
-      <div className="flex items-center justify-center gap-6 pt-2">
+      <div className="flex items-center justify-center gap-6 pt-4">
         <CinematicGhostButton onClick={() => setRevealSlide(0)}>← BACK</CinematicGhostButton>
         <CinematicButton onClick={() => setRevealSlide(2)}>Next →</CinematicButton>
       </div>
     </div>,
 
     // ── Slide 3 (The Ascendant / Rising) ──
-    <div key="slide-3" className="space-y-6 text-center">
-      <div className="text-[11px] font-mono uppercase tracking-[0.4em] text-blue-200/50">
-        Slide 3 of 11 · The Ascendant (Rising)
-      </div>
-      <div className="text-2xl md:text-3xl font-light text-white tracking-widest drop-shadow-md">
-        The Outer Persona & Horizon
-      </div>
-      <p className="text-base md:text-lg font-light text-blue-100/75 max-w-lg mx-auto leading-relaxed drop-shadow-md">
-        The Western Ascendant is the zodiac sign rising on the eastern horizon at the exact moment of birth, acting as the "outer mask" that governs first impressions and outward persona.
+    <div key="slide-3" className="space-y-8 text-center max-w-lg mx-auto">
+      <p className="text-base md:text-lg font-light text-blue-100/85 max-w-md mx-auto leading-relaxed drop-shadow-md">
+        The outer mask that governs first impressions, physical presence, and outward persona
       </p>
 
       {/* Dynamic Center Display with Custom Figma SVG */}
@@ -300,22 +276,19 @@ export default function CinematicReveal() {
         <div className={`p-4 rounded-full ${ascGlowClass} transition-transform hover:scale-105 duration-300`}>
           <AscZodiacIcon className="w-24 h-24 md:w-28 md:h-28" />
         </div>
-        <div className="text-3xl md:text-4xl font-light tracking-[0.25em] text-white mt-3">
+        <div className="text-3xl md:text-4xl font-light tracking-[0.25em] text-white mt-4">
           {ascSign.toUpperCase()}
-        </div>
-        <div className="text-xs font-mono uppercase tracking-[0.3em] text-blue-200/60 mt-1">
-          {ascData.element} Element · {ascInfo.outerMask}
         </div>
       </div>
 
-      {/* Personalized Narrative Text */}
-      <div className="max-w-lg mx-auto p-4 bg-white/[0.015] border border-blue-200/10 rounded-2xl">
-        <p className="text-base md:text-lg font-light text-white/90 leading-relaxed drop-shadow-md">
+      {/* Personalized Outer Persona Text Floating Cleanly Against Stars */}
+      <div className="max-w-md mx-auto">
+        <p className="text-base md:text-lg font-light text-white/95 leading-relaxed drop-shadow-md">
           {ascInfo.firstImpression}
         </p>
       </div>
 
-      <div className="flex items-center justify-center gap-6 pt-2">
+      <div className="flex items-center justify-center gap-6 pt-4">
         <CinematicGhostButton onClick={() => setRevealSlide(1)}>← BACK</CinematicGhostButton>
         <CinematicButton onClick={() => setRevealSlide(3)}>Next →</CinematicButton>
       </div>

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Country, State, City } from 'country-state-city'
 import { CinematicButton, fadeUp } from './CinematicPrimitives'
+import CinematicWheelPicker from './CinematicWheelPicker'
 
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search'
 
@@ -19,8 +20,7 @@ export default function CinematicLocationSearch({ onSelect }) {
   const [selectedCountryCode, setSelectedCountryCode] = useState('')
   const [selectedStateCode, setSelectedStateCode]     = useState('')
   const [selectedCityName, setSelectedCityName]       = useState('')
-
-  const [searchingFinal, setSearchingFinal] = useState(false)
+  const [searchingFinal, setSearchingFinal]           = useState(false)
 
   // 1. All Countries list
   const countries = useMemo(() => Country.getAllCountries(), [])
@@ -33,7 +33,7 @@ export default function CinematicLocationSearch({ onSelect }) {
 
   // 3. Cities for selected country and state
   const cities = useMemo(() => {
-    if (!selectedCountryCode || !selectedStateCode) return []
+    if (!selectedCountryCode || !selectedStateCode || selectedStateCode === 'NA') return []
     return City.getCitiesOfState(selectedCountryCode, selectedStateCode)
   }, [selectedCountryCode, selectedStateCode])
 
@@ -45,23 +45,72 @@ export default function CinematicLocationSearch({ onSelect }) {
     return states.find(s => s.isoCode === selectedStateCode)
   }, [states, selectedStateCode])
 
-  const isComplete = Boolean(selectedCountryCode && (states.length === 0 || selectedStateCode) && (cities.length === 0 || selectedCityName))
+  // Wheel Options with leading placeholder
+  const countryOptions = useMemo(() => {
+    return [
+      { label: 'Select Country…', value: '' },
+      ...countries.map(c => ({ label: c.name, value: c.isoCode }))
+    ]
+  }, [countries])
 
-  const handleCountryChange = (e) => {
-    const code = e.target.value
+  const stateOptions = useMemo(() => {
+    if (!selectedCountryCode) {
+      return [{ label: 'Choose Country First', value: '' }]
+    }
+    if (states.length === 0) {
+      return [{ label: 'No States Required', value: 'NA' }]
+    }
+    return [
+      { label: 'Select State…', value: '' },
+      ...states.map(s => ({ label: s.name, value: s.isoCode }))
+    ]
+  }, [selectedCountryCode, states])
+
+  const cityOptions = useMemo(() => {
+    if (!selectedStateCode || selectedStateCode === '') {
+      return [{ label: 'Choose State First', value: '' }]
+    }
+    if (cities.length === 0) {
+      return [{ label: 'No Cities Required', value: 'NA' }]
+    }
+    return [
+      { label: 'Select City…', value: '' },
+      ...cities.map(c => ({ label: c.name, value: c.name }))
+    ]
+  }, [selectedStateCode, cities])
+
+  const isComplete = Boolean(
+    selectedCountryCode &&
+    (states.length === 0 || (selectedStateCode && selectedStateCode !== '')) &&
+    (cities.length === 0 || (selectedCityName && selectedCityName !== ''))
+  )
+
+  const handleCountryChange = (code) => {
     setSelectedCountryCode(code)
-    setSelectedStateCode('')
-    setSelectedCityName('')
+    const newStates = code ? State.getStatesOfCountry(code) : []
+    if (newStates.length === 0) {
+      setSelectedStateCode('NA')
+      setSelectedCityName('NA')
+    } else {
+      setSelectedStateCode('')
+      setSelectedCityName('')
+    }
   }
 
-  const handleStateChange = (e) => {
-    const code = e.target.value
+  const handleStateChange = (code) => {
     setSelectedStateCode(code)
-    setSelectedCityName('')
+    const newCities = (selectedCountryCode && code && code !== 'NA')
+      ? City.getCitiesOfState(selectedCountryCode, code)
+      : []
+    if (newCities.length === 0) {
+      setSelectedCityName('NA')
+    } else {
+      setSelectedCityName('')
+    }
   }
 
-  const handleCityChange = (e) => {
-    setSelectedCityName(e.target.value)
+  const handleCityChange = (cityName) => {
+    setSelectedCityName(cityName)
   }
 
   const handleReset = () => {
@@ -75,10 +124,11 @@ export default function CinematicLocationSearch({ onSelect }) {
     setSearchingFinal(true)
 
     const countryName = selectedCountryObj?.name || ''
-    const stateName   = selectedStateObj?.name || ''
-    const cityName    = selectedCityName || stateName || countryName
+    const stateName   = selectedStateObj?.name || (selectedStateCode === 'NA' ? '' : '')
+    const cityName    = selectedCityName === 'NA' ? '' : selectedCityName
 
-    const locationName = [cityName, stateName, countryName].filter(Boolean).join(', ')
+    const locationParts = [cityName, stateName, countryName].filter(Boolean)
+    const locationName  = locationParts.join(', ') || countryName
 
     try {
       const res = await fetch(
@@ -93,9 +143,8 @@ export default function CinematicLocationSearch({ onSelect }) {
         lat = parseFloat(data[0].lat)
         lon = parseFloat(data[0].lon)
       } else {
-        // Fallback query country/city
         const fallbackRes = await fetch(
-          `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(`${cityName}, ${countryName}`)}&limit=1`,
+          `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(`${cityName || stateName}, ${countryName}`)}&limit=1`,
           { headers: { 'Accept-Language': 'en' } }
         )
         const fallbackData = await fallbackRes.json()
@@ -130,73 +179,41 @@ export default function CinematicLocationSearch({ onSelect }) {
     }
   }
 
-  const selectStyle = {
-    background: 'transparent',
-    border: 'none',
-    borderBottom: '1px solid rgba(160,200,255,0.3)',
-    outline: 'none',
-    color: 'white',
-    textAlign: 'center',
-    textAlignLast: 'center',
-    fontSize: '1.25rem', // text-xl / text-2xl large readable font
-    fontWeight: '300',
-    letterSpacing: '0.12em',
-    padding: '0.75rem 0.25rem',
-    width: '100%',
-    cursor: 'pointer',
-    colorScheme: 'dark',
-  }
-
   return (
-    <div className="w-full max-w-md flex flex-col items-center gap-7">
-      {/* Country Select */}
-      <motion.div variants={fadeUp} custom={1} initial="hidden" animate="visible" className="w-full space-y-1">
-        <select value={selectedCountryCode} onChange={handleCountryChange} style={selectStyle}>
-          <option value="" disabled className="bg-[#050816] text-blue-200/40">Country</option>
-          {countries.map(c => (
-            <option key={c.isoCode} value={c.isoCode} className="bg-[#050816] text-white">
-              {c.name}
-            </option>
-          ))}
-        </select>
+    <div className="w-full max-w-xl flex flex-col items-center gap-6 px-2">
+      {/* ── Cinematic Wheel Picker Grid for Country, State, City ── */}
+      <motion.div
+        variants={fadeUp} custom={1} initial="hidden" animate="visible"
+        className="w-full grid grid-cols-1 md:grid-cols-3 gap-3 bg-white/[0.015] border border-blue-200/10 rounded-2xl p-3"
+      >
+        <CinematicWheelPicker
+          label="Country"
+          options={countryOptions}
+          value={selectedCountryCode}
+          onChange={handleCountryChange}
+        />
+        <CinematicWheelPicker
+          label="State / Region"
+          options={stateOptions}
+          value={selectedStateCode}
+          onChange={handleStateChange}
+        />
+        <CinematicWheelPicker
+          label="City"
+          options={cityOptions}
+          value={selectedCityName}
+          onChange={handleCityChange}
+        />
       </motion.div>
 
-      {/* State Select (Revealed after Country) */}
-      {selectedCountryCode && states.length > 0 && (
-        <motion.div variants={fadeUp} custom={1} initial="hidden" animate="visible" className="w-full space-y-1">
-          <select value={selectedStateCode} onChange={handleStateChange} style={selectStyle}>
-            <option value="" disabled className="bg-[#050816] text-blue-200/40">State</option>
-            {states.map(s => (
-              <option key={s.isoCode} value={s.isoCode} className="bg-[#050816] text-white">
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </motion.div>
-      )}
-
-      {/* City Select (Revealed after State) */}
-      {selectedStateCode && cities.length > 0 && (
-        <motion.div variants={fadeUp} custom={1} initial="hidden" animate="visible" className="w-full space-y-1">
-          <select value={selectedCityName} onChange={handleCityChange} style={selectStyle}>
-            <option value="" disabled className="bg-[#050816] text-blue-200/40">City</option>
-            {cities.map((c, i) => (
-              <option key={`${c.name}-${i}`} value={c.name} className="bg-[#050816] text-white">
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </motion.div>
-      )}
-
-      {/* Reset Location Button */}
+      {/* Reset Location Action */}
       {selectedCountryCode && (
         <motion.button
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           onClick={handleReset}
           onMouseEnter={e => { e.currentTarget.style.textShadow = '0 0 12px rgba(160,200,255,0.8)' }}
           onMouseLeave={e => { e.currentTarget.style.textShadow = 'none' }}
-          className="text-xs font-mono tracking-widest uppercase text-blue-200/60 hover:text-white transition cursor-pointer bg-transparent border-0 mt-1"
+          className="text-xs font-mono tracking-widest uppercase text-blue-200/60 hover:text-white transition cursor-pointer bg-transparent border-0"
         >
           Reset Location
         </motion.button>
