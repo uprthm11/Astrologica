@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   getAdminConfig,
@@ -33,7 +33,7 @@ const UsersIcon = ({ className = 'w-4 h-4' }) => (
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
-  const { adminToken, logoutAdmin, setSiteConfig } = useAppStore()
+  const { adminToken, logoutAdmin, setSiteConfig, resetJourney } = useAppStore()
 
   const [activeTab, setActiveTab] = useState('banner')
   const [config, setConfig] = useState({ banner_message: '', show_banner: true, maintenance_mode: false })
@@ -105,7 +105,12 @@ export default function AdminDashboard() {
           <h1 className="text-2xl font-bold text-white tracking-tight mt-1">Platform Management Console</h1>
         </div>
         <div className="flex items-center gap-3">
-          <Link to="/" className="btn-secondary text-xs">← View App</Link>
+          <button
+            onClick={() => { resetJourney(); navigate('/') }}
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#3858f6]/20 to-[#00d2ff]/10 border border-[#3858f6]/40 hover:border-[#00d2ff]/60 text-white/80 hover:text-white text-xs font-bold tracking-wider transition cursor-pointer flex items-center gap-2"
+          >
+            <span className="text-[#00d2ff]">✦</span> Return to Universe
+          </button>
           <button onClick={() => { logoutAdmin(); navigate('/admin') }}
             className="px-3 py-1.5 rounded-xl bg-rose-950/60 hover:bg-rose-900/60 border border-rose-500/40 text-rose-300 text-xs font-semibold transition cursor-pointer">
             Logout

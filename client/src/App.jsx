@@ -80,21 +80,6 @@ function IntroStep() {
           ✦ Explore the Universe
         </CinematicButton>
       </div>
-
-      <motion.div
-        variants={fadeIn}
-        custom={5}
-        initial="hidden"
-        animate="visible"
-        className="mt-8 pointer-events-auto"
-      >
-        <button
-          onClick={() => advanceStep(4, 'Skipped to Dashboard')}
-          className="text-[11px] font-mono text-white/20 hover:text-white/50 transition cursor-pointer underline underline-offset-4"
-        >
-          Skip to Dashboard
-        </button>
-      </motion.div>
     </div>
   )
 }
@@ -336,6 +321,31 @@ function CinematicRoot() {
   )
 }
 
+// ─── Admin Shell — completely separate from the cinematic universe ────────
+// The universe fades out here. Admin panel has its own dark solid environment.
+function AdminShell({ children, centered = false }) {
+  return (
+    <div
+      className="relative min-h-screen text-white overflow-x-hidden"
+      style={{
+        background: 'radial-gradient(ellipse at 30% 20%, #0d1145 0%, #07081a 60%, #020308 100%)',
+      }}
+    >
+      {/* Subtle grid overlay for depth */}
+      <div
+        className="pointer-events-none fixed inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage: 'linear-gradient(#3858f6 1px, transparent 1px), linear-gradient(90deg, #3858f6 1px, transparent 1px)',
+          backgroundSize: '64px 64px',
+        }}
+      />
+      <div className={`relative z-10 ${centered ? 'flex items-center justify-center min-h-screen p-6' : 'p-6 sm:p-8'}`}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
 // ─── App Root with Router ─────────────────────────────────────────────────
 export default function App() {
   return (
@@ -346,21 +356,24 @@ export default function App() {
 
         {/* Saved blueprint dossier page */}
         <Route path="/blueprint/:id" element={
-          <Suspense fallback={null}><SharedDossier /></Suspense>
+          <AdminShell>
+            <Suspense fallback={null}><SharedDossier /></Suspense>
+          </AdminShell>
         } />
 
-        {/* Admin routes */}
+        {/* Admin routes — solid dark shell, universe does not render here */}
         <Route path="/admin" element={
-          <div className="min-h-screen bg-[#0b0e29] flex items-center justify-center p-6">
+          <AdminShell centered>
             <Suspense fallback={null}><AdminLogin /></Suspense>
-          </div>
+          </AdminShell>
         } />
         <Route path="/admin/dashboard" element={
-          <div className="min-h-screen bg-[#0b0e29] p-6 sm:p-8">
+          <AdminShell>
             <Suspense fallback={null}><AdminDashboard /></Suspense>
-          </div>
+          </AdminShell>
         } />
       </Routes>
     </BrowserRouter>
   )
 }
+
