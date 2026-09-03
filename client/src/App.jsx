@@ -312,11 +312,11 @@ function LocationStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 55 — PATH SELECTION (NEW STEP)
+// STEP 55 — PATH SELECTION (Multi-screen Framer Motion Wipe)
 // ═══════════════════════════════════════════════════════════════════════════════
 function PathSelectionStep() {
   const { advanceStep, setPreferredSystem, goBack } = useAppStore()
-  const [showChartOptions, setShowChartOptions] = useState(false)
+  const [screen, setScreen] = useState(1) // Screen 1: Intent, Screen 2: System Choice
   const [notice, setNotice] = useState('')
 
   const handleSelectSystem = (sys) => {
@@ -325,56 +325,82 @@ function PathSelectionStep() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
-      <motion.h2
-        variants={fadeUp} custom={0} initial="hidden" animate="visible"
-        style={{ ...TS, color: 'white', fontSize: 'clamp(1.5rem,4vw,2.5rem)',
-          fontWeight: 300, letterSpacing: '0.07em' }}
-      >
-        What path shall we illuminate?
-      </motion.h2>
-
-      <div className="flex flex-col items-center gap-6 w-full max-w-sm">
-        {/* Main Option 1 */}
-        <CinematicButton onClick={() => setShowChartOptions(!showChartOptions)}>
-          Show Astro Chart
-        </CinematicButton>
-
-        {/* Sub-options revealed under Show Astro Chart */}
-        <AnimatePresence>
-          {showChartOptions && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-4 py-2 border-t border-b border-blue-200/10 w-full"
+    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6">
+      <AnimatePresence mode="wait">
+        {screen === 1 ? (
+          /* ── Screen 1: Intent Selection ── */
+          <motion.div
+            key="path-screen-1"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.8 } }}
+            exit={{ opacity: 0, y: -15, transition: { duration: 0.4 } }}
+            className="flex flex-col items-center gap-10 w-full max-w-md"
+          >
+            <motion.h2
+              variants={fadeUp} custom={0} initial="hidden" animate="visible"
+              style={{ ...TS, color: 'white', fontSize: 'clamp(1.5rem,4vw,2.5rem)',
+                fontWeight: 300, letterSpacing: '0.07em' }}
             >
-              <CinematicButton onClick={() => handleSelectSystem('vedic')}>
-                Vedic (Preferred)
+              What path shall we illuminate?
+            </motion.h2>
+
+            <div className="flex flex-col items-center gap-6 w-full">
+              <CinematicButton onClick={() => setScreen(2)}>
+                Show Astro Chart
               </CinematicButton>
-              <CinematicGhostButton onClick={() => handleSelectSystem('western')}>
-                Western
+
+              <CinematicGhostButton onClick={() => setNotice('Compatibility Checker coming soon in v2.5!')}>
+                Compatibility Checker (Coming Soon)
               </CinematicGhostButton>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
-        {/* Main Option 2: Compatibility Checker (Coming soon state) */}
-        <CinematicGhostButton onClick={() => setNotice('Compatibility Checker coming soon in v2.5!')}>
-          Compatibility Checker
-        </CinematicGhostButton>
+              {notice && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs font-mono text-cyan-300/80 tracking-widest">
+                  {notice}
+                </motion.div>
+              )}
+            </div>
 
-        {notice && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs font-mono text-cyan-300/80 tracking-widest">
-            {notice}
+            <CinematicGhostButton onClick={goBack} delay={0.3}>
+              ← BACK
+            </CinematicGhostButton>
+          </motion.div>
+        ) : (
+          /* ── Screen 2: System Choice ── */
+          <motion.div
+            key="path-screen-2"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.8 } }}
+            exit={{ opacity: 0, y: -15, transition: { duration: 0.4 } }}
+            className="flex flex-col items-center gap-10 w-full max-w-md"
+          >
+            <motion.h2
+              variants={fadeUp} custom={0} initial="hidden" animate="visible"
+              style={{ ...TS, color: 'white', fontSize: 'clamp(1.5rem,4vw,2.5rem)',
+                fontWeight: 300, letterSpacing: '0.07em' }}
+            >
+              Choose your cosmic lens:
+            </motion.h2>
+
+            <div className="flex flex-col items-center gap-6 w-full">
+              <CinematicButton onClick={() => handleSelectSystem('vedic')}>
+                Start Vedic Cosmic Journey (Preferred)
+              </CinematicButton>
+
+              <CinematicGhostButton onClick={() => handleSelectSystem('western')}>
+                Start Western Cosmic Journey
+              </CinematicGhostButton>
+            </div>
+
+            <CinematicGhostButton onClick={() => setScreen(1)} delay={0.3}>
+              ← BACK
+            </CinematicGhostButton>
           </motion.div>
         )}
-      </div>
-
-      <CinematicGhostButton onClick={goBack} delay={0.5}>
-        ← BACK
-      </CinematicGhostButton>
+      </AnimatePresence>
     </div>
   )
 }
+
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // STEP 6 — PROCESSING
