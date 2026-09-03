@@ -1,5 +1,6 @@
 import React, { useRef, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
+import * as THREE from 'three'
 import { useAppStore } from '../../store/useAppStore'
 
 // Camera Z targets per cinematic step (extended for 8 steps)
@@ -15,11 +16,31 @@ function getCameraTarget(step, revealSlide) {
   return STEP_Z[Math.min(step, STEP_Z.length - 1)]
 }
 
+// Generate circular alpha map texture to guarantee round particle spheres
+function createCircleTexture() {
+  if (typeof document === 'undefined') return null
+  const canvas = document.createElement('canvas')
+  canvas.width = 64
+  canvas.height = 64
+  const ctx = canvas.getContext('2d')
+  const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32)
+  grad.addColorStop(0, 'rgba(255, 255, 255, 1)')
+  grad.addColorStop(0.3, 'rgba(210, 225, 255, 0.8)')
+  grad.addColorStop(0.7, 'rgba(150, 180, 255, 0.25)')
+  grad.addColorStop(1, 'rgba(0, 0, 0, 0)')
+  ctx.fillStyle = grad
+  ctx.fillRect(0, 0, 64, 64)
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.needsUpdate = true
+  return texture
+}
 
 // ─── Star particle field ──────────────────────────────────────────────────────
 function StarField() {
   const ref = useRef()
   const COUNT = 22000
+
+  const circleTexture = useMemo(() => createCircleTexture(), [])
 
   const positions = useMemo(() => {
     const arr = new Float32Array(COUNT * 3)
@@ -43,7 +64,15 @@ function StarField() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" array={positions} count={COUNT} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial size={0.32} color="#b8d0ff" transparent opacity={0.88} sizeAttenuation depthWrite={false} />
+      <pointsMaterial
+        size={0.65}
+        color="#b8d0ff"
+        map={circleTexture || undefined}
+        transparent
+        opacity={0.88}
+        sizeAttenuation
+        depthWrite={false}
+      />
     </points>
   )
 }
@@ -52,6 +81,8 @@ function StarField() {
 function NebulaDust() {
   const ref = useRef()
   const COUNT = 4000
+
+  const circleTexture = useMemo(() => createCircleTexture(), [])
 
   const positions = useMemo(() => {
     const arr = new Float32Array(COUNT * 3)
@@ -75,7 +106,15 @@ function NebulaDust() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" array={positions} count={COUNT} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial size={1.2} color="#4466ff" transparent opacity={0.18} sizeAttenuation depthWrite={false} />
+      <pointsMaterial
+        size={1.8}
+        color="#4466ff"
+        map={circleTexture || undefined}
+        transparent
+        opacity={0.18}
+        sizeAttenuation
+        depthWrite={false}
+      />
     </points>
   )
 }
@@ -99,7 +138,7 @@ export default function UniverseCanvas() {
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 0,
-      background: 'radial-gradient(ellipse at 50% 38%, #080b22 0%, #010208 100%)',
+      background: 'radial-gradient(circle at 50% 38%, #080b22 0%, #010208 100%)',
     }}>
       <Canvas
         camera={{ position: [0, 0, 120], fov: 60, near: 0.1, far: 2500 }}

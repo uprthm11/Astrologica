@@ -4,322 +4,458 @@ import html2canvas from 'html2canvas'
 import { useAppStore } from '../../store/useAppStore'
 import { CinematicButton, CinematicGhostButton } from './CinematicPrimitives'
 
-// ─── Sun Sign Knowledge Base ─────────────────────────────────────────────────
+// ─── Sign Database with Elements, Rulers, Gems, Traits ───────────────────────
 const SIGN_DB = {
-  Aries:       { glyph: '♈', sanskrit: 'Mesha',      element: 'Fire',  ruling: 'Mars',    stone: 'Diamond',    color: '#ef4444' },
-  Taurus:      { glyph: '♉', sanskrit: 'Vrishabha',  element: 'Earth', ruling: 'Venus',   stone: 'Emerald',    color: '#10b981' },
-  Gemini:      { glyph: '♊', sanskrit: 'Mithuna',    element: 'Air',   ruling: 'Mercury', stone: 'Pearl',      color: '#06b6d4' },
-  Cancer:      { glyph: '♋', sanskrit: 'Karka',      element: 'Water', ruling: 'Moon',    stone: 'Ruby',       color: '#818cf8' },
-  Leo:         { glyph: '♌', sanskrit: 'Simha',      element: 'Fire',  ruling: 'Sun',     stone: 'Peridot',    color: '#f59e0b' },
-  Virgo:       { glyph: '♍', sanskrit: 'Kanya',      element: 'Earth', ruling: 'Mercury', stone: 'Sapphire',   color: '#84cc16' },
-  Libra:       { glyph: '♎', sanskrit: 'Tula',       element: 'Air',   ruling: 'Venus',   stone: 'Opal',       color: '#a78bfa' },
-  Scorpio:     { glyph: '♏', sanskrit: 'Vrishchika', element: 'Water', ruling: 'Mars',    stone: 'Topaz',      color: '#7c3aed' },
-  Sagittarius: { glyph: '♐', sanskrit: 'Dhanu',      element: 'Fire',  ruling: 'Jupiter', stone: 'Turquoise',  color: '#f97316' },
-  Capricorn:   { glyph: '♑', sanskrit: 'Makara',     element: 'Earth', ruling: 'Saturn',  stone: 'Garnet',     color: '#6b7280' },
-  Aquarius:    { glyph: '♒', sanskrit: 'Kumbha',     element: 'Air',   ruling: 'Saturn',  stone: 'Amethyst',   color: '#38bdf8' },
-  Pisces:      { glyph: '♓', sanskrit: 'Meena',      element: 'Water', ruling: 'Jupiter', stone: 'Aquamarine', color: '#6366f1' },
+  Aries:       { glyph: '♈', sanskrit: 'Mesha',      element: 'Fire',  ruling: 'Mars',    stone: 'Diamond',   vedicStone: 'Red Coral',   trait: 'Pioneering drive, instinctive courage, & direct initiative.' },
+  Taurus:      { glyph: '♉', sanskrit: 'Vrishabha',  element: 'Earth', ruling: 'Venus',   stone: 'Emerald',   vedicStone: 'White Sapphire', trait: 'Immovable stability, sensory elegance, & grounded endurance.' },
+  Gemini:      { glyph: '♊', sanskrit: 'Mithuna',    element: 'Air',   ruling: 'Mercury', stone: 'Pearl',     vedicStone: 'Emerald',     trait: 'Quicksilver intellect, dual curiosity, & articulate agility.' },
+  Cancer:      { glyph: '♋', sanskrit: 'Karka',      element: 'Water', ruling: 'Moon',    stone: 'Ruby',      vedicStone: 'Natural Pearl', trait: 'Deep empathic intuition, protective roots, & lunar sensitivity.' },
+  Leo:         { glyph: '♌', sanskrit: 'Simha',      element: 'Fire',  ruling: 'Sun',     stone: 'Peridot',   vedicStone: 'Ruby',        trait: 'Radiant authority, magnetic warmth, & sovereign creative flame.' },
+  Virgo:       { glyph: '♍', sanskrit: 'Kanya',      element: 'Earth', ruling: 'Mercury', stone: 'Sapphire',  vedicStone: 'Emerald',     trait: 'Analytical mastery, sacred devotion, & subtle perfectionism.' },
+  Libra:       { glyph: '♎', sanskrit: 'Tula',       element: 'Air',   ruling: 'Venus',   stone: 'Opal',      vedicStone: 'Diamond',     trait: 'Cosmic harmony, aesthetic justice, & relational diplomacy.' },
+  Scorpio:     { glyph: '♏', sanskrit: 'Vrishchika', element: 'Water', ruling: 'Mars',    stone: 'Topaz',     vedicStone: 'Red Coral',   trait: 'Transformative depth, alchemical perception, & intense magnetism.' },
+  Sagittarius: { glyph: '♐', sanskrit: 'Dhanu',      element: 'Fire',  ruling: 'Jupiter', stone: 'Turquoise', vedicStone: 'Yellow Sapphire', trait: 'Expansive philosophy, boundless freedom, & truth-seeking arrows.' },
+  Capricorn:   { glyph: '♑', sanskrit: 'Makara',    element: 'Earth', ruling: 'Saturn',  stone: 'Garnet',    vedicStone: 'Blue Sapphire', trait: 'Architectural ambition, timeless discipline, & mountain resilience.' },
+  Aquarius:    { glyph: '♒', sanskrit: 'Kumbha',    element: 'Air',   ruling: 'Saturn',  stone: 'Amethyst',  vedicStone: 'Blue Sapphire', trait: 'Visionary innovation, collective ideals, & electric originality.' },
+  Pisces:      { glyph: '♓', sanskrit: 'Meena',      element: 'Water', ruling: 'Jupiter', stone: 'Aquamarine',vedicStone: 'Yellow Sapphire', trait: 'Mystic transcendence, fluid compassion, & oceanic imagination.' },
 }
 
-// ─── Slide transition ─────────────────────────────────────────────────────────
-const SLIDE_ENTER = {
-  initial:   { opacity: 0, y: 20 },
-  animate:   { opacity: 1, y: 0, transition: { duration: 1.5, ease: [0.22, 1, 0.36, 1] } },
-  exit:      { opacity: 0, y: -20, transition: { duration: 0.8 } },
+const ELEMENT_GLYPHS = {
+  Fire: '🔥', Earth: '🏔️', Air: '💨', Water: '🌊'
 }
 
-// ─── Large sign display (glyph + name + subtitle) ────────────────────────────
-function SignDisplay({ sign, label, system }) {
-  const info = SIGN_DB[sign] || {}
+const SLIDE_TRANSITION = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0, transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] } },
+  exit:    { opacity: 0, y: -20, transition: { duration: 0.6 } },
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function getWesternSign(data, planetId) {
+  const planets = data?.western?.planets || []
+  return planets.find(p => p.id === planetId)?.sign || '—'
+}
+function getWesternAsc(data) {
+  return data?.western?.ascendant?.sign || '—'
+}
+function getVedicSign(data, key) {
+  return data?.vedic?.[key]?.rashi || '—'
+}
+function getVedicNakshatra(data) {
+  return data?.vedic?.surya_rashi?.nakshatra?.name || '—'
+}
+
+// ─── Single System Big 3 Component ───────────────────────────────────────────
+function BigThreeColumn({ title, subtitle, sun, moon, asc, isVedic = false }) {
+  const sInfo = SIGN_DB[sun] || {}
+  const mInfo = SIGN_DB[moon] || {}
+  const aInfo = SIGN_DB[asc] || {}
+
   return (
-    <div className="text-center space-y-3">
-      <div
-        className="text-[11px] font-mono uppercase tracking-[0.35em]"
-        style={{ color: 'rgba(160,200,255,0.4)' }}
-      >
-        {system} · {label}
+    <div className="space-y-6 text-center">
+      <div className="space-y-1">
+        <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-blue-200/40">{subtitle}</div>
+        <div className="text-xl font-light text-white tracking-widest">{title}</div>
       </div>
-      <div
-        className="text-8xl sm:text-9xl leading-none select-none"
-        style={{
-          textShadow: `0 0 60px ${info.color || '#ffffff'}55, 0 0 100px ${info.color || '#ffffff'}22`,
-          filter: `drop-shadow(0 0 20px ${info.color || '#ffffff'}44)`,
-        }}
-      >
-        {info.glyph || '✦'}
-      </div>
-      <div className="text-4xl sm:text-5xl font-thin tracking-[0.15em] text-white"
-        style={{ textShadow: `0 0 30px ${info.color || '#ffffff'}55` }}>
-        {sign}
-      </div>
-      {info.sanskrit && (
-        <div className="text-sm font-mono tracking-widest" style={{ color: 'rgba(160,200,255,0.35)' }}>
-          {info.sanskrit}
+
+      {/* Grid of 3 */}
+      <div className="space-y-5">
+        {/* Sun */}
+        <div className="space-y-1">
+          <div className="text-[10px] font-mono uppercase tracking-widest text-blue-200/50">☀️ Sun / Surya</div>
+          <div className="text-4xl select-none">{sInfo.glyph || '✦'}</div>
+          <div className="text-lg font-light text-white tracking-wider">{sun}</div>
+          {isVedic && sInfo.sanskrit && <div className="text-[10px] font-mono text-blue-200/30">{sInfo.sanskrit}</div>}
         </div>
-      )}
-    </div>
-  )
-}
 
-// ─── Pair display (two signs side by side) ────────────────────────────────────
-function SignPair({ leftSign, leftLabel, leftSystem, rightSign, rightLabel, rightSystem }) {
-  return (
-    <div className="flex items-start justify-center gap-16 sm:gap-24">
-      <SignDisplay sign={leftSign}  label={leftLabel}  system={leftSystem} />
-      <div className="w-px self-stretch" style={{ background: 'rgba(160,200,255,0.1)' }} />
-      <SignDisplay sign={rightSign} label={rightLabel} system={rightSystem} />
-    </div>
-  )
-}
-
-// ─── Large attribute reveal ───────────────────────────────────────────────────
-function AttributeReveal({ label, value, subtitle, glyph, color }) {
-  return (
-    <div className="text-center space-y-4">
-      <div className="text-[11px] font-mono uppercase tracking-[0.35em]"
-        style={{ color: 'rgba(160,200,255,0.4)' }}>
-        {label}
-      </div>
-      {glyph && (
-        <div className="text-6xl" style={{ textShadow: `0 0 40px ${color || '#ffffff'}66` }}>
-          {glyph}
+        {/* Moon */}
+        <div className="space-y-1">
+          <div className="text-[10px] font-mono uppercase tracking-widest text-blue-200/50">🌙 Moon / Chandra</div>
+          <div className="text-4xl select-none">{mInfo.glyph || '✦'}</div>
+          <div className="text-lg font-light text-white tracking-wider">{moon}</div>
+          {isVedic && mInfo.sanskrit && <div className="text-[10px] font-mono text-blue-200/30">{mInfo.sanskrit}</div>}
         </div>
-      )}
-      <div className="text-5xl sm:text-6xl font-thin tracking-[0.12em] text-white"
-        style={{ textShadow: `0 0 40px ${color || 'rgba(160,200,255,0.5)'}` }}>
-        {value}
+
+        {/* Ascendant */}
+        <div className="space-y-1">
+          <div className="text-[10px] font-mono uppercase tracking-widest text-blue-200/50">⬆️ Ascendant / Lagna</div>
+          <div className="text-4xl select-none">{aInfo.glyph || '✦'}</div>
+          <div className="text-lg font-light text-white tracking-wider">{asc}</div>
+          {isVedic && aInfo.sanskrit && <div className="text-[10px] font-mono text-blue-200/30">{aInfo.sanskrit}</div>}
+        </div>
       </div>
-      {subtitle && (
-        <div className="text-sm text-blue-100/40 font-light tracking-widest">{subtitle}</div>
-      )}
     </div>
   )
 }
 
-// ─── Final chart card for html2canvas capture ─────────────────────────────────
-function ChartCard({ data, sunInfo, userName }) {
-  const w = data?.western || {}
-  const v = data?.vedic   || {}
-  const planets = w?.planets || []
-  const wSun    = planets.find(p => p.id === 'sun')
-  const wMoon   = planets.find(p => p.id === 'moon')
+// ─── Single System Rulers Component ──────────────────────────────────────────
+function RulersColumn({ title, subtitle, sunSign, isVedic = false, nakshatra }) {
+  const info = SIGN_DB[sunSign] || {}
+  const rulingPlanet = info.ruling || '—'
+  const stone = isVedic ? (info.vedicStone || info.stone) : info.stone
 
+  return (
+    <div className="space-y-6 text-center">
+      <div className="space-y-1">
+        <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-blue-200/40">{subtitle}</div>
+        <div className="text-xl font-light text-white tracking-widest">{title}</div>
+      </div>
+
+      <div className="space-y-6 pt-2">
+        <div className="space-y-1">
+          <div className="text-[10px] font-mono uppercase tracking-widest text-blue-200/40">Ruling Graha / Planet</div>
+          <div className="text-3xl select-none">⭑</div>
+          <div className="text-2xl font-light text-white tracking-wider">{rulingPlanet}</div>
+        </div>
+
+        <div className="space-y-1">
+          <div className="text-[10px] font-mono uppercase tracking-widest text-blue-200/40">Cosmic Gemstone</div>
+          <div className="text-3xl select-none">◈</div>
+          <div className="text-2xl font-light text-white tracking-wider">{stone}</div>
+        </div>
+
+        {isVedic && nakshatra && (
+          <div className="space-y-1 pt-1">
+            <div className="text-[10px] font-mono uppercase tracking-widest text-blue-200/40">Nakshatra Realm</div>
+            <div className="text-base font-light text-blue-100/80 tracking-widest">{nakshatra}</div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Single System Traits & Element Component ────────────────────────────────
+function TraitsColumn({ title, subtitle, sunSign }) {
+  const info = SIGN_DB[sunSign] || {}
+  const element = info.element || 'Air'
+  const glyph = ELEMENT_GLYPHS[element] || '✨'
+
+  return (
+    <div className="space-y-6 text-center">
+      <div className="space-y-1">
+        <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-blue-200/40">{subtitle}</div>
+        <div className="text-xl font-light text-white tracking-widest">{title}</div>
+      </div>
+
+      <div className="space-y-4 pt-2">
+        <div className="space-y-1">
+          <div className="text-3xl select-none">{glyph}</div>
+          <div className="text-xs font-mono uppercase tracking-widest text-blue-200/50">Dominant Element</div>
+          <div className="text-xl font-light text-white tracking-wider">{element} Realm</div>
+        </div>
+
+        <div className="space-y-2 max-w-xs mx-auto pt-2">
+          <div className="text-[10px] font-mono uppercase tracking-widest text-blue-200/40">Core Personality Synthesis</div>
+          <p className="text-sm font-light text-white/80 leading-relaxed italic">
+            "{info.trait || 'A unique celestial resonance blending cosmic archetypes.'}"
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Exportable Single Chart Printable Card ──────────────────────────────────
+function ExportableChartCard({ title, system, sun, moon, asc, ruling, stone, element, userName, nakshatra }) {
   return (
     <div
       style={{
-        background:    'linear-gradient(160deg, #050816 0%, #0b0e29 60%, #050816 100%)',
-        padding:       '2rem',
-        borderRadius:  '1.5rem',
-        minWidth:      '320px',
-        maxWidth:      '480px',
-        fontFamily:    'system-ui, sans-serif',
+        background: 'linear-gradient(160deg, #050816 0%, #080c26 60%, #030511 100%)',
+        padding: '2rem',
+        borderRadius: '1rem',
+        width: '100%',
+        maxWidth: '340px',
+        fontFamily: 'system-ui, sans-serif',
+        color: 'white',
+        textAlign: 'center',
       }}
     >
-      {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '1.5rem', borderBottom: '1px solid rgba(160,200,255,0.1)', paddingBottom: '1rem' }}>
-        <div style={{ fontSize: '10px', letterSpacing: '0.3em', color: 'rgba(160,200,255,0.35)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-          Astrologica · Cosmic Blueprint
-        </div>
-        <div style={{ fontSize: '1.8rem', fontWeight: 300, letterSpacing: '0.1em', color: 'white' }}>
-          {userName || 'Cosmic Traveller'}
-        </div>
+      <div style={{ fontSize: '9px', letterSpacing: '0.35em', color: 'rgba(160,200,255,0.4)', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+        Astrologica · {system}
+      </div>
+      <div style={{ fontSize: '1.4rem', fontWeight: 300, letterSpacing: '0.12em', color: 'white', marginBottom: '1.2rem' }}>
+        {userName || 'Cosmic Traveller'}
       </div>
 
-      {/* Signs grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-        {[
-          { label: 'Western Sun',   value: wSun?.sign || '—',                  sys: 'Tropical' },
-          { label: 'Western Moon',  value: wMoon?.sign || '—',                  sys: 'Tropical' },
-          { label: 'Vedic Sun',     value: v?.surya_rashi?.rashi || '—',        sys: 'Sidereal' },
-          { label: 'Vedic Moon',    value: v?.chandra_rashi?.rashi || '—',       sys: 'Sidereal' },
-        ].map(row => {
-          const info = SIGN_DB[row.value] || {}
-          return (
-            <div key={row.label} style={{ textAlign: 'center', padding: '0.75rem', borderRadius: '0.75rem', background: 'rgba(255,255,255,0.04)' }}>
-              <div style={{ fontSize: '9px', color: 'rgba(160,200,255,0.3)', letterSpacing: '0.25em', textTransform: 'uppercase' }}>{row.sys} · {row.label}</div>
-              <div style={{ fontSize: '1.6rem', margin: '0.25rem 0' }}>{info.glyph || '·'}</div>
-              <div style={{ fontSize: '1rem', color: 'white', fontWeight: 300, letterSpacing: '0.08em' }}>{row.value}</div>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Attributes */}
-      <div style={{ borderTop: '1px solid rgba(160,200,255,0.08)', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        {[
-          { k: 'Element',       v: sunInfo?.element },
-          { k: 'Ruling Planet', v: sunInfo?.ruling  },
-          { k: 'Birthstone',    v: sunInfo?.stone    },
-          { k: 'Nakshatra',     v: v?.surya_rashi?.nakshatra?.name },
-        ].filter(r => r.v).map(row => (
-          <div key={row.k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
-            <span style={{ color: 'rgba(160,200,255,0.3)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>{row.k}</span>
-            <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>{row.v}</span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', borderTop: '1px solid rgba(160,200,255,0.1)', borderBottom: '1px solid rgba(160,200,255,0.1)', padding: '1rem 0', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+          <span style={{ color: 'rgba(160,200,255,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Sun Sign</span>
+          <span style={{ fontWeight: 500 }}>{sun}</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+          <span style={{ color: 'rgba(160,200,255,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Moon Sign</span>
+          <span style={{ fontWeight: 500 }}>{moon}</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+          <span style={{ color: 'rgba(160,200,255,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Ascendant</span>
+          <span style={{ fontWeight: 500 }}>{asc}</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+          <span style={{ color: 'rgba(160,200,255,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Ruler</span>
+          <span style={{ fontWeight: 500 }}>{ruling}</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+          <span style={{ color: 'rgba(160,200,255,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Gemstone</span>
+          <span style={{ fontWeight: 500 }}>{stone}</span>
+        </div>
+        {nakshatra && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+            <span style={{ color: 'rgba(160,200,255,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Nakshatra</span>
+            <span style={{ fontWeight: 500 }}>{nakshatra}</span>
           </div>
-        ))}
+        )}
       </div>
 
-      {/* Footer */}
-      <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '9px', color: 'rgba(160,200,255,0.18)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+      <div style={{ fontSize: '8px', color: 'rgba(160,200,255,0.25)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
         Swiss Ephemeris v2.10 · Pratham Upadhyay
       </div>
     </div>
   )
 }
 
-// ─── Data extractors ──────────────────────────────────────────────────────────
-function getWesternSign(data, planet) {
-  const planets = data?.western?.planets || []
-  return planets.find(p => p.id === planet)?.sign || '—'
-}
-function getVedicSign(data, key) {
-  return data?.vedic?.[key]?.rashi || '—'
-}
-
-// ─── Main CinematicReveal ─────────────────────────────────────────────────────
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function CinematicReveal() {
   const { astrologyData, userName, revealSlide, setRevealSlide, advanceStep } = useAppStore()
-  const chartRef    = useRef(null)
-  const [downloading, setDownloading] = useState(false)
 
-  const wMoon    = getWesternSign(astrologyData, 'moon')
-  const vMoon    = getVedicSign(astrologyData, 'chandra_rashi')
-  const wSun     = getWesternSign(astrologyData, 'sun')
-  const vSun     = getVedicSign(astrologyData, 'surya_rashi')
-  const sunInfo  = SIGN_DB[wSun] || SIGN_DB[vSun] || {}
-  const ruling   = sunInfo.ruling  || '—'
-  const stone    = sunInfo.stone   || '—'
-  const element  = sunInfo.element || '—'
+  const [downloadingWestern, setDownloadingWestern] = useState(false)
+  const [downloadingVedic, setDownloadingVedic]     = useState(false)
+  const [downloadingFused, setDownloadingFused]     = useState(false)
+  const [isFused, setIsFused]                       = useState(false)
 
-  const handleDownload = useCallback(async () => {
-    if (!chartRef.current) return
-    setDownloading(true)
+  const westernCardRef = useRef(null)
+  const vedicCardRef   = useRef(null)
+  const fusedCardRef   = useRef(null)
+
+  // Data extraction
+  const wSun  = getWesternSign(astrologyData, 'sun')
+  const wMoon = getWesternSign(astrologyData, 'moon')
+  const wAsc  = getWesternAsc(astrologyData)
+
+  const vSun  = getVedicSign(astrologyData, 'surya_rashi')
+  const vMoon = getVedicSign(astrologyData, 'chandra_rashi')
+  const vAsc  = getVedicSign(astrologyData, 'lagna')
+  const vNakshatra = getVedicNakshatra(astrologyData)
+
+  const wInfo = SIGN_DB[wSun] || {}
+  const vInfo = SIGN_DB[vSun] || {}
+
+  const handleDownloadWestern = useCallback(async () => {
+    if (!westernCardRef.current) return
+    setDownloadingWestern(true)
     try {
-      const canvas = await html2canvas(chartRef.current, {
-        backgroundColor: '#050816', scale: 2, useCORS: true, logging: false,
-      })
+      const canvas = await html2canvas(westernCardRef.current, { backgroundColor: '#050816', scale: 2, useCORS: true, logging: false })
       const link = document.createElement('a')
-      link.download = `astrologica-${(userName || 'chart').toLowerCase().replace(/\s+/g, '-')}.png`
+      link.download = `astrologica-western-${(userName || 'chart').toLowerCase().replace(/\s+/g, '-')}.png`
       link.href = canvas.toDataURL('image/png')
       link.click()
-      // After download → reset to Crossroads with camera zoom-back
-      setTimeout(() => advanceStep(2, `${userName} downloaded chart and returned`), 800)
     } catch (e) {
       console.error(e)
     } finally {
-      setDownloading(false)
+      setDownloadingWestern(false)
     }
-  }, [userName, advanceStep])
+  }, [userName])
 
+  const handleDownloadVedic = useCallback(async () => {
+    if (!vedicCardRef.current) return
+    setDownloadingVedic(true)
+    try {
+      const canvas = await html2canvas(vedicCardRef.current, { backgroundColor: '#050816', scale: 2, useCORS: true, logging: false })
+      const link = document.createElement('a')
+      link.download = `astrologica-vedic-${(userName || 'chart').toLowerCase().replace(/\s+/g, '-')}.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setDownloadingVedic(false)
+    }
+  }, [userName])
+
+  const handleDownloadFused = useCallback(async () => {
+    if (!fusedCardRef.current) return
+    setDownloadingFused(true)
+    try {
+      const canvas = await html2canvas(fusedCardRef.current, { backgroundColor: '#050816', scale: 2, useCORS: true, logging: false })
+      const link = document.createElement('a')
+      link.download = `astrologica-fused-verdict-${(userName || 'chart').toLowerCase().replace(/\s+/g, '-')}.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setDownloadingFused(false)
+    }
+  }, [userName])
+
+  // Slide definitions
   const SLIDES = [
-    // ── Slide 0: Western & Vedic Moon Signs ─────────────────────────────────
-    <div key="s0" className="text-center space-y-16">
-      <motion.div {...SLIDE_ENTER}
-        className="text-[11px] font-mono uppercase tracking-[0.4em]"
-        style={{ color: 'rgba(160,200,255,0.4)' }}
-      >
-        Your Moon Signs
-      </motion.div>
-      <motion.div {...SLIDE_ENTER} style={{ transitionDelay: '0.3s' }}>
-        <SignPair
-          leftSign={wMoon}  leftLabel="Moon Sign"    leftSystem="Western"
-          rightSign={vMoon} rightLabel="Chandra Rashi" rightSystem="Vedic"
-        />
-      </motion.div>
-      <motion.div {...SLIDE_ENTER} style={{ transitionDelay: '0.6s' }}>
-        <CinematicButton onClick={() => setRevealSlide(1)} delay={0}>Next</CinematicButton>
-      </motion.div>
+    // ── Slide 0: The Big 3 (Western vs. Vedic) ──
+    <div key="slide-0" className="space-y-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
+        <BigThreeColumn title="Western Tropical" subtitle="Conscious Identity" sun={wSun} moon={wMoon} asc={wAsc} />
+        <div className="hidden md:block w-px self-stretch bg-blue-200/10 mx-auto" />
+        <BigThreeColumn title="Vedic Sidereal" subtitle="Soul & Karmic Path" sun={vSun} moon={vMoon} asc={vAsc} isVedic />
+      </div>
+      <div className="text-center pt-4">
+        <CinematicButton onClick={() => setRevealSlide(1)}>Next →</CinematicButton>
+      </div>
     </div>,
 
-    // ── Slide 1: Vedic Sun & Moon Rashis ────────────────────────────────────
-    <div key="s1" className="text-center space-y-16">
-      <motion.div {...SLIDE_ENTER}
-        className="text-[11px] font-mono uppercase tracking-[0.4em]"
-        style={{ color: 'rgba(160,200,255,0.4)' }}
-      >
-        Your Vedic Blueprint
-      </motion.div>
-      <motion.div {...SLIDE_ENTER} style={{ transitionDelay: '0.3s' }}>
-        <SignPair
-          leftSign={vSun}  leftLabel="Surya Rashi"  leftSystem="Vedic"
-          rightSign={vMoon} rightLabel="Chandra Rashi" rightSystem="Vedic"
-        />
-      </motion.div>
-      <motion.div {...SLIDE_ENTER} style={{ transitionDelay: '0.6s' }}>
-        <CinematicButton onClick={() => setRevealSlide(2)} delay={0}>Next</CinematicButton>
-      </motion.div>
+    // ── Slide 1: The Rulers & Stones ──
+    <div key="slide-1" className="space-y-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
+        <RulersColumn title="Western Rulers" subtitle="Tropical Systems" sunSign={wSun} />
+        <div className="hidden md:block w-px self-stretch bg-blue-200/10 mx-auto" />
+        <RulersColumn title="Vedic Rulers" subtitle="Sidereal Jyotish" sunSign={vSun} isVedic nakshatra={vNakshatra} />
+      </div>
+      <div className="text-center pt-4">
+        <CinematicButton onClick={() => setRevealSlide(2)}>Next →</CinematicButton>
+      </div>
     </div>,
 
-    // ── Slide 2: Ruling Planet ───────────────────────────────────────────────
-    <div key="s2" className="text-center space-y-16">
-      <motion.div {...SLIDE_ENTER}>
-        <AttributeReveal
-          label="Your Ruling Planet"
-          value={ruling}
-          subtitle="The celestial body that governs your western sun sign"
-          glyph="⭑"
-          color={sunInfo.color}
-        />
-      </motion.div>
-      <motion.div {...SLIDE_ENTER} style={{ transitionDelay: '0.5s' }}>
-        <CinematicButton onClick={() => setRevealSlide(3)} delay={0}>Next</CinematicButton>
-      </motion.div>
+    // ── Slide 2: Core Traits & Elements ──
+    <div key="slide-2" className="space-y-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
+        <TraitsColumn title="Western Archetype" subtitle="Ego & Solar Direction" sunSign={wSun} />
+        <div className="hidden md:block w-px self-stretch bg-blue-200/10 mx-auto" />
+        <TraitsColumn title="Vedic Archetype" subtitle="Lunar Destiny & Nakshatra" sunSign={vSun} />
+      </div>
+      <div className="text-center pt-4">
+        <CinematicButton onClick={() => setRevealSlide(3)}>Next →</CinematicButton>
+      </div>
     </div>,
 
-    // ── Slide 3: Birthstone ──────────────────────────────────────────────────
-    <div key="s3" className="text-center space-y-16">
-      <motion.div {...SLIDE_ENTER}>
-        <AttributeReveal
-          label="Your Cosmic Stone"
-          value={stone}
-          subtitle={`Element · ${element}`}
-          glyph="◈"
-          color={sunInfo.color}
-        />
-      </motion.div>
-      <motion.div {...SLIDE_ENTER} style={{ transitionDelay: '0.5s' }}>
-        <CinematicButton onClick={() => setRevealSlide(4)} delay={0}>Next</CinematicButton>
-      </motion.div>
-    </div>,
+    // ── Slide 3: Separate Downloads & Fusion Trigger ──
+    <div key="slide-3" className="space-y-10 text-center">
+      <AnimatePresence mode="wait">
+        {!isFused ? (
+          <motion.div key="split-view" initial={{ opacity: 1 }} exit={{ opacity: 0, y: -20, transition: { duration: 0.8 } }} className="space-y-10">
+            <div className="text-xs font-mono uppercase tracking-[0.35em] text-blue-200/50">
+              Dual System Dossiers
+            </div>
 
-    // ── Slide 4: Full Chart + Download ───────────────────────────────────────
-    <div key="s4" className="text-center space-y-10">
-      <motion.div {...SLIDE_ENTER}
-        className="text-[11px] font-mono uppercase tracking-[0.4em]"
-        style={{ color: 'rgba(160,200,255,0.4)' }}
-      >
-        Your Cosmic Blueprint
-      </motion.div>
+            {/* Split printable cards */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
+              <div ref={westernCardRef} className="w-full flex justify-center">
+                <ExportableChartCard
+                  title="Western Dossier" system="Western Tropical"
+                  sun={wSun} moon={wMoon} asc={wAsc}
+                  ruling={wInfo.ruling} stone={wInfo.stone} element={wInfo.element}
+                  userName={userName}
+                />
+              </div>
 
-      {/* Chart card (captured by html2canvas) */}
-      <motion.div {...SLIDE_ENTER} style={{ transitionDelay: '0.2s' }}
-        className="flex justify-center" ref={chartRef}
-      >
-        <ChartCard data={astrologyData} sunInfo={sunInfo} userName={userName} />
-      </motion.div>
+              <div ref={vedicCardRef} className="w-full flex justify-center">
+                <ExportableChartCard
+                  title="Vedic Dossier" system="Vedic Sidereal (Jyotish)"
+                  sun={vSun} moon={vMoon} asc={vAsc}
+                  ruling={vInfo.ruling} stone={vInfo.vedicStone || vInfo.stone} element={vInfo.element}
+                  userName={userName} nakshatra={vNakshatra}
+                />
+              </div>
+            </div>
 
-      <motion.div {...SLIDE_ENTER} style={{ transitionDelay: '0.6s' }}>
-        <CinematicButton
-          onClick={handleDownload}
-          disabled={downloading}
-          delay={0}
-        >
-          {downloading ? 'Rendering…' : 'Download Chart'}
-        </CinematicButton>
-      </motion.div>
+            {/* Downloads Row */}
+            <div className="flex flex-wrap items-center justify-center gap-6 pt-2">
+              <CinematicButton onClick={handleDownloadWestern} disabled={downloadingWestern}>
+                {downloadingWestern ? 'Generating...' : 'Download Western Chart'}
+              </CinematicButton>
+
+              <CinematicButton onClick={handleDownloadVedic} disabled={downloadingVedic}>
+                {downloadingVedic ? 'Generating...' : 'Download Vedic Chart'}
+              </CinematicButton>
+            </div>
+
+            {/* PHASE 5: Fusion Button */}
+            <div className="pt-8 border-t border-blue-200/10">
+              <CinematicButton onClick={() => setIsFused(true)} className="text-base font-normal tracking-[0.4em]">
+                ✦ Fuse Blueprints ✦
+              </CinematicButton>
+              <div className="text-[11px] font-mono text-blue-200/40 mt-2">
+                Synthesize Western & Vedic into 100% accurate verdict
+              </div>
+            </div>
+          </motion.div>
+        ) : (
+          /* ── PHASE 5: COSMIC SYNTHESIS VERDICT ── */
+          <motion.div
+            key="fused-verdict"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 1.5, ease: [0.22, 1, 0.36, 1] } }}
+            className="space-y-8 max-w-2xl mx-auto"
+          >
+            <div className="space-y-2">
+              <div className="text-[11px] font-mono uppercase tracking-[0.4em] text-blue-200/40">
+                100% Accurate Celestial Synthesis
+              </div>
+              <div className="text-3xl font-thin tracking-wider text-white">
+                The Cosmic Verdict
+              </div>
+            </div>
+
+            {/* Fused Printable Card */}
+            <div ref={fusedCardRef} className="p-8 rounded-2xl text-left space-y-6" style={{ background: 'linear-gradient(160deg, #050816 0%, #0a0e30 60%, #030511 100%)', border: '1px solid rgba(160,200,255,0.1)' }}>
+              <div className="text-center border-b border-blue-200/10 pb-4">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-blue-200/40">Unified Cosmic Archetype</div>
+                <div className="text-2xl font-light text-white tracking-widest mt-1">
+                  {userName || 'Cosmic Traveller'} · {wSun} / {vSun} Synthesis
+                </div>
+              </div>
+
+              <div className="space-y-4 text-sm font-light text-white/85 leading-relaxed">
+                <div>
+                  <h4 className="text-xs font-mono uppercase tracking-widest text-blue-200/60 mb-1">1. The Dual Paradox Resolved</h4>
+                  <p>
+                    Western Tropical astrology maps your <strong>conscious ego and psychological orientation</strong> ({wSun} Sun in {wInfo.element}), reflecting how you interact with the modern seasonal calendar. Conversely, Vedic Sidereal Jyotish maps your <strong>subconscious karmic destiny and moon rhythm</strong> ({vSun} Surya / {vMoon} Chandra), rooted in the true astronomical positions of the fixed stars. Both are 100% valid; they measure distinct layers of your existence.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-xs font-mono uppercase tracking-widest text-blue-200/60 mb-1">2. Core Synthesized Blueprint</h4>
+                  <p>
+                    Your solar identity channels the <strong>{wInfo.element} flame of {wSun}</strong> for outward manifestation, while your inner emotional compass aligns with the <strong>{vInfo.element} wisdom of {vSun}</strong> ({vNakshatra} Nakshatra). This creates a unique dual-engine: your mind seeks {wInfo.trait.toLowerCase()} while your soul path unfolds through {vInfo.trait.toLowerCase()}
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-xs font-mono uppercase tracking-widest text-blue-200/60 mb-1">3. The Final Verdict</h4>
+                  <p className="italic text-blue-100">
+                    "Do not choose between Western and Vedic. Use Western as your conscious strategy in society, and Vedic as your internal spiritual compass for soul evolution. When aligned, your true celestial potential is unlocked."
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-center text-[9px] font-mono uppercase tracking-widest text-blue-200/30 pt-2 border-t border-blue-200/10">
+                Swiss Ephemeris v2.10 Ayanamsha Synthesis · Pratham Upadhyay
+              </div>
+            </div>
+
+            {/* Fusion Actions */}
+            <div className="flex flex-wrap items-center justify-center gap-6 pt-4">
+              <CinematicButton onClick={handleDownloadFused} disabled={downloadingFused}>
+                {downloadingFused ? 'Generating...' : 'Download Fused Verdict'}
+              </CinematicButton>
+
+              <CinematicGhostButton onClick={() => advanceStep(2, `${userName} returned to Crossroads from Fusion`)}>
+                ← Return to Crossroads
+              </CinematicGhostButton>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>,
   ]
 
   const currentSlide = SLIDES[Math.min(revealSlide, SLIDES.length - 1)]
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
       <AnimatePresence mode="wait">
         <motion.div
-          key={`reveal-${revealSlide}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1, transition: { duration: 0.9 } }}
-          exit={{ opacity: 0, transition: { duration: 0.6 } }}
-          className="w-full max-w-2xl"
+          key={`reveal-slide-${revealSlide}-${isFused}`}
+          {...SLIDE_TRANSITION}
+          className="w-full max-w-4xl"
         >
           {currentSlide}
         </motion.div>

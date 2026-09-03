@@ -7,20 +7,19 @@ import {
   CinematicButton,
   CinematicGhostButton,
   CinematicInput,
-  CinematicDateInput,
-  CinematicTimeInput,
   fadeUp,
   fadeIn,
 } from './components/cinematic/CinematicPrimitives'
 
 // ─── Lazy imports ──────────────────────────────────────────────────────────────
-const UniverseCanvas          = lazy(() => import('./components/canvas/UniverseCanvas'))
-const SharedDossier           = lazy(() => import('./components/SharedDossier'))
-const AdminLogin              = lazy(() => import('./components/admin/AdminLogin'))
-const AdminDashboard          = lazy(() => import('./components/admin/AdminDashboard'))
-const CinematicReveal         = lazy(() => import('./components/cinematic/CinematicReveal'))
-const CinematicLocationSearch = lazy(() => import('./components/cinematic/CinematicLocationSearch'))
-const AboutPanel              = lazy(() => import('./components/cinematic/AboutPanel'))
+const UniverseCanvas                = lazy(() => import('./components/canvas/UniverseCanvas'))
+const SharedDossier                 = lazy(() => import('./components/SharedDossier'))
+const AdminLogin                    = lazy(() => import('./components/admin/AdminLogin'))
+const AdminDashboard                = lazy(() => import('./components/admin/AdminDashboard'))
+const CinematicReveal               = lazy(() => import('./components/cinematic/CinematicReveal'))
+const CinematicLocationSearch       = lazy(() => import('./components/cinematic/CinematicLocationSearch'))
+const CinematicChronologicalInputs  = lazy(() => import('./components/cinematic/CinematicChronologicalInputs'))
+const AboutPanel                    = lazy(() => import('./components/cinematic/AboutPanel'))
 
 // ─── Step text drop-shadow for visibility on stars ───────────────────────────
 const TS = { textShadow: '0 2px 24px rgba(0,0,0,0.9), 0 0 40px rgba(0,0,0,0.8)' }
@@ -41,17 +40,17 @@ function IntroStep() {
         a cosmic journey awaits
       </motion.div>
 
-      {/* Logotype: Pure white with bright ethereal cyan glow */}
+      {/* Logotype: Interstellar Aesthetic — Pure White, Wide Tracking (0.4em), No Cyan Glow */}
       <motion.h1
         variants={fadeUp} custom={1} initial="hidden" animate="visible"
         style={{
           color: '#ffffff',
-          textShadow: '0 0 20px rgba(0, 210, 255, 0.7), 0 0 40px rgba(0, 210, 255, 0.4), 0 2px 24px rgba(0,0,0,0.9)',
-          fontSize: 'clamp(3rem, 11vw, 7.5rem)',
-          fontWeight: 900,
-          letterSpacing: '0.18em',
-          lineHeight: 1.05,
+          fontSize: 'clamp(2.5rem, 9vw, 6.5rem)',
+          fontWeight: 200,
+          letterSpacing: '0.4em',
+          lineHeight: 1.1,
           userSelect: 'none',
+          textShadow: 'none',
         }}
       >
         ASTROLOGICA
@@ -139,13 +138,13 @@ function CrossroadsStep() {
         What seeks you in the cosmos?
       </motion.h2>
 
-      {/* Choices */}
+      {/* Choices — exact text per spec */}
       <div className="flex flex-col items-center gap-7">
         <CinematicButton
           onClick={() => advanceStep(4, `${userName} chose astro calculation`)}
           delay={0.2}
         >
-          Calculate my astro chart
+          Lets start cosmic journey
         </CinematicButton>
 
         <CinematicGhostButton
@@ -217,18 +216,18 @@ function AboutStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 4 — DATE OF BIRTH
+// STEP 4 — DATE & TIME OF BIRTH (Frictionless Dropdowns)
 // ═══════════════════════════════════════════════════════════════════════════════
 function DobStep() {
   const { advanceStep, setBirthData, birthData, goBack } = useAppStore()
-  const [date, setDate] = useState(birthData?.date || '')
-  const [time, setTime] = useState(birthData?.time || '12:00')
-  const [err,  setErr]  = useState('')
+  const [chronData, setChronData] = useState({
+    date: birthData?.date || '2000-01-01',
+    time: birthData?.time || '12:00',
+  })
 
   const submit = () => {
-    if (!date) { setErr('Please enter your date of birth'); return }
-    setBirthData({ ...birthData, date, time: time || '12:00' })
-    advanceStep(5, `DOB set: ${date} at ${time}`)
+    setBirthData({ ...birthData, date: chronData.date, time: chronData.time })
+    advanceStep(5, `DOB set: ${chronData.date} at ${chronData.time}`)
   }
 
   return (
@@ -241,25 +240,15 @@ function DobStep() {
         When did your journey begin?
       </motion.h2>
 
-      <div className="flex flex-col items-center gap-6 w-full max-w-xs">
-        <CinematicDateInput value={date} onChange={e => { setDate(e.target.value); setErr('') }} autoFocus />
+      <Suspense fallback={null}>
+        <CinematicChronologicalInputs
+          onChange={setChronData}
+          initialDate={birthData?.date}
+          initialTime={birthData?.time}
+        />
+      </Suspense>
 
-        <motion.div variants={fadeIn} custom={2} initial="hidden" animate="visible"
-          style={{ color: 'rgba(160,200,255,0.4)', fontSize: '10px', letterSpacing: '0.35em',
-            textTransform: 'uppercase', marginBottom: '-0.5rem' }}>
-          Birth time
-        </motion.div>
-        <CinematicTimeInput value={time} onChange={e => setTime(e.target.value)} />
-      </div>
-
-      {err && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          style={{ color: 'rgba(255,150,150,0.85)', fontSize: '12px', letterSpacing: '0.2em' }}>
-          {err}
-        </motion.div>
-      )}
-
-      <div className="flex flex-col items-center gap-5 pt-2">
+      <div className="flex flex-col items-center gap-5 pt-4">
         <CinematicButton onClick={submit} delay={0.3}>Continue</CinematicButton>
         <CinematicGhostButton onClick={goBack} delay={0.5}>
           ← BACK
@@ -270,7 +259,7 @@ function DobStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 5 — LOCATION (3-Tier Progressive Flow)
+// STEP 5 — LOCATION (3-Tier Autocorrecting Autocomplete Flow)
 // ═══════════════════════════════════════════════════════════════════════════════
 function LocationStep() {
   const { advanceStep, setBirthData, birthData, goBack } = useAppStore()
@@ -315,7 +304,6 @@ function ProcessingStep() {
 
     const compute = async () => {
       try {
-        // Construct payload strictly matching DualRequest Pydantic schema
         const payload = {
           date:         birthData?.date || '2000-01-01',
           time:         birthData?.time || '12:00',
@@ -368,7 +356,7 @@ function ProcessingStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 7 — COSMIC REVEAL (5 slides)
+// STEP 7 — COSMIC REVEAL (Dual-Column & Fusion)
 // ═══════════════════════════════════════════════════════════════════════════════
 function RevealStep() {
   return (

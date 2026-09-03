@@ -20,8 +20,7 @@ export const fadeIn = {
   exit: { opacity: 0, transition: { duration: 0.5 } },
 }
 
-// ─── Primary CinematicButton — pure pulsating text, no background ────────────
-// Matches spec: tracking-widest, base opacity 0.75 -> 1.0 pulse, glowing bottom border/bracket on hover
+// ─── Primary CinematicButton — pure text, no borders/underlines ───────────────
 export function CinematicButton({
   onClick,
   children,
@@ -43,25 +42,19 @@ export function CinematicButton({
       }}
       whileHover={{
         opacity: 1.0,
-        scale: 1.04,
+        scale: 1.05,
         transition: { duration: 0.15 },
       }}
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
       disabled={disabled}
-      onMouseEnter={e => {
-        e.currentTarget.style.textShadow = '0 0 20px rgba(0, 210, 255, 0.9), 0 0 35px rgba(0, 210, 255, 0.5)'
-        e.currentTarget.style.borderBottom = '1px solid rgba(0, 210, 255, 0.8)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.textShadow = 'none'
-        e.currentTarget.style.borderBottom = '1px solid transparent'
-      }}
       style={{
         cursor: disabled ? 'not-allowed' : 'pointer',
-        borderBottom: '1px solid transparent',
-        paddingBottom: '2px',
-        transition: 'border-color 0.25s, text-shadow 0.25s',
+        border: 'none',
+        background: 'transparent',
+        outline: 'none',
+        textDecoration: 'none',
+        transition: 'opacity 0.25s, transform 0.25s',
       }}
       className={`
         bg-transparent border-0 outline-none
@@ -76,7 +69,7 @@ export function CinematicButton({
   )
 }
 
-// ─── Ghost / secondary text button — base opacity 0.75 -> 1.0 pulse ───────────
+// ─── Ghost / secondary text button — pure text, no borders/underlines ─────────
 export function CinematicGhostButton({
   onClick,
   children,
@@ -97,24 +90,18 @@ export function CinematicGhostButton({
       }}
       whileHover={{
         opacity: 1.0,
-        scale: 1.04,
+        scale: 1.05,
         transition: { duration: 0.15 },
       }}
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
-      onMouseEnter={e => {
-        e.currentTarget.style.textShadow = '0 0 16px rgba(160,200,255,0.8)'
-        e.currentTarget.style.borderBottom = '1px solid rgba(160,200,255,0.6)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.textShadow = 'none'
-        e.currentTarget.style.borderBottom = '1px solid transparent'
-      }}
       style={{
         cursor: 'pointer',
-        borderBottom: '1px solid transparent',
-        paddingBottom: '2px',
-        transition: 'border-color 0.25s, text-shadow 0.25s',
+        border: 'none',
+        background: 'transparent',
+        outline: 'none',
+        textDecoration: 'none',
+        transition: 'opacity 0.25s, transform 0.25s',
       }}
       className={`
         bg-transparent border-0 outline-none
@@ -128,6 +115,7 @@ export function CinematicGhostButton({
     </motion.button>
   )
 }
+
 
 
 // ─── Cinematic text input — thin underline only, no box ──────────────────────

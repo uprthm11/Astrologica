@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { motion } from 'framer-motion'
+import React, { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { CinematicButton, fadeUp } from './CinematicPrimitives'
 
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search'
@@ -14,30 +14,133 @@ function formatUtcOffset(lon) {
   return `${sign}${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
 
-/**
- * 3-Tier Progressive Location Flow: Country -> State/Province -> City
- * Floating typography with zero boxes or borders.
- */
 export default function CinematicLocationSearch({ onSelect }) {
-  const [country, setCountry] = useState('')
-  const [state, setState]     = useState('')
-  const [city, setCity]       = useState('')
-  const [searching, setSearching] = useState(false)
-  const [err, setErr]         = useState('')
+  // Country state
+  const [countryQuery, setCountryQuery] = useState('')
+  const [countryOptions, setCountryOptions] = useState([])
+  const [selectedCountry, setSelectedCountry] = useState(null)
 
-  const canShowState = country.trim().length >= 2
-  const canShowCity  = canShowState && state.trim().length >= 2
-  const isComplete   = canShowCity && city.trim().length >= 2
+  // State/Province state
+  const [stateQuery, setStateQuery] = useState('')
+  const [stateOptions, setStateOptions] = useState([])
+  const [selectedState, setSelectedState] = useState(null)
+
+  // City state
+  const [cityQuery, setCityQuery] = useState('')
+  const [cityOptions, setCityOptions] = useState([])
+  const [selectedCity, setSelectedCity] = useState(null)
+
+  const [loading, setLoading] = useState(false)
+  const [searchingFinal, setSearchingFinal] = useState(false)
+  const debounceRef = useRef(null)
+
+  // Fetch Country options
+  useEffect(() => {
+    if (selectedCountry || countryQuery.trim().length < 2) {
+      setCountryOptions([])
+      return
+    }
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true)
+      try {
+        const res = await fetch(
+          `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(countryQuery)}&featuretype=country&limit=5`,
+          { headers: { 'Accept-Language': 'en' } }
+        )
+        const data = await res.json()
+        setCountryOptions(data)
+      } catch (_) {
+        setCountryOptions([])
+      } finally {
+        setLoading(false)
+      }
+    }, 300)
+  }, [countryQuery, selectedCountry])
+
+  // Fetch State options
+  useEffect(() => {
+    if (!selectedCountry || selectedState || stateQuery.trim().length < 2) {
+      setStateOptions([])
+      return
+    }
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true)
+      try {
+        const q = `${stateQuery.trim()}, ${selectedCountry}`
+        const res = await fetch(
+          `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(q)}&limit=5`,
+          { headers: { 'Accept-Language': 'en' } }
+        )
+        const data = await res.json()
+        setStateOptions(data)
+      } catch (_) {
+        setStateOptions([])
+      } finally {
+        setLoading(false)
+      }
+    }, 300)
+  }, [stateQuery, selectedCountry, selectedState])
+
+  // Fetch City options
+  useEffect(() => {
+    if (!selectedState || selectedCity || cityQuery.trim().length < 2) {
+      setCityOptions([])
+      return
+    }
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true)
+      try {
+        const q = `${cityQuery.trim()}, ${selectedState}, ${selectedCountry}`
+        const res = await fetch(
+          `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(q)}&limit=5`,
+          { headers: { 'Accept-Language': 'en' } }
+        )
+        const data = await res.json()
+        setCityOptions(data)
+      } catch (_) {
+        setCityOptions([])
+      } finally {
+        setLoading(false)
+      }
+    }, 300)
+  }, [cityQuery, selectedState, selectedCity])
+
+  const handleSelectCountry = (opt) => {
+    const addr = opt.address || {}
+    const name = addr.country || opt.display_name.split(',')[0].trim()
+    setSelectedCountry(name)
+    setCountryQuery(name)
+    setCountryOptions([])
+  }
+
+  const handleSelectState = (opt) => {
+    const addr = opt.address || {}
+    const name = addr.state || addr.region || opt.display_name.split(',')[0].trim()
+    setSelectedState(name)
+    setStateQuery(name)
+    setStateOptions([])
+  }
+
+  const handleSelectCity = (opt) => {
+    const addr = opt.address || {}
+    const name = addr.city || addr.town || addr.village || addr.county || opt.display_name.split(',')[0].trim()
+    setSelectedCity(name)
+    setCityQuery(name)
+    setCityOptions([])
+  }
+
+  const isAllLocked = Boolean(selectedCountry && selectedState && selectedCity)
 
   const handleContinue = async () => {
-    if (!isComplete) return
-    setSearching(true)
-    setErr('')
-
-    const queryStr = `${city.trim()}, ${state.trim()}, ${country.trim()}`
+    if (!isAllLocked) return
+    setSearchingFinal(true)
+    const locationName = `${selectedCity}, ${selectedState}, ${selectedCountry}`
     try {
       const res = await fetch(
-        `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(queryStr)}&addressdetails=1&limit=1`,
+        `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(locationName)}&limit=1`,
         { headers: { 'Accept-Language': 'en' } }
       )
       const data = await res.json()
@@ -47,42 +150,30 @@ export default function CinematicLocationSearch({ onSelect }) {
       if (data && data.length > 0) {
         lat = parseFloat(data[0].lat)
         lon = parseFloat(data[0].lon)
-      } else {
-        // Fallback search by city/country
-        const fallbackRes = await fetch(
-          `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(`${city.trim()}, ${country.trim()}`)}&limit=1`,
-          { headers: { 'Accept-Language': 'en' } }
-        )
-        const fallbackData = await fallbackRes.json()
-        if (fallbackData && fallbackData.length > 0) {
-          lat = parseFloat(fallbackData[0].lat)
-          lon = parseFloat(fallbackData[0].lon)
-        }
       }
 
       const utcOffset = formatUtcOffset(lon)
       onSelect({
         lat,
         lng: lon,
-        locationName: queryStr,
+        locationName,
         utcOffset,
-        country: country.trim(),
-        state: state.trim(),
-        city: city.trim(),
+        country: selectedCountry,
+        state: selectedState,
+        city: selectedCity,
       })
     } catch (_) {
-      // Fallback if network offline
       onSelect({
         lat: 0.0,
         lng: 0.0,
-        locationName: queryStr,
+        locationName,
         utcOffset: "+00:00",
-        country: country.trim(),
-        state: state.trim(),
-        city: city.trim(),
+        country: selectedCountry,
+        state: selectedState,
+        city: selectedCity,
       })
     } finally {
-      setSearching(false)
+      setSearchingFinal(false)
     }
   }
 
@@ -93,78 +184,163 @@ export default function CinematicLocationSearch({ onSelect }) {
     outline: 'none',
     color: 'white',
     textAlign: 'center',
-    textShadow: '0 0 10px rgba(160,200,255,0.35)',
     caretColor: 'rgba(160,200,255,0.7)',
     width: '100%',
   }
 
   return (
     <div className="w-full max-w-sm flex flex-col items-center gap-6">
-      {/* Country Input */}
+      {/* ── Tier 1: Country ── */}
       <motion.div variants={fadeUp} custom={1} initial="hidden" animate="visible" className="w-full space-y-1">
-        <div style={{ color: 'rgba(160,200,255,0.35)', fontSize: '10px', letterSpacing: '0.35em', textTransform: 'uppercase' }}>
-          Country
+        <div className="flex items-center justify-between text-[10px] uppercase font-mono tracking-widest text-blue-200/40">
+          <span>1. Country</span>
+          {selectedCountry && (
+            <button
+              onClick={() => { setSelectedCountry(null); setSelectedState(null); setSelectedCity(null); setCountryQuery(''); setStateQuery(''); setCityQuery('') }}
+              className="text-blue-300/60 hover:text-white underline cursor-pointer bg-transparent border-0"
+            >
+              Reset
+            </button>
+          )}
         </div>
         <input
           type="text"
-          value={country}
-          onChange={e => setCountry(e.target.value)}
-          placeholder="e.g. United States, India…"
-          autoFocus
-          style={inputStyle}
+          value={countryQuery}
+          onChange={(e) => { setCountryQuery(e.target.value); setSelectedCountry(null); setSelectedState(null); setSelectedCity(null) }}
+          placeholder="Type country name…"
+          disabled={Boolean(selectedCountry)}
+          style={{ ...inputStyle, opacity: selectedCountry ? 0.7 : 1 }}
           className="text-lg font-light tracking-widest py-2 placeholder-white/20"
         />
+
+        {/* Floating Autocomplete List for Country */}
+        <AnimatePresence>
+          {countryOptions.length > 0 && !selectedCountry && (
+            <motion.ul
+              initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              className="mt-2 space-y-2 list-none p-0"
+            >
+              {countryOptions.map((opt, i) => (
+                <motion.li key={opt.place_id || i} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <button
+                    onClick={() => handleSelectCountry(opt)}
+                    className="w-full text-center text-white/70 hover:text-white transition text-sm font-light tracking-wider cursor-pointer bg-transparent border-0 py-1"
+                  >
+                    {opt.address?.country || opt.display_name}
+                  </button>
+                </motion.li>
+              ))}
+            </motion.ul>
+          )}
+        </AnimatePresence>
       </motion.div>
 
-      {/* State / Province Input (Revealed after Country) */}
-      {canShowState && (
+      {/* ── Tier 2: State / Province (Revealed once Country is selected) ── */}
+      {selectedCountry && (
         <motion.div variants={fadeUp} custom={1} initial="hidden" animate="visible" className="w-full space-y-1">
-          <div style={{ color: 'rgba(160,200,255,0.35)', fontSize: '10px', letterSpacing: '0.35em', textTransform: 'uppercase' }}>
-            State / Province
+          <div className="flex items-center justify-between text-[10px] uppercase font-mono tracking-widest text-blue-200/40">
+            <span>2. State / Province</span>
+            {selectedState && (
+              <button
+                onClick={() => { setSelectedState(null); setSelectedCity(null); setStateQuery(''); setCityQuery('') }}
+                className="text-blue-300/60 hover:text-white underline cursor-pointer bg-transparent border-0"
+              >
+                Reset
+              </button>
+            )}
           </div>
           <input
             type="text"
-            value={state}
-            onChange={e => setState(e.target.value)}
-            placeholder="e.g. California, MP…"
-            style={inputStyle}
+            value={stateQuery}
+            onChange={(e) => { setStateQuery(e.target.value); setSelectedState(null); setSelectedCity(null) }}
+            placeholder="Type state name…"
+            disabled={Boolean(selectedState)}
+            style={{ ...inputStyle, opacity: selectedState ? 0.7 : 1 }}
             className="text-lg font-light tracking-widest py-2 placeholder-white/20"
           />
+
+          {/* Floating Autocomplete List for State */}
+          <AnimatePresence>
+            {stateOptions.length > 0 && !selectedState && (
+              <motion.ul
+                initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                className="mt-2 space-y-2 list-none p-0"
+              >
+                {stateOptions.map((opt, i) => (
+                  <motion.li key={opt.place_id || i} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <button
+                      onClick={() => handleSelectState(opt)}
+                      className="w-full text-center text-white/70 hover:text-white transition text-sm font-light tracking-wider cursor-pointer bg-transparent border-0 py-1"
+                    >
+                      {opt.address?.state || opt.address?.region || opt.display_name.split(',')[0]}
+                    </button>
+                  </motion.li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
 
-      {/* City Input (Revealed after State) */}
-      {canShowCity && (
+      {/* ── Tier 3: City (Revealed once State is selected) ── */}
+      {selectedState && (
         <motion.div variants={fadeUp} custom={1} initial="hidden" animate="visible" className="w-full space-y-1">
-          <div style={{ color: 'rgba(160,200,255,0.35)', fontSize: '10px', letterSpacing: '0.35em', textTransform: 'uppercase' }}>
-            City
+          <div className="flex items-center justify-between text-[10px] uppercase font-mono tracking-widest text-blue-200/40">
+            <span>3. City</span>
+            {selectedCity && (
+              <button
+                onClick={() => { setSelectedCity(null); setCityQuery('') }}
+                className="text-blue-300/60 hover:text-white underline cursor-pointer bg-transparent border-0"
+              >
+                Reset
+              </button>
+            )}
           </div>
           <input
             type="text"
-            value={city}
-            onChange={e => setCity(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && isComplete && handleContinue()}
-            placeholder="e.g. San Francisco, Indore…"
-            style={inputStyle}
+            value={cityQuery}
+            onChange={(e) => { setCityQuery(e.target.value); setSelectedCity(null) }}
+            placeholder="Type city name…"
+            disabled={Boolean(selectedCity)}
+            style={{ ...inputStyle, opacity: selectedCity ? 0.7 : 1 }}
             className="text-lg font-light tracking-widest py-2 placeholder-white/20"
           />
+
+          {/* Floating Autocomplete List for City */}
+          <AnimatePresence>
+            {cityOptions.length > 0 && !selectedCity && (
+              <motion.ul
+                initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                className="mt-2 space-y-2 list-none p-0 max-h-48 overflow-y-auto"
+              >
+                {cityOptions.map((opt, i) => (
+                  <motion.li key={opt.place_id || i} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <button
+                      onClick={() => handleSelectCity(opt)}
+                      className="w-full text-center text-white/70 hover:text-white transition text-sm font-light tracking-wider cursor-pointer bg-transparent border-0 py-1"
+                    >
+                      {opt.address?.city || opt.address?.town || opt.address?.village || opt.display_name.split(',')[0]}
+                    </button>
+                  </motion.li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
 
-      {/* Searching Indicator */}
-      {searching && (
+      {/* Loading indicator */}
+      {(loading || searchingFinal) && (
         <motion.div
-          animate={{ opacity: [0.3, 0.9, 0.3] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          style={{ color: 'rgba(160,200,255,0.5)', fontSize: '11px', letterSpacing: '0.25em' }}
-          className="font-mono"
+          animate={{ opacity: [0.3, 0.9, 0.3] }} transition={{ duration: 1.5, repeat: Infinity }}
+          className="text-center text-blue-200/40 text-xs font-mono tracking-widest mt-2"
         >
-          locating birth coordinates…
+          verifying cosmic coordinates…
         </motion.div>
       )}
 
-      {/* Continue Button (Revealed after all 3 filled) */}
-      {isComplete && !searching && (
+      {/* Continue Button (ONLY when all 3 are strictly selected) */}
+      {isAllLocked && !searchingFinal && (
         <motion.div variants={fadeUp} custom={2} initial="hidden" animate="visible" className="pt-2">
           <CinematicButton onClick={handleContinue}>
             Continue →
