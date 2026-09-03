@@ -9,6 +9,9 @@ import {
   SUN_SIGN_DESCRIPTIONS,
   MOON_SIGN_DESCRIPTIONS,
   ASCENDANT_DESCRIPTIONS,
+  sunIdentity,
+  sunEgo,
+  sunPurpose,
 } from '../../utils/bigThreeData'
 
 // ─── Defensive String Helper ──────────────────────────────────────────────────
@@ -152,13 +155,19 @@ export default function CinematicReveal() {
 
   // Planetary sign extraction
   const planets = astrologyData?.western?.planets || []
-  const rawSunSign  = planets.find(p => p?.id === 'sun')?.sign
+  const sunPlanet = planets.find(p => p?.id === 'sun')
+  const rawSunSign  = sunPlanet?.sign
+  const rawSunHouse = sunPlanet?.house
   const rawMoonSign = planets.find(p => p?.id === 'moon')?.sign
   const rawAscSign  = astrologyData?.western?.ascendant?.sign
 
   const sunSign  = normalizeSign(rawSunSign)
   const moonSign = normalizeSign(rawMoonSign)
   const ascSign  = normalizeSign(rawAscSign)
+
+  const identityText = sunIdentity[sunSign] || sunIdentity.Aries
+  const egoText = sunEgo[sunSign] || sunEgo.Aries
+  const purposeText = (rawSunHouse && sunPurpose[rawSunHouse]) || sunPurpose[sunSign] || sunPurpose[1]
 
   const sunData  = SIGN_DATA[sunSign]  || DEFAULT_SIGN_INFO
   const moonData = SIGN_DATA[moonSign] || DEFAULT_SIGN_INFO
@@ -207,29 +216,57 @@ export default function CinematicReveal() {
   // 11-SLIDE PSYCHOLOGICAL DEPTH PIPELINE
   // ═════════════════════════════════════════════════════════════════════════════
   const SLIDES = [
-    // ── Slide 1 (The Sun Sign) ──
-    <div key="slide-1" className="space-y-8 text-center max-w-lg mx-auto">
-      <p className="text-base md:text-lg font-light text-blue-100/85 max-w-md mx-auto leading-relaxed drop-shadow-md">
-        Identity, conscious ego, and life purpose central axis of your personality and the 'I AM' statement
-      </p>
+    // ── Slide 1 (The Sun Sign: Three-Tier Dossier) ──
+    <div key="slide-1" className="flex flex-col items-center text-center max-w-2xl mx-auto w-full">
+      {/* Top Indicator */}
+      <div className="text-xs tracking-[0.4em] text-blue-300/60 uppercase mb-4">
+        The Sun Sign
+      </div>
 
-      {/* Dynamic Center Display with Custom Figma SVG */}
-      <div className="flex flex-col items-center justify-center my-4">
+      {/* The Core Anchor */}
+      <div className="flex flex-col items-center justify-center mb-4">
         <div className={`p-4 rounded-full ${sunGlowClass} transition-transform hover:scale-105 duration-300`}>
-          <SunZodiacIcon className="w-24 h-24 md:w-28 md:h-28" />
+          <SunZodiacIcon className="w-20 h-20 md:w-24 md:h-24" />
         </div>
-        <div className="text-3xl md:text-4xl font-light tracking-[0.25em] text-white mt-4">
+        <div className="text-2xl md:text-3xl font-light tracking-[0.25em] text-white mt-2">
           {sunSign.toUpperCase()}
         </div>
       </div>
 
-      {/* Personalized Mission Text Floating Cleanly Against Stars */}
-      <div className="max-w-md mx-auto">
-        <p className="text-base md:text-lg font-light text-white/95 leading-relaxed drop-shadow-md">
-          {sunInfo.text}
-        </p>
+      {/* The Three-Tier Dossier */}
+      <div className="max-h-[40vh] md:max-h-[50vh] overflow-y-auto custom-scrollbar flex flex-col gap-6 text-center max-w-2xl px-4 scrollbar-thin">
+        {/* Tier 1: Identity */}
+        <div className="space-y-1">
+          <h3 className="text-sm md:text-base tracking-widest text-cyan-400 uppercase mb-2 drop-shadow-md">
+            Identity
+          </h3>
+          <p className="text-blue-50/90 font-light leading-relaxed text-sm md:text-base drop-shadow-md">
+            {identityText}
+          </p>
+        </div>
+
+        {/* Tier 2: Conscious Ego */}
+        <div className="space-y-1">
+          <h3 className="text-sm md:text-base tracking-widest text-cyan-400 uppercase mb-2 drop-shadow-md">
+            Conscious Ego
+          </h3>
+          <p className="text-blue-50/90 font-light leading-relaxed text-sm md:text-base drop-shadow-md">
+            {egoText}
+          </p>
+        </div>
+
+        {/* Tier 3: Life Purpose */}
+        <div className="space-y-1">
+          <h3 className="text-sm md:text-base tracking-widest text-cyan-400 uppercase mb-2 drop-shadow-md">
+            Life Purpose
+          </h3>
+          <p className="text-blue-50/90 font-light leading-relaxed text-sm md:text-base drop-shadow-md">
+            {purposeText}
+          </p>
+        </div>
       </div>
 
+      {/* Navigation */}
       <div className="flex items-center justify-center gap-6 pt-4">
         <CinematicGhostButton onClick={goBack}>← BACK</CinematicGhostButton>
         <CinematicButton onClick={() => setRevealSlide(1)}>Next →</CinematicButton>

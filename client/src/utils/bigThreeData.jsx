@@ -299,3 +299,65 @@ export const ASCENDANT_DESCRIPTIONS = {
     firstImpression: "You project an ethereal, gentle presence that feels otherworldly. Others sense your compassion, imaginative depth, and open-hearted receptivity."
   }
 }
+
+// ─── Sun Sign Psychological Dossier (Identity, Conscious Ego, Life Purpose) ──
+
+export const sunIdentity = {
+  Aries: "Aries (March 21 – April 19): Ruled by Mars, this Fire sign is Cardinal. You are decisive, action-oriented, and a natural leader with bold, assertive energy.",
+  Taurus: "Taurus (April 20 – May 20): Ruled by Venus, this Earth sign is Fixed. You are reliable, diligent, and grounded, seeking stability and tangible results.",
+  Gemini: "Gemini (May 21 – June 20): Ruled by Mercury, this Air sign is Mutable. You are quick-witted, curious, and communicative, adapting easily to new information.",
+  Cancer: "Cancer (June 21 – July 22): Ruled by the Moon, this Water sign is Cardinal. You are sensitive, imaginative, and nurturing, driven by emotional depth and home.",
+  Leo: "Leo (July 23 – August 22): Ruled by the Sun, this Fire sign is Fixed. You are charismatic, generous, and proud, naturally taking center stage and seeking creative expression.",
+  Virgo: "Virgo (August 23 – September 22): Ruled by Mercury, this Earth sign is Mutable. You are analytical, practical, and diligent, striving for perfection and efficiency.",
+  Libra: "Libra (September 23 – October 22): Ruled by Venus, this Air sign is Cardinal. You are equitable, charming, and diplomatic, seeking harmony and balance in relationships.",
+  Scorpio: "Scorpio (October 23 – November 21): Ruled by Pluto (or Mars traditionally), this Water sign is Fixed. You are insightful, mysterious, and intense, capable of deep transformation and research.",
+  Sagittarius: "Sagittarius (November 22 – December 21): Ruled by Jupiter, this Fire sign is Mutable. You are unconstrained, lively, and philosophical, seeking truth and adventure.",
+  Capricorn: "Capricorn (December 22 – January 19): Ruled by Saturn, this Earth sign is Cardinal. You are disciplined, ambitious, and realistic, committed to long-term goals and structure.",
+  Aquarius: "Aquarius (January 20 – February 18): Ruled by Uranus (or Saturn traditionally), this Air sign is Fixed. You are innovative, liberal, and independent, often focusing on collective ideals and reform.",
+  Pisces: "Pisces (February 19 – March 20): Ruled by Neptune (or Jupiter traditionally), this Water sign is Mutable. You are romantic, kind, and sentimental, possessing strong intuition and empathy."
+}
+
+export const sunEgo = {
+  Aries: "The ego is driven by action and individuality. It requires immediate autonomy, conquest, and praise, often acting before thinking to assert its unique presence.",
+  Taurus: "The ego is rooted in the physical world, needing security, comfort, and material abundance. Self-worth is tied to stability, sensory pleasure, and tangible possessions.",
+  Gemini: "The ego relies on communication and information. It thrives on variety, intellectual exchange, and adaptability, with self-esteem fluctuating based on mental stimulation and social interaction.",
+  Cancer: "The ego is wrapped in emotional security. It is deeply sensitive, often hiding its true needs, and requires emotional understanding, nurturing, and a sense of home to feel validated.",
+  Leo: "The ego is connected to recognition and self-expression. As the sign ruled by the Sun, it naturally seeks the spotlight, admiration, and authority, feeling essential and vital when appreciated.",
+  Virgo: "The ego is driven by perfection and service. It can be critical and self-effacing, seeking worth through utility, order, and improvement, often neglecting its own needs for the sake of flawlessness.",
+  Libra: "The ego revolves around harmony and acceptance. It often loses its identity in pleasing others to avoid conflict, needing self-love and balanced relationships to strengthen its sense of self.",
+  Scorpio: "The ego is intense and transformative, reflecting past pain or reward. It feeds on deep emotional experiences and power dynamics, undergoing profound shifts in identity throughout life.",
+  Sagittarius: "The ego is tied to belief systems and expansion. It seeks truth, freedom, and the ability to influence others through wisdom, needing recognition for its philosophical insights and adventurous spirit.",
+  Capricorn: "The ego is expressed through ambition and achievement. It is tied to social status, career success, and material mastery, often appearing harsh or neglectful of emotional needs in pursuit of goals.",
+  Aquarius: "The ego is unconventional and independent. It takes pride in being unique and different, focusing on humanitarian causes and intellectual innovation, sometimes at the expense of personal intimacy.",
+  Pisces: "The ego is fluid and empathetic, strongly connected to emotions and the collective unconscious. It feeds on reassurance, closeness, and spiritual connection, often being influenced by the feelings of others."
+}
+
+export const sunPurpose = {
+  // Mapped by House Number
+  1: "First House (Aries Archetype): Identity & Leadership. Your purpose revolves around self-discovery, individuality, and leadership. You are meant to assert your unique personality, initiate new projects, and lead with courage, often thriving as an entrepreneur, athlete, or pioneer.",
+  2: "Second House (Taurus Archetype): Values & Wealth. Your life purpose focuses on accumulating resources, material security, and aligning your work with your personal values. You are driven to build stability through practical skills, potentially in finance, real estate, or the arts.",
+  3: "Third House (Gemini Archetype): Communication & Intellect. Your purpose lies in communication, education, and local community interaction. You are meant to share knowledge, travel, and connect ideas, often finding fulfillment in writing, teaching, or law.",
+  4: "Fourth House (Cancer Archetype): Home & Family. Your life purpose is centered on nurturing, emotional foundations, and family. You find meaning in creating a secure home environment, often pursuing careers in caregiving, psychology, or real estate that support others' emotional well-being.",
+  5: "Fifth House (Leo Archetype): Creativity & Romance. Your purpose involves creative expression, romance, and self-display. You are meant to shine through artistic endeavors, entertainment, or leadership roles that inspire joy and passion, often in the arts or performance.",
+  6: "Sixth House (Virgo Archetype): Service & Health. Your life purpose is found in service, daily work, and health. You are driven to help others through practical solutions, often in healthcare, business administration, or any role requiring diligence and attention to detail.",
+  7: "Seventh House (Libra Archetype): Partnerships & Justice. Your purpose revolves around relationships, diplomacy, and fairness. You thrive in partnerships, law, or public relations, where you can balance conflicting interests and create harmony in social or legal contexts.",
+  8: "Eighth House (Scorpio Archetype): Transformation & Depth. Your life purpose involves deep transformation, research, and uncovering hidden truths. You are drawn to professions involving psychology, healing, finance, or spiritual exploration that deal with life’s profound mysteries.",
+  9: "Ninth House (Sagittarius Archetype): Truth & Expansion. Your purpose is to seek truth, higher education, and broaden your horizons. You are meant to teach, lead civic institutions, or travel, sharing wisdom and philosophical insights with others.",
+  10: "Tenth House (Capricorn Archetype): Career & Status. Your life purpose is tied to professional achievement, social status, and public recognition. You are driven to build lasting structures, lead organizations, and attain mastery in your chosen career field.",
+  11: "Eleventh House (Aquarius Archetype): Community & Innovation. Your purpose lies in humanitarian work, innovation, and community building. You are meant to improve society through technology, social groups, or visionary ideas that benefit the collective.",
+  12: "Twelfth House (Pisces Archetype): Spirituality & Service. Your life purpose involves selfless service, spiritual growth, and compassion for the underprivileged. You find meaning in healing, artistic expression, or working behind the scenes to support those in need.",
+
+  // Mapped by Zodiac Sign Name Fallback
+  Aries: "First House (Aries Archetype): Identity & Leadership. Your purpose revolves around self-discovery, individuality, and leadership. You are meant to assert your unique personality, initiate new projects, and lead with courage, often thriving as an entrepreneur, athlete, or pioneer.",
+  Taurus: "Second House (Taurus Archetype): Values & Wealth. Your life purpose focuses on accumulating resources, material security, and aligning your work with your personal values. You are driven to build stability through practical skills, potentially in finance, real estate, or the arts.",
+  Gemini: "Third House (Gemini Archetype): Communication & Intellect. Your purpose lies in communication, education, and local community interaction. You are meant to share knowledge, travel, and connect ideas, often finding fulfillment in writing, teaching, or law.",
+  Cancer: "Fourth House (Cancer Archetype): Home & Family. Your life purpose is centered on nurturing, emotional foundations, and family. You find meaning in creating a secure home environment, often pursuing careers in caregiving, psychology, or real estate that support others' emotional well-being.",
+  Leo: "Fifth House (Leo Archetype): Creativity & Romance. Your purpose involves creative expression, romance, and self-display. You are meant to shine through artistic endeavors, entertainment, or leadership roles that inspire joy and passion, often in the arts or performance.",
+  Virgo: "Sixth House (Virgo Archetype): Service & Health. Your life purpose is found in service, daily work, and health. You are driven to help others through practical solutions, often in healthcare, business administration, or any role requiring diligence and attention to detail.",
+  Libra: "Seventh House (Libra Archetype): Partnerships & Justice. Your purpose revolves around relationships, diplomacy, and fairness. You thrive in partnerships, law, or public relations, where you can balance conflicting interests and create harmony in social or legal contexts.",
+  Scorpio: "Eighth House (Scorpio Archetype): Transformation & Depth. Your life purpose involves deep transformation, research, and uncovering hidden truths. You are drawn to professions involving psychology, healing, finance, or spiritual exploration that deal with life’s profound mysteries.",
+  Sagittarius: "Ninth House (Sagittarius Archetype): Truth & Expansion. Your purpose is to seek truth, higher education, and broaden your horizons. You are meant to teach, lead civic institutions, or travel, sharing wisdom and philosophical insights with others.",
+  Capricorn: "Tenth House (Capricorn Archetype): Career & Status. Your life purpose is tied to professional achievement, social status, and public recognition. You are driven to build lasting structures, lead organizations, and attain mastery in your chosen career field.",
+  Aquarius: "Eleventh House (Aquarius Archetype): Community & Innovation. Your purpose lies in humanitarian work, innovation, and community building. You are meant to improve society through technology, social groups, or visionary ideas that benefit the collective.",
+  Pisces: "Twelfth House (Pisces Archetype): Spirituality & Service. Your life purpose involves selfless service, spiritual growth, and compassion for the underprivileged. You find meaning in healing, artistic expression, or working behind the scenes to support those in need."
+}
