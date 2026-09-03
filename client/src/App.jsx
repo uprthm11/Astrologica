@@ -30,7 +30,7 @@ const TS = { textShadow: '0 2px 24px rgba(0,0,0,0.9), 0 0 40px rgba(0,0,0,0.8)' 
 function IntroStep() {
   const { advanceStep } = useAppStore()
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6">
+    <div className="min-h-screen w-full flex flex-col justify-center items-center overflow-hidden px-4 md:px-8 text-center">
       <motion.div
         variants={fadeIn} custom={0} initial="hidden" animate="visible"
         style={{ ...TS, color: 'rgba(160,200,255,0.5)', fontSize: '10px',
@@ -95,7 +95,7 @@ function NameStep() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
+    <div className="min-h-screen w-full flex flex-col justify-center items-center overflow-hidden px-4 md:px-8 text-center gap-10">
       <motion.h2
         variants={fadeUp} custom={0} initial="hidden" animate="visible"
         style={{ ...TS, color: 'white', fontSize: 'clamp(1.6rem,4vw,2.6rem)',
@@ -131,7 +131,7 @@ function CrossroadsStep() {
   const isAdmin = userName.toLowerCase() === 'admin'
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
+    <div className="min-h-screen w-full flex flex-col justify-center items-center overflow-hidden px-4 md:px-8 text-center gap-10">
       {/* Fixed Text Order: WELCOME on top, userName below in larger glowing font */}
       <motion.div variants={fadeIn} custom={0} initial="hidden" animate="visible" className="space-y-2">
         <div style={{ ...TS, color: 'rgba(160,200,255,0.5)', fontSize: '11px',
@@ -205,7 +205,7 @@ function AdminLoginStep() {
 function AboutStep() {
   const { goBack } = useAppStore()
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen px-4 py-16 gap-8">
+    <div className="min-h-screen w-full flex flex-col justify-start items-center overflow-hidden px-4 md:px-8 py-16 gap-8 text-center">
       <motion.h2
         variants={fadeUp} custom={0} initial="hidden" animate="visible"
         style={{ ...TS, color: 'white', fontSize: '2rem', fontWeight: 300,
@@ -228,7 +228,7 @@ function AboutStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 4 — DATE & TIME OF BIRTH (Blank Initial Defaults)
+// STEP 4 — DATE & TIME OF BIRTH (Wheel Pickers & Enlarged Helper Text)
 // ═══════════════════════════════════════════════════════════════════════════════
 function DobStep() {
   const { advanceStep, setBirthData, birthData, goBack } = useAppStore()
@@ -241,10 +241,10 @@ function DobStep() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
+    <div className="min-h-screen w-full flex flex-col justify-center items-center overflow-hidden px-4 md:px-8 text-center gap-8">
       <motion.h2
         variants={fadeUp} custom={0} initial="hidden" animate="visible"
-        style={{ ...TS, color: 'white', fontSize: 'clamp(1.5rem,4vw,2.4rem)',
+        style={{ ...TS, color: 'white', fontSize: 'clamp(1.5rem,4vw,2.5rem)',
           fontWeight: 300, letterSpacing: '0.07em' }}
       >
         When did your journey begin?
@@ -254,11 +254,11 @@ function DobStep() {
         <CinematicChronologicalInputs onComplete={setChronData} />
       </Suspense>
 
-      <div className="flex flex-col items-center gap-5 pt-4">
+      <div className="flex flex-col items-center gap-5 pt-2">
         {chronData.isComplete ? (
           <CinematicButton onClick={submit} delay={0.2}>Continue</CinematicButton>
         ) : (
-          <div className="text-xs font-mono text-blue-200/40 tracking-widest">
+          <div className="text-xl md:text-2xl font-light tracking-wide text-blue-200/50">
             Select all date & time fields to continue
           </div>
         )}
@@ -271,24 +271,25 @@ function DobStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 5 — LOCATION (Hierarchical Country-State-City)
+// STEP 5 — LOCATION (Direct Western Routing & Select your birth location)
 // ═══════════════════════════════════════════════════════════════════════════════
 function LocationStep() {
-  const { advanceStep, setBirthData, birthData, goBack } = useAppStore()
+  const { advanceStep, setBirthData, birthData, setPreferredSystem, goBack } = useAppStore()
 
   const handleSelect = (locationResult) => {
     setBirthData({ ...birthData, ...locationResult })
-    advanceStep(55, `Location set: ${locationResult.locationName}`)
+    setPreferredSystem('western') // Automatically set to 'western' (Psychological Depth)
+    advanceStep(6, `Location set: ${locationResult.locationName}. Commencing calculation.`)
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
+    <div className="min-h-screen w-full flex flex-col justify-center items-center overflow-hidden px-4 md:px-8 text-center gap-8">
       <motion.h2
         variants={fadeUp} custom={0} initial="hidden" animate="visible"
-        style={{ ...TS, color: 'white', fontSize: 'clamp(1.4rem,3.8vw,2.2rem)',
+        style={{ ...TS, color: 'white', fontSize: 'clamp(1.5rem,4vw,2.5rem)',
           fontWeight: 300, letterSpacing: '0.06em' }}
       >
-        Where did the stars greet you? (Birthplace)
+        Select your birth location
       </motion.h2>
 
       <Suspense fallback={null}>
@@ -301,110 +302,6 @@ function LocationStep() {
     </div>
   )
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// STEP 55 — PATH SELECTION (Multi-screen Framer Motion Wipe & Locked Paths)
-// ═══════════════════════════════════════════════════════════════════════════════
-function PathSelectionStep() {
-  const { advanceStep, setPreferredSystem, goBack } = useAppStore()
-  const [screen, setScreen] = useState(1)
-  const [notice, setNotice] = useState('')
-
-  const handleSelectSystem = (sys) => {
-    setPreferredSystem(sys)
-    advanceStep(6, `Selected path system: ${sys}`)
-  }
-
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6">
-      <AnimatePresence mode="wait">
-        {screen === 1 ? (
-          /* ── Screen 1: Intent Selection ── */
-          <motion.div
-            key="path-screen-1"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.8 } }}
-            exit={{ opacity: 0, y: -15, transition: { duration: 0.4 } }}
-            className="flex flex-col items-center gap-10 w-full max-w-md"
-          >
-            <motion.h2
-              variants={fadeUp} custom={0} initial="hidden" animate="visible"
-              style={{ ...TS, color: 'white', fontSize: 'clamp(1.5rem,4vw,2.5rem)',
-                fontWeight: 300, letterSpacing: '0.07em' }}
-            >
-              What path shall we illuminate?
-            </motion.h2>
-
-            <div className="flex flex-col items-center gap-6 w-full">
-              <CinematicButton onClick={() => setScreen(2)}>
-                Show Astro Chart
-              </CinematicButton>
-
-              <CinematicGhostButton onClick={() => setNotice('Compatibility Checker coming soon in v2.5!')}>
-                Compatibility Checker (Coming Soon)
-              </CinematicGhostButton>
-
-              {notice && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs font-mono text-cyan-300/80 tracking-widest">
-                  {notice}
-                </motion.div>
-              )}
-            </div>
-
-            <CinematicGhostButton onClick={goBack} delay={0.3}>
-              ← BACK
-            </CinematicGhostButton>
-          </motion.div>
-        ) : (
-          /* ── Screen 2: System Choice (Locked Options) ── */
-          <motion.div
-            key="path-screen-2"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.8 } }}
-            exit={{ opacity: 0, y: -15, transition: { duration: 0.4 } }}
-            className="flex flex-col items-center gap-8 w-full max-w-md"
-          >
-            <motion.h2
-              variants={fadeUp} custom={0} initial="hidden" animate="visible"
-              style={{ ...TS, color: 'white', fontSize: 'clamp(1.5rem,4vw,2.5rem)',
-                fontWeight: 300, letterSpacing: '0.07em' }}
-            >
-              Choose your cosmic lens:
-            </motion.h2>
-
-            <div className="flex flex-col items-center gap-5 w-full">
-              {/* Option 1: Vedic Cosmic Journey (Locked) */}
-              <button
-                disabled
-                className="w-full max-w-xs py-3 px-6 rounded-full border border-blue-200/20 text-white/50 text-sm font-light tracking-widest opacity-50 cursor-not-allowed bg-transparent"
-              >
-                Start Vedic Cosmic Journey (Locked)
-              </button>
-
-              {/* Option 2: Psychological Depth (ONLY Active Glowing Path) */}
-              <CinematicButton onClick={() => handleSelectSystem('western')}>
-                Start Psychological Depth
-              </CinematicButton>
-
-              {/* Option 3: Emotional Depth (Locked) */}
-              <button
-                disabled
-                className="w-full max-w-xs py-3 px-6 rounded-full border border-blue-200/20 text-white/50 text-sm font-light tracking-widest opacity-50 cursor-not-allowed bg-transparent"
-              >
-                Start Emotional Depth (Locked)
-              </button>
-            </div>
-
-            <CinematicGhostButton onClick={() => setScreen(1)} delay={0.3}>
-              ← BACK
-            </CinematicGhostButton>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
-
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // STEP 6 — PROCESSING
@@ -444,7 +341,7 @@ function ProcessingStep() {
   }, [])
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
+    <div className="min-h-screen w-full flex flex-col justify-center items-center overflow-hidden px-4 md:px-8 text-center gap-10">
       {!errorMsg ? (
         <motion.div
           animate={{ opacity: [0.35, 1, 0.35] }}
@@ -472,7 +369,7 @@ function ProcessingStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 7 — COSMIC REVEAL (9-Slide Paginated Deep Dive)
+// STEP 7 — COSMIC REVEAL (11-Slide Deep Dive)
 // ═══════════════════════════════════════════════════════════════════════════════
 function RevealStep() {
   return (
@@ -519,7 +416,6 @@ function CinematicRoot() {
       case 3:  return <AboutStep key="s3" />
       case 4:  return <DobStep key="s4" />
       case 5:  return <LocationStep key="s5" />
-      case 55: return <PathSelectionStep key="s55" />
       case 6:  return <ProcessingStep key="s6" />
       case 7:  return <RevealStep key="s7" />
       default: return <IntroStep key="s0" />

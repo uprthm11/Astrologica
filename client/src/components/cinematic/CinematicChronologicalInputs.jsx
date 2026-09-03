@@ -1,18 +1,47 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { fadeUp } from './CinematicPrimitives'
+import CinematicWheelPicker from './CinematicWheelPicker'
 
 const MONTHS = [
-  { name: 'January', val: '01' }, { name: 'February', val: '02' }, { name: 'March', val: '03' },
-  { name: 'April', val: '04' }, { name: 'May', val: '05' }, { name: 'June', val: '06' },
-  { name: 'July', val: '07' }, { name: 'August', val: '08' }, { name: 'September', val: '09' },
-  { name: 'October', val: '10' }, { name: 'November', val: '11' }, { name: 'December', val: '12' }
+  { label: 'January', value: '01' },
+  { label: 'February', value: '02' },
+  { label: 'March', value: '03' },
+  { label: 'April', value: '04' },
+  { label: 'May', value: '05' },
+  { label: 'June', value: '06' },
+  { label: 'July', value: '07' },
+  { label: 'August', value: '08' },
+  { label: 'September', value: '09' },
+  { label: 'October', value: '10' },
+  { label: 'November', value: '11' },
+  { label: 'December', value: '12' },
 ]
 
-const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'))
-const YEARS = Array.from({ length: 107 }, (_, i) => String(2026 - i)) // 2026 down to 1920
-const HOURS = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'))
-const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
+const DAYS = Array.from({ length: 31 }, (_, i) => {
+  const d = String(i + 1).padStart(2, '0')
+  return { label: String(i + 1), value: d }
+})
+
+const YEARS = Array.from({ length: 107 }, (_, i) => {
+  const y = String(2026 - i)
+  return { label: y, value: y }
+})
+
+const HOURS = Array.from({ length: 12 }, (_, i) => {
+  const h = String(i + 1).padStart(2, '0')
+  return { label: String(i + 1), value: h }
+})
+
+const MINUTES = Array.from({ length: 60 }, (_, i) => {
+  const m = String(i).padStart(2, '0')
+  return { label: `:${m}`, value: m }
+})
+
+const AMPM_OPTIONS = [
+  { label: 'AM', value: 'AM' },
+  { label: 'PM', value: 'PM' },
+]
 
 export default function CinematicChronologicalInputs({ onComplete }) {
   const [day, setDay]       = useState('')
@@ -38,94 +67,59 @@ export default function CinematicChronologicalInputs({ onComplete }) {
     }
   }, [day, month, year, hour, minute, ampm])
 
-  const selectStyle = {
-    background: 'transparent',
-    border: 'none',
-    borderBottom: '1px solid rgba(160,200,255,0.3)',
-    outline: 'none',
-    color: 'white',
-    textAlign: 'center',
-    textAlignLast: 'center',
-    fontSize: '1.1rem',
-    fontWeight: '300',
-    letterSpacing: '0.12em',
-    padding: '0.6rem 0.2rem',
-    cursor: 'pointer',
-    colorScheme: 'dark',
-  }
-
   return (
-    <div className="flex flex-col items-center gap-8 w-full max-w-md">
-      {/* ── Date Selection Row ── */}
+    <div className="flex flex-col items-center gap-6 w-full max-w-lg px-2">
+      {/* ── Date Wheel Pickers ── */}
       <motion.div variants={fadeUp} custom={1} initial="hidden" animate="visible" className="w-full space-y-2">
-        <div style={{ color: 'rgba(160,200,255,0.4)', fontSize: '10px', letterSpacing: '0.35em', textTransform: 'uppercase' }}>
+        <div className="text-[11px] font-mono uppercase tracking-[0.35em] text-blue-200/50 text-center">
           Date of Birth
         </div>
-        <div className="grid grid-cols-3 gap-3">
-          {/* Day */}
-          <select value={day} onChange={e => setDay(e.target.value)} style={selectStyle}>
-            <option value="" disabled className="bg-[#050816] text-blue-200/40">Day</option>
-            {DAYS.map(d => (
-              <option key={d} value={d} className="bg-[#050816] text-white">
-                {parseInt(d, 10)}
-              </option>
-            ))}
-          </select>
-
-          {/* Month */}
-          <select value={month} onChange={e => setMonth(e.target.value)} style={selectStyle}>
-            <option value="" disabled className="bg-[#050816] text-blue-200/40">Month</option>
-            {MONTHS.map(m => (
-              <option key={m.val} value={m.val} className="bg-[#050816] text-white">
-                {m.name}
-              </option>
-            ))}
-          </select>
-
-          {/* Year */}
-          <select value={year} onChange={e => setYear(e.target.value)} style={selectStyle}>
-            <option value="" disabled className="bg-[#050816] text-blue-200/40">Year</option>
-            {YEARS.map(y => (
-              <option key={y} value={y} className="bg-[#050816] text-white">
-                {y}
-              </option>
-            ))}
-          </select>
+        <div className="grid grid-cols-3 gap-2 bg-white/[0.015] border border-blue-200/10 rounded-2xl p-3">
+          <CinematicWheelPicker
+            label="Day"
+            options={DAYS}
+            value={day}
+            onChange={setDay}
+          />
+          <CinematicWheelPicker
+            label="Month"
+            options={MONTHS}
+            value={month}
+            onChange={setMonth}
+          />
+          <CinematicWheelPicker
+            label="Year"
+            options={YEARS}
+            value={year}
+            onChange={setYear}
+          />
         </div>
       </motion.div>
 
-      {/* ── Time Selection Row ── */}
+      {/* ── Time Wheel Pickers ── */}
       <motion.div variants={fadeUp} custom={2} initial="hidden" animate="visible" className="w-full space-y-2">
-        <div style={{ color: 'rgba(160,200,255,0.4)', fontSize: '10px', letterSpacing: '0.35em', textTransform: 'uppercase' }}>
+        <div className="text-[11px] font-mono uppercase tracking-[0.35em] text-blue-200/50 text-center">
           Time of Birth
         </div>
-        <div className="grid grid-cols-3 gap-3">
-          {/* Hour */}
-          <select value={hour} onChange={e => setHour(e.target.value)} style={selectStyle}>
-            <option value="" disabled className="bg-[#050816] text-blue-200/40">Hour</option>
-            {HOURS.map(h => (
-              <option key={h} value={h} className="bg-[#050816] text-white">
-                {parseInt(h, 10)}
-              </option>
-            ))}
-          </select>
-
-          {/* Minute */}
-          <select value={minute} onChange={e => setMinute(e.target.value)} style={selectStyle}>
-            <option value="" disabled className="bg-[#050816] text-blue-200/40">Min</option>
-            {MINUTES.map(m => (
-              <option key={m} value={m} className="bg-[#050816] text-white">
-                :{m}
-              </option>
-            ))}
-          </select>
-
-          {/* AM / PM */}
-          <select value={ampm} onChange={e => setAmpm(e.target.value)} style={selectStyle}>
-            <option value="" disabled className="bg-[#050816] text-blue-200/40">AM/PM</option>
-            <option value="AM" className="bg-[#050816] text-white">AM</option>
-            <option value="PM" className="bg-[#050816] text-white">PM</option>
-          </select>
+        <div className="grid grid-cols-3 gap-2 bg-white/[0.015] border border-blue-200/10 rounded-2xl p-3">
+          <CinematicWheelPicker
+            label="Hour"
+            options={HOURS}
+            value={hour}
+            onChange={setHour}
+          />
+          <CinematicWheelPicker
+            label="Minute"
+            options={MINUTES}
+            value={minute}
+            onChange={setMinute}
+          />
+          <CinematicWheelPicker
+            label="Period"
+            options={AMPM_OPTIONS}
+            value={ampm}
+            onChange={setAmpm}
+          />
         </div>
       </motion.div>
     </div>
