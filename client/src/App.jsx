@@ -72,7 +72,7 @@ function IntroStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 1 — NAME (Strict Full Name Validation)
+// STEP 1 — NAME (Auto-Capitalized Full Name Validation)
 // ═══════════════════════════════════════════════════════════════════════════════
 function NameStep() {
   const { userName, setUserName, advanceStep } = useAppStore()
@@ -106,7 +106,7 @@ function NameStep() {
 
       <CinematicInput
         value={draft}
-        onChange={e => setDraft(e.target.value)}
+        onChange={e => setDraft(e.target.value.replace(/\b\w/g, char => char.toUpperCase()))}
         onKeyDown={e => e.key === 'Enter' && canSubmit && submit()}
         placeholder="Your full name..."
         autoFocus
@@ -124,7 +124,7 @@ function NameStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 2 — CROSSROADS (Correct Text Order & Glowing Name)
+// STEP 2 — CROSSROADS (Correct Text Order & Cleaned Buttons)
 // ═══════════════════════════════════════════════════════════════════════════════
 function CrossroadsStep() {
   const { userName, advanceStep, goBack } = useAppStore()
@@ -151,29 +151,20 @@ function CrossroadsStep() {
         </div>
       </motion.div>
 
-      {/* Main question */}
-      <motion.h2
-        variants={fadeUp} custom={1} initial="hidden" animate="visible"
-        style={{ ...TS, color: 'white', fontSize: 'clamp(1.4rem,3.8vw,2.4rem)',
-          fontWeight: 300, letterSpacing: '0.06em', lineHeight: 1.3 }}
-      >
-        What seeks you in the cosmos?
-      </motion.h2>
-
       {/* Choices */}
-      <div className="flex flex-col items-center gap-6">
+      <div className="flex flex-col items-center gap-6 pt-4">
         <CinematicButton
           onClick={() => advanceStep(4, `${userName} chose astro calculation`)}
           delay={0.2}
         >
-          Lets start cosmic journey
+          Start cosmic journey
         </CinematicButton>
 
         <CinematicGhostButton
           onClick={() => advanceStep(3, `${userName} explored About`)}
           delay={0.4}
         >
-          About the web
+          About website
         </CinematicGhostButton>
 
         {/* Admin Trap -> Step 25 */}
@@ -312,11 +303,11 @@ function LocationStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 55 — PATH SELECTION (Multi-screen Framer Motion Wipe)
+// STEP 55 — PATH SELECTION (Multi-screen Framer Motion Wipe & Locked Paths)
 // ═══════════════════════════════════════════════════════════════════════════════
 function PathSelectionStep() {
   const { advanceStep, setPreferredSystem, goBack } = useAppStore()
-  const [screen, setScreen] = useState(1) // Screen 1: Intent, Screen 2: System Choice
+  const [screen, setScreen] = useState(1)
   const [notice, setNotice] = useState('')
 
   const handleSelectSystem = (sys) => {
@@ -365,13 +356,13 @@ function PathSelectionStep() {
             </CinematicGhostButton>
           </motion.div>
         ) : (
-          /* ── Screen 2: System Choice ── */
+          /* ── Screen 2: System Choice (Locked Options) ── */
           <motion.div
             key="path-screen-2"
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0, transition: { duration: 0.8 } }}
             exit={{ opacity: 0, y: -15, transition: { duration: 0.4 } }}
-            className="flex flex-col items-center gap-10 w-full max-w-md"
+            className="flex flex-col items-center gap-8 w-full max-w-md"
           >
             <motion.h2
               variants={fadeUp} custom={0} initial="hidden" animate="visible"
@@ -381,14 +372,27 @@ function PathSelectionStep() {
               Choose your cosmic lens:
             </motion.h2>
 
-            <div className="flex flex-col items-center gap-6 w-full">
-              <CinematicButton onClick={() => handleSelectSystem('vedic')}>
-                Start Vedic Cosmic Journey (Preferred)
+            <div className="flex flex-col items-center gap-5 w-full">
+              {/* Option 1: Vedic Cosmic Journey (Locked) */}
+              <button
+                disabled
+                className="w-full max-w-xs py-3 px-6 rounded-full border border-blue-200/20 text-white/50 text-sm font-light tracking-widest opacity-50 cursor-not-allowed bg-transparent"
+              >
+                Start Vedic Cosmic Journey (Locked)
+              </button>
+
+              {/* Option 2: Psychological Depth (ONLY Active Glowing Path) */}
+              <CinematicButton onClick={() => handleSelectSystem('western')}>
+                Start Psychological Depth
               </CinematicButton>
 
-              <CinematicGhostButton onClick={() => handleSelectSystem('western')}>
-                Start Psychological Depth
-              </CinematicGhostButton>
+              {/* Option 3: Emotional Depth (Locked) */}
+              <button
+                disabled
+                className="w-full max-w-xs py-3 px-6 rounded-full border border-blue-200/20 text-white/50 text-sm font-light tracking-widest opacity-50 cursor-not-allowed bg-transparent"
+              >
+                Start Emotional Depth (Locked)
+              </button>
             </div>
 
             <CinematicGhostButton onClick={() => setScreen(1)} delay={0.3}>

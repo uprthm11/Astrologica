@@ -166,14 +166,16 @@ const SLIDE_TRANSITION = {
 }
 
 export default function CinematicReveal() {
-  const { astrologyData, userName, preferredSystem, revealSlide, setRevealSlide, advanceStep, goBack } = useAppStore()
+  const { astrologyData, birthData, userName, preferredSystem, revealSlide, setRevealSlide, advanceStep, goBack } = useAppStore()
   const [downloading, setDownloading] = useState(false)
-  const chartRef = useRef(null)
+
+  // Dedicated offscreen poster ref for high-res html2canvas export
+  const exportRef = useRef(null)
 
   const isVedic = preferredSystem === 'vedic'
   const sysLabel = isVedic ? 'Vedic Sidereal Formula' : 'Psychological Depth'
 
-  // Robust Data Extraction with optional chaining and fallback normalizers
+  // Robust Data Extraction
   let rawSunSign = 'Aries'
   let rawMoonSign = 'Taurus'
   let rawAscSign = 'Gemini'
@@ -205,15 +207,21 @@ export default function CinematicReveal() {
   const primaryElement = sunData?.element || 'Air'
   const glow = ELEMENT_GLOWS[primaryElement] || ELEMENT_GLOWS.Air
 
+  // Dedicated High-Res Poster Capture Handler
   const handleDownload = useCallback(async () => {
-    if (!chartRef.current) return
+    if (!exportRef.current) return
     setDownloading(true)
     try {
-      const canvas = await html2canvas(chartRef.current, {
-        backgroundColor: '#050816', scale: 2, useCORS: true, logging: false
+      const canvas = await html2canvas(exportRef.current, {
+        backgroundColor: '#030712',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        width: 800,
+        height: 1200,
       })
       const link = document.createElement('a')
-      link.download = `astrologica-${preferredSystem}-${safeLower(userName || 'chart').replace(/\s+/g, '-')}.png`
+      link.download = `astrologica-${preferredSystem}-${safeLower(userName || 'blueprint').replace(/\s+/g, '-')}.png`
       link.href = canvas.toDataURL('image/png')
       link.click()
     } catch (e) {
@@ -230,7 +238,7 @@ export default function CinematicReveal() {
     // Slide 1: Foundation (The Big Three)
     <div key="w1" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 1 of 9 · Foundation (The Big Three)</div>
-      <div className="text-2xl font-light text-white tracking-widest">Core Psychological Archetype</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Core Psychological Archetype</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title={`Sun (Core Identity) · ${sunSign}`}
@@ -263,7 +271,7 @@ export default function CinematicReveal() {
     // Slide 2: Inner Planetary Placements
     <div key="w2" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 2 of 9 · Inner Planetary Placements</div>
-      <div className="text-2xl font-light text-white tracking-widest">Cognitive & Relational Engines</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Cognitive & Relational Engines</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title={`Mercury (Cognition & Intellect) · ${sunSign}`}
@@ -296,7 +304,7 @@ export default function CinematicReveal() {
     // Slide 3: Outer Planetary Expansion
     <div key="w3" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 3 of 9 · Outer Planetary Expansion</div>
-      <div className="text-2xl font-light text-white tracking-widest">Transpersonal Horizons</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Transpersonal Horizons</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title="Jupiter & Saturn (Growth vs. Structure)"
@@ -322,7 +330,7 @@ export default function CinematicReveal() {
     // Slide 4: Astrological Aspects
     <div key="w4" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 4 of 9 · Astrological Aspects (Geometry)</div>
-      <div className="text-2xl font-light text-white tracking-widest">Planetary Aspects & Clusters</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Planetary Aspects & Clusters</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title="Harmonious Aspects (Flow)"
@@ -355,7 +363,7 @@ export default function CinematicReveal() {
     // Slide 5: Elemental Balance
     <div key="w5" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 5 of 9 · Elemental Balance</div>
-      <div className="text-2xl font-light text-white tracking-widest">{primaryElement} Element Alignment</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">{primaryElement} Element Alignment</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title="Fire & Earth (Passionate Realism)"
@@ -388,7 +396,7 @@ export default function CinematicReveal() {
     // Slide 6: Modality (Style of Expression)
     <div key="w6" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 6 of 9 · Modality (Style of Expression)</div>
-      <div className="text-2xl font-light text-white tracking-widest">{sunData.modality} Operational Mode</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">{sunData.modality} Operational Mode</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title="Cardinal (Initiator)"
@@ -421,7 +429,7 @@ export default function CinematicReveal() {
     // Slide 7: The Calculation Engine (Behind the Scenes)
     <div key="w7" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 7 of 9 · The Calculation Engine</div>
-      <div className="text-2xl font-light text-white tracking-widest">Behind the Scenes Precision</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Behind the Scenes Precision</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title="Stage 1 & 2: UT Time & Swiss Ephemeris"
@@ -447,7 +455,7 @@ export default function CinematicReveal() {
     // Slide 8: Gemstone Correspondence
     <div key="w8" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 8 of 9 · Gemstone Correspondence</div>
-      <div className="text-2xl font-light text-white tracking-widest">Vibrational Frequency Alignment</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Vibrational Frequency Alignment</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title="Vibrational Frequency & Gemstone Logic"
@@ -477,10 +485,10 @@ export default function CinematicReveal() {
       </div>
     </div>,
 
-    // Slide 9: Putting It All Together (The Interpretation Stack)
+    // Slide 9: Putting It All Together (The Interpretation Stack & Export)
     <div key="w9" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 9 of 9 · Putting It All Together</div>
-      <div className="text-2xl font-light text-white tracking-widest">The Interpretation Stack</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">The Interpretation Stack</div>
 
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
@@ -492,27 +500,9 @@ export default function CinematicReveal() {
         />
       </div>
 
-      {/* Printable Card */}
-      <div className="flex justify-center pt-2" ref={chartRef}>
-        <div style={{ background: 'linear-gradient(160deg, #050816 0%, #080c26 60%, #030511 100%)', padding: '2rem', borderRadius: '1rem', width: '100%', maxWidth: '420px', color: 'white', textAlign: 'center', border: '1px solid rgba(160,200,255,0.1)' }}>
-          <div style={{ fontSize: '9px', letterSpacing: '0.35em', color: 'rgba(160,200,255,0.4)', textTransform: 'uppercase', marginBottom: '0.4rem' }}>Astrologica · Psychological Depth</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 300, letterSpacing: '0.12em', color: 'white', marginBottom: '1rem' }}>{userName || 'Cosmic Traveller'}</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: '1px solid rgba(160,200,255,0.1)', borderBottom: '1px solid rgba(160,200,255,0.1)', padding: '1rem 0', marginBottom: '1rem', fontSize: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Sun Sign</span><span>{sunSign}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Moon Sign</span><span>{moonSign}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Ascendant</span><span>{ascSign}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Ruler</span><span>{sunData.ruling}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Gemstone</span><span>{sunData.stone}</span></div>
-          </div>
-          <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.8)', fontStyle: 'italic' }}>
-            "You embody the {safeLower(sunData.element)} drive of {sunSign} with {safeLower(sunData.modality)} momentum, guided by {sunData.ruling}."
-          </p>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-center gap-6 pt-2">
+      <div className="flex flex-wrap items-center justify-center gap-6 pt-6">
         <CinematicButton onClick={handleDownload} disabled={downloading}>
-          {downloading ? 'Generating...' : 'Download Chart'}
+          {downloading ? 'Generating Poster...' : 'Download Chart'}
         </CinematicButton>
         <CinematicGhostButton onClick={() => advanceStep(2, `${userName} returned to Main Menu`)}>
           ← BACK
@@ -528,7 +518,7 @@ export default function CinematicReveal() {
     // Slide 1: The Core
     <div key="v1" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 1 of 9 · Vedic Core Formula</div>
-      <div className="text-2xl font-light text-white tracking-widest">Jyotish Core Triad</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Jyotish Core Triad</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title={`Lagna (Ascendant) · ${ascSign}`}
@@ -561,7 +551,7 @@ export default function CinematicReveal() {
     // Slide 2: Lagna Lord
     <div key="v2" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 2 of 9 · Lagna Lord Governance</div>
-      <div className="text-2xl font-light text-white tracking-widest">Lagna Lord (Ascendant Ruler)</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Lagna Lord (Ascendant Ruler)</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title={`Lagna Lord (Ascendant Ruler) · ${ascData.ruling}`}
@@ -580,7 +570,7 @@ export default function CinematicReveal() {
     // Slide 3: Navagrahas (The 9 Planets)
     <div key="v3" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 3 of 9 · Navagrahas (9 Planets)</div>
-      <div className="text-2xl font-light text-white tracking-widest">Planetary Bhavas (Houses)</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Planetary Bhavas (Houses)</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title="Jupiter / Guru (Wisdom / Dharma)"
@@ -613,7 +603,7 @@ export default function CinematicReveal() {
     // Slide 4: Planetary Dignity
     <div key="v4" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 4 of 9 · Planetary Dignity</div>
-      <div className="text-2xl font-light text-white tracking-widest">Sthana Bala (Positional Strength)</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Sthana Bala (Positional Strength)</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title="Uccha (Exalted / Amplified) Dignity"
@@ -639,7 +629,7 @@ export default function CinematicReveal() {
     // Slide 5: Shadbala & Yogas
     <div key="v5" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 5 of 9 · Shadbala & Yogas</div>
-      <div className="text-2xl font-light text-white tracking-widest">Shadbala (Six-fold Strength) & Yogas</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Shadbala (Six-fold Strength) & Yogas</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title="Shadbala (Six-fold Planetary Strength)"
@@ -665,7 +655,7 @@ export default function CinematicReveal() {
     // Slide 6: Pancha Mahabhutas (Elements)
     <div key="v6" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 6 of 9 · Pancha Mahabhutas (5 Elements)</div>
-      <div className="text-2xl font-light text-white tracking-widest">Pancha Mahabhutas (Elements)</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Pancha Mahabhutas (Elements)</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title="Agni (Fire) & Vayu (Air)"
@@ -691,7 +681,7 @@ export default function CinematicReveal() {
     // Slide 7: Prakriti (Ayurvedic Dosha)
     <div key="v7" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 7 of 9 · Prakriti (Ayurvedic Constitution)</div>
-      <div className="text-2xl font-light text-white tracking-widest">Prakriti (Ayurvedic Dosha)</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Prakriti (Ayurvedic Dosha)</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title="Dominant Ayurvedic Constitution"
@@ -710,7 +700,7 @@ export default function CinematicReveal() {
     // Slide 8: Vimshottari Dasha & Gemstone
     <div key="v8" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 8 of 9 · Dasha & Ratna (Gemstone)</div>
-      <div className="text-2xl font-light text-white tracking-widest">Dasha & Ratna (Gemstone)</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Dasha & Ratna (Gemstone)</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
           title="Vimshottari Dasha (Planetary Period timeline)"
@@ -736,29 +726,21 @@ export default function CinematicReveal() {
     // Slide 9: Synthesis & Export
     <div key="v9" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 9 of 9 · Final Vedic Synthesis</div>
-      <div className="text-2xl font-light text-white tracking-widest">Complete Jyotish Dossier</div>
+      <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Complete Jyotish Dossier</div>
 
-      {/* Printable Card */}
-      <div className="flex justify-center" ref={chartRef}>
-        <div style={{ background: 'linear-gradient(160deg, #050816 0%, #080c26 60%, #030511 100%)', padding: '2rem', borderRadius: '1rem', width: '100%', maxWidth: '420px', color: 'white', textAlign: 'center', border: '1px solid rgba(160,200,255,0.1)' }}>
-          <div style={{ fontSize: '9px', letterSpacing: '0.35em', color: 'rgba(160,200,255,0.4)', textTransform: 'uppercase', marginBottom: '0.4rem' }}>Astrologica · {sysLabel}</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 300, letterSpacing: '0.12em', color: 'white', marginBottom: '1rem' }}>{userName || 'Cosmic Traveller'}</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: '1px solid rgba(160,200,255,0.1)', borderBottom: '1px solid rgba(160,200,255,0.1)', padding: '1rem 0', marginBottom: '1rem', fontSize: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Lagna (Ascendant)</span><span>{ascSign}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Rashi (Moon Sign)</span><span>{moonSign}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Janma Nakshatra</span><span>{nakshatra} ({pada})</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Lagna Lord</span><span>{ascData.ruling}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Ratna (Gemstone)</span><span>{sunData.vedicGem}</span></div>
-          </div>
-          <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.8)', fontStyle: 'italic' }}>
-            "Your soul path is guided by {nakshatra} Nakshatra ({pada}) with Lagna Lord {ascData.ruling} protecting your Dharma."
-          </p>
-        </div>
+      <div className="space-y-4 max-w-md mx-auto">
+        <InteractiveBubble
+          title="Vedic Soul Blueprint Synthesis"
+          subtitle="Karmic Vector"
+          icon={DignityIcon} glowColor={glow} defaultExpanded
+          summary={`Nakshatra Realm: ${nakshatra} (${pada})`}
+          details={`Your soul path is guided by ${nakshatra} Nakshatra (${pada}) with Lagna Lord ${ascData.ruling} protecting your Dharma.`}
+        />
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-6 pt-2">
+      <div className="flex flex-wrap items-center justify-center gap-6 pt-6">
         <CinematicButton onClick={handleDownload} disabled={downloading}>
-          {downloading ? 'Generating...' : 'Download Chart'}
+          {downloading ? 'Generating Poster...' : 'Download Chart'}
         </CinematicButton>
         <CinematicGhostButton onClick={() => advanceStep(2, `${userName} returned to Main Menu`)}>
           ← BACK
@@ -771,7 +753,111 @@ export default function CinematicReveal() {
   const currentSlide = activeSlides[Math.min(revealSlide, activeSlides.length - 1)]
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8 relative">
+      {/* ── Hidden Dedicated Infographic Poster Export Template (800px x 1200px) ── */}
+      <div
+        ref={exportRef}
+        style={{
+          position: 'absolute',
+          top: '-9999px',
+          left: '-9999px',
+          width: '800px',
+          height: '1200px',
+          background: '#030712',
+          color: '#ffffff',
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          padding: '3.5rem 3.5rem',
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          border: '1px solid rgba(160, 200, 255, 0.2)',
+        }}
+      >
+        {/* Header Section */}
+        <div style={{ textAlign: 'center', borderBottom: '1px solid rgba(160, 200, 255, 0.15)', paddingBottom: '2rem' }}>
+          <div style={{ fontSize: '10px', letterSpacing: '0.6em', textTransform: 'uppercase', color: 'rgba(160, 200, 255, 0.5)', marginBottom: '0.6rem' }}>
+            ASTROLOGICA CELESTIAL BLUEPRINT
+          </div>
+          <div style={{ fontSize: '3rem', fontWeight: 200, letterSpacing: '0.35em', color: '#ffffff', textShadow: '0 0 24px rgba(0, 210, 255, 0.6)' }}>
+            ASTROLOGICA
+          </div>
+          <div style={{ fontSize: '1.1rem', fontWeight: 300, letterSpacing: '0.25em', color: 'rgba(200, 220, 255, 0.85)', marginTop: '0.6rem' }}>
+            {sysLabel}
+          </div>
+        </div>
+
+        {/* User Identity Banner */}
+        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(160, 200, 255, 0.12)', borderRadius: '1rem', padding: '1.6rem 2.2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.3em', color: 'rgba(160, 200, 255, 0.4)' }}>Traveller Identity</div>
+            <div style={{ fontSize: '2.2rem', fontWeight: 300, letterSpacing: '0.1em', color: '#ffffff', marginTop: '0.2rem' }}>{userName || 'Cosmic Traveller'}</div>
+          </div>
+          <div style={{ textAlign: 'right', fontSize: '13px', color: 'rgba(200, 220, 255, 0.8)', lineHeight: 1.7 }}>
+            <div>Date: <strong style={{ color: '#fff' }}>{birthData?.date || '—'}</strong></div>
+            <div>Time: <strong style={{ color: '#fff' }}>{birthData?.time || '—'}</strong></div>
+            <div>Location: <strong style={{ color: '#fff' }}>{birthData?.locationName || 'Global Ephemeris'}</strong></div>
+          </div>
+        </div>
+
+        {/* The Core Triad Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+          {/* Sun Card */}
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(160, 200, 255, 0.15)', borderRadius: '1rem', padding: '1.6rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em', color: 'rgba(160, 200, 255, 0.5)', marginBottom: '0.5rem' }}>Sun (Core Identity)</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 300, color: '#ffffff', letterSpacing: '0.08em' }}>{sunSign}</div>
+            <div style={{ fontSize: '11px', color: 'rgba(200, 220, 255, 0.65)', marginTop: '0.5rem' }}>Ruler: {sunData.ruling}</div>
+          </div>
+          {/* Moon Card */}
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(160, 200, 255, 0.15)', borderRadius: '1rem', padding: '1.6rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em', color: 'rgba(160, 200, 255, 0.5)', marginBottom: '0.5rem' }}>Moon (Subconscious)</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 300, color: '#ffffff', letterSpacing: '0.08em' }}>{moonSign}</div>
+            <div style={{ fontSize: '11px', color: 'rgba(200, 220, 255, 0.65)', marginTop: '0.5rem' }}>Element: {moonData.element}</div>
+          </div>
+          {/* Ascendant Card */}
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(160, 200, 255, 0.15)', borderRadius: '1rem', padding: '1.6rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em', color: 'rgba(160, 200, 255, 0.5)', marginBottom: '0.5rem' }}>Ascendant (Rising)</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 300, color: '#ffffff', letterSpacing: '0.08em' }}>{ascSign}</div>
+            <div style={{ fontSize: '11px', color: 'rgba(200, 220, 255, 0.65)', marginTop: '0.5rem' }}>Modality: {ascData.modality}</div>
+          </div>
+        </div>
+
+        {/* Formula Breakdown Details Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(160, 200, 255, 0.12)', borderRadius: '1rem', padding: '1.6rem' }}>
+            <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em', color: 'rgba(160, 200, 255, 0.5)', marginBottom: '0.8rem' }}>Elemental Composition</div>
+            <div style={{ fontSize: '13px', lineHeight: 1.8, color: 'rgba(255, 255, 255, 0.85)' }}>
+              <div>• Primary Fuel: <strong style={{ color: '#38bdf8' }}>{primaryElement} Element Alignment</strong></div>
+              <div>• Sun Modality: <strong>{sunData.modality} Operational Mode</strong></div>
+              <div>• Behavioral Focus: <em>{sunData.domain}</em></div>
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(160, 200, 255, 0.12)', borderRadius: '1rem', padding: '1.6rem' }}>
+            <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em', color: 'rgba(160, 200, 255, 0.5)', marginBottom: '0.8rem' }}>Resonance & Gemstone</div>
+            <div style={{ fontSize: '13px', lineHeight: 1.8, color: 'rgba(255, 255, 255, 0.85)' }}>
+              <div>• Assigned Gemstone: <strong style={{ color: '#fbbf24' }}>{sunData.stone}</strong></div>
+              <div>• Ruling Gravity: <strong>{sunData.ruling}</strong></div>
+              <div>• Metal Alignment: <strong>{sunData.metal} ({sunData.day})</strong></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Algorithmic Synthesis Narrative */}
+        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(160, 200, 255, 0.15)', borderRadius: '1rem', padding: '1.8rem', textAlign: 'center' }}>
+          <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.3em', color: 'rgba(160, 200, 255, 0.4)', marginBottom: '0.5rem' }}>Algorithmic Synthesis</div>
+          <div style={{ fontSize: '14px', fontStyle: 'italic', lineHeight: 1.7, color: 'rgba(255, 255, 255, 0.9)' }}>
+            "You embody the {safeLower(primaryElement)} power of {sunSign} with {safeLower(sunData.modality)} momentum, guided by {sunData.ruling} to illuminate your unique psychological blueprint."
+          </div>
+        </div>
+
+        {/* Footer Stamp */}
+        <div style={{ borderTop: '1px solid rgba(160, 200, 255, 0.15)', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em', color: 'rgba(160, 200, 255, 0.4)' }}>
+          <div>Swiss Ephemeris v2.10 · Sub-Arcsecond Precision</div>
+          <div>Designed by Pratham Upadhyay</div>
+        </div>
+      </div>
+
       <AnimatePresence mode="wait">
         <motion.div
           key={`reveal-pipeline-${preferredSystem}-slide-${revealSlide}`}

@@ -3,65 +3,61 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { fadeUp } from './CinematicPrimitives'
 
 const TABS = [
-  { id: 'flow',   label: 'Journey Flow' },
-  { id: 'tech',   label: 'Technologies' },
-  { id: 'arch',   label: 'Architecture' },
-  { id: 'about',  label: 'About Creator' },
+  { id: 'flow',   label: 'Prologue Flow' },
+  { id: 'tech',   label: 'Engine Stack' },
+  { id: 'arch',   label: 'System Topology' },
+  { id: 'about',  label: 'Creator Philosophy' },
 ]
 
 const TECH_STACK = [
-  { name: 'React 19',          role: 'Frontend Framework',      color: '#61dafb' },
-  { name: 'Vite 8',            role: 'Build Tool & Dev Server', color: '#9b59b6' },
-  { name: 'Three.js + R3F',    role: '3D WebGL Engine',         color: '#00d2ff' },
-  { name: 'Framer Motion',     role: 'Cinematic Animations',    color: '#ff4d9d' },
-  { name: 'Zustand',           role: 'Global State Manager',    color: '#f97316' },
-  { name: 'Tailwind CSS',      role: 'Utility Styling System',  color: '#38bdf8' },
-  { name: 'FastAPI',           role: 'Python Backend API',       color: '#10b981' },
-  { name: 'Swiss Ephemeris',   role: 'Astronomical Engine',     color: '#a855f7' },
-  { name: 'MongoDB Atlas',     role: 'Cloud Database',          color: '#4db33d' },
-  { name: 'Vercel + Render',   role: 'Cloud Deployment',        color: '#6366f1' },
-  { name: 'PyJWT',             role: 'Admin Authentication',    color: '#fbbf24' },
-  { name: 'html2canvas',       role: 'Chart PNG Export',        color: '#ec4899' },
+  { name: 'React 19 & Vite 8', role: 'Cinematic Web Core', color: '#61dafb' },
+  { name: 'Three.js & R3F',    role: 'WebGL Spatial Engine', color: '#00d2ff' },
+  { name: 'Framer Motion',     role: 'Fluid State Wipes', color: '#ff4d9d' },
+  { name: 'Zustand',           role: 'Global Telemetry Store', color: '#f97316' },
+  { name: 'FastAPI Python',    role: 'Backend Calculation API', color: '#10b981' },
+  { name: 'Swiss Ephemeris',   role: 'Sub-Arcsecond Astronomy', color: '#a855f7' },
+  { name: 'MongoDB Atlas',     role: 'Persistent Journey Telemetry', color: '#4db33d' },
+  { name: 'html2canvas',       role: 'High-Res Poster Export', color: '#ec4899' },
 ]
 
-const FLOW_STEPS = [
-  { step: '01', title: 'Cinematic Entry',      desc: 'Full-screen star field intro with the ASTROLOGICA logotype.' },
-  { step: '02', title: 'Identity Collection',  desc: 'User enters their name — seeding the personalized journey.' },
-  { step: '03', title: 'Crossroads',           desc: 'Choose between exploring the platform or running a live calculation.' },
-  { step: '04', title: 'Birth Data Entry',     desc: 'Date, time and geocoded location collected via Nominatim.' },
-  { step: '05', title: 'Ephemeris Calculation',desc: 'Swiss Ephemeris computes dual Tropical + Sidereal charts server-side.' },
-  { step: '06', title: 'Cosmic Blueprint',     desc: 'Infographic overlay rendered and available for PNG download.' },
+const PROLOGUE_STEPS = [
+  { step: '01', title: 'The Celestial Entry', desc: 'Awakening within a 3D WebGL starfield, setting an immersive interstellar tone.' },
+  { step: '02', title: 'Identity Anchoring', desc: 'Auto-formatted full name input establishing personal resonance across the journey.' },
+  { step: '03', title: 'Frictionless Chronology', desc: 'Strict, borderless date and time selectors eliminating invalid birth data.' },
+  { step: '04', title: 'Hierarchical Geocoding', desc: 'Country, State, and City selection with Nominatim backend latitude/longitude resolution.' },
+  { step: '05', title: 'Swiss Ephemeris Engine', desc: 'Server-side computation of geocentric planetary coordinates accurate to <1 arc-second.' },
+  { step: '06', title: 'Psychological Depth Reveal', desc: 'A 9-slide interactive bubble dossier revealing core ego, geometry, and gemstone frequencies.' },
 ]
 
 const ARCH_NODES = [
-  { label: 'Browser', children: ['UniverseCanvas (WebGL)', 'Zustand Store', 'React Router v7'] },
-  { label: 'FastAPI Server', children: ['Ephemeris Engine', 'MBTI Psychometrics', 'Admin & Auth', 'Journey Telemetry'] },
-  { label: 'Data Layer', children: ['MongoDB Atlas (blueprints, visitors)', 'In-Memory Fallback Dict'] },
+  { label: 'Client Space', children: ['UniverseCanvas (R3F Starfield)', 'Interactive Bubble Engine', 'Zustand Telemetry Store'] },
+  { label: 'Server Space', children: ['FastAPI Ephemeris API', 'Swiss Ephemeris v2.10', 'Visitor Journey Telemetry'] },
+  { label: 'Data Space', children: ['MongoDB Atlas Cloud Storage', 'In-Memory State Fallback'] },
 ]
 
 const tabContent = {
   flow: (
-    <div className="space-y-3">
-      {FLOW_STEPS.map((s, i) => (
+    <div className="space-y-4 text-left">
+      {PROLOGUE_STEPS.map((s, i) => (
         <motion.div
           key={s.step}
           variants={fadeUp}
           custom={i}
           initial="hidden"
           animate="visible"
-          className="flex gap-4 items-start p-3 rounded-xl bg-white/5 border border-white/8"
+          className="flex gap-4 items-start"
         >
-          <div className="text-2xl font-black text-[#3858f6]/60 font-mono w-8 shrink-0">{s.step}</div>
-          <div>
-            <div className="text-sm font-bold text-white">{s.title}</div>
-            <div className="text-xs text-white/50 mt-0.5">{s.desc}</div>
+          <div className="text-xl font-light font-mono text-cyan-300/60 w-8 shrink-0">{s.step}</div>
+          <div className="space-y-1">
+            <div className="text-lg font-light text-white tracking-wider">{s.title}</div>
+            <div className="text-sm font-light text-blue-100/75 leading-relaxed">{s.desc}</div>
           </div>
         </motion.div>
       ))}
     </div>
   ),
   tech: (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
       {TECH_STACK.map((t, i) => (
         <motion.div
           key={t.name}
@@ -69,19 +65,19 @@ const tabContent = {
           custom={i * 0.5}
           initial="hidden"
           animate="visible"
-          className="p-3 rounded-xl bg-white/5 border border-white/8 flex items-start gap-2"
+          className="space-y-1"
         >
-          <div className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ background: t.color }} />
-          <div>
-            <div className="text-xs font-bold text-white">{t.name}</div>
-            <div className="text-[10px] text-white/40">{t.role}</div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full shrink-0" style={{ background: t.color, boxShadow: `0 0 10px ${t.color}` }} />
+            <div className="text-base font-light text-white tracking-wider">{t.name}</div>
           </div>
+          <div className="text-xs font-mono text-blue-200/50 pl-4">{t.role}</div>
         </motion.div>
       ))}
     </div>
   ),
   arch: (
-    <div className="space-y-4">
+    <div className="space-y-6 text-left">
       {ARCH_NODES.map((node, i) => (
         <motion.div
           key={node.label}
@@ -89,12 +85,14 @@ const tabContent = {
           custom={i}
           initial="hidden"
           animate="visible"
-          className="p-4 rounded-xl bg-white/5 border border-white/10"
+          className="space-y-2"
         >
-          <div className="text-xs font-bold uppercase tracking-wider text-[#00d2ff] mb-2">{node.label}</div>
+          <div className="text-xs font-mono uppercase tracking-[0.3em] text-cyan-300/80">{node.label}</div>
           <div className="flex flex-wrap gap-2">
             {node.children.map(c => (
-              <span key={c} className="px-2.5 py-0.5 rounded-full bg-[#3858f6]/20 border border-[#3858f6]/30 text-[11px] text-white/75">{c}</span>
+              <span key={c} className="text-xs font-light text-white/90 tracking-wider">
+                • {c}
+              </span>
             ))}
           </div>
         </motion.div>
@@ -102,33 +100,17 @@ const tabContent = {
     </div>
   ),
   about: (
-    <div className="space-y-4 text-center">
-      <motion.div variants={fadeUp} custom={0} initial="hidden" animate="visible">
-        <div className="w-20 h-20 rounded-full mx-auto bg-gradient-to-tr from-[#3858f6] to-[#00d2ff] p-0.5 shadow-lg shadow-[#3858f6]/30">
-          <div className="w-full h-full rounded-full bg-[#050816] flex items-center justify-center text-3xl font-black text-[#00d2ff]">P</div>
-        </div>
+    <div className="space-y-5 text-center max-w-md mx-auto">
+      <motion.div variants={fadeUp} custom={0} initial="hidden" animate="visible" className="space-y-1">
+        <div className="text-2xl font-light text-white tracking-widest drop-shadow-md">Pratham Upadhyay</div>
+        <div className="text-xs font-mono uppercase tracking-[0.3em] text-cyan-300">Creator & Lead Architect</div>
       </motion.div>
-      <motion.div variants={fadeUp} custom={1} initial="hidden" animate="visible" className="space-y-1">
-        <div className="text-xl font-bold text-white tracking-tight">Pratham Upadhyay</div>
-        <div className="text-xs font-mono uppercase tracking-widest text-[#00d2ff]">Full-Stack Cloud Architect & AI Engineer</div>
-      </motion.div>
-      <motion.div variants={fadeUp} custom={2} initial="hidden" animate="visible"
-        className="text-sm text-white/55 leading-relaxed max-w-xs mx-auto">
-        Built Astrologica as a fusion of ancient astronomical wisdom and modern full-stack engineering — marrying Swiss Ephemeris precision, Jungian psychology, and cinematic 3D interfaces into one unified platform.
-      </motion.div>
-      <motion.div variants={fadeUp} custom={3} initial="hidden" animate="visible"
-        className="grid grid-cols-3 gap-3 pt-2">
-        {[
-          { label: 'Stack', value: 'React + FastAPI' },
-          { label: 'Engine', value: 'Swiss Ephemeris' },
-          { label: 'DB', value: 'MongoDB Atlas' },
-        ].map(s => (
-          <div key={s.label} className="p-2 rounded-xl bg-white/5 border border-white/8 text-center">
-            <div className="text-xs font-bold text-white">{s.value}</div>
-            <div className="text-[10px] text-white/40">{s.label}</div>
-          </div>
-        ))}
-      </motion.div>
+      <motion.p
+        variants={fadeUp} custom={1} initial="hidden" animate="visible"
+        className="text-base font-light text-white/85 leading-relaxed italic drop-shadow-md"
+      >
+        "Astrologica was born at the intersection of classical astronomy, Jungian psychological archetypes, and modern high-performance web architecture. It elevates birth chart calculations into an evocative, cinematic journey through self-discovery."
+      </motion.p>
     </div>
   ),
 }
@@ -137,9 +119,9 @@ export default function AboutPanel() {
   const [activeTab, setActiveTab] = useState('flow')
 
   return (
-    <div className="w-full max-w-lg mx-auto p-5 space-y-4">
-      {/* Tab Bar — pure text, no background */}
-      <div className="flex gap-6 justify-center mb-2">
+    <div className="w-full max-w-xl mx-auto p-4 space-y-6">
+      {/* Tab Bar — pure text with glowing active state */}
+      <div className="flex gap-8 justify-center border-b border-blue-200/10 pb-3">
         {TABS.map(t => (
           <button
             key={t.id}
@@ -147,14 +129,15 @@ export default function AboutPanel() {
             style={{
               background: 'none',
               border: 'none',
-              color: activeTab === t.id ? 'rgba(200,220,255,0.95)' : 'rgba(160,200,255,0.3)',
-              fontSize: '10px',
+              color: activeTab === t.id ? '#ffffff' : 'rgba(160,200,255,0.4)',
+              fontSize: '11px',
               letterSpacing: '0.3em',
               textTransform: 'uppercase',
               cursor: 'pointer',
-              padding: '4px 0',
-              borderBottom: activeTab === t.id ? '1px solid rgba(160,200,255,0.4)' : '1px solid transparent',
-              transition: 'all 0.25s',
+              textShadow: activeTab === t.id ? '0 0 12px rgba(0,210,255,0.8)' : 'none',
+              borderBottom: activeTab === t.id ? '1px solid rgba(255,255,255,0.8)' : '1px solid transparent',
+              paddingBottom: '4px',
+              transition: 'all 0.3s',
             }}
           >
             {t.label}
@@ -163,7 +146,7 @@ export default function AboutPanel() {
       </div>
 
       {/* Tab Content */}
-      <div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 pr-1">
+      <div className="max-h-80 overflow-y-auto pr-2 scrollbar-thin">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
