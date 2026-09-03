@@ -5,6 +5,9 @@ import { useAppStore } from '../../store/useAppStore'
 import { CinematicButton, CinematicGhostButton } from './CinematicPrimitives'
 import InteractiveBubble from './InteractiveBubble'
 
+// ─── Defensive String Helper ──────────────────────────────────────────────────
+const safeLower = (val) => String(val || '').toLowerCase()
+
 // ─── Polished SVG Icons (0 Emojis) ───────────────────────────────────────────
 const SunIcon = ({ className = "w-6 h-6" }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -64,20 +67,89 @@ const TimelineIcon = ({ className = "w-6 h-6" }) => (
   </svg>
 )
 
-// ─── Sign Database ────────────────────────────────────────────────────────────
+// ─── Complete Sign Database (Defensive with full properties) ──────────────────
 const SIGN_DATA = {
-  Aries:       { element: 'Fire',  modality: 'Cardinal', ruling: 'Mars/Mangal',    stone: 'Diamond / Red Coral (Moonga)',   vedicGem: 'Red Coral (Moonga)',   metal: 'Copper', day: 'Tuesday' },
-  Taurus:      { element: 'Earth', modality: 'Fixed',    ruling: 'Venus/Shukra',   stone: 'Emerald / Diamond (Hira)',       vedicGem: 'Diamond (Hira)',       metal: 'Silver / White Gold', day: 'Friday' },
-  Gemini:      { element: 'Air',   modality: 'Mutable',  ruling: 'Mercury/Budha', stone: 'Pearl / Emerald (Panna)',       vedicGem: 'Emerald (Panna)',      metal: 'Gold', day: 'Wednesday' },
-  Cancer:      { element: 'Water', modality: 'Cardinal', ruling: 'Moon/Chandra',   stone: 'Ruby / Pearl (Moti)',            vedicGem: 'Natural Pearl (Moti)', metal: 'Silver', day: 'Monday' },
-  Leo:         { element: 'Fire',  modality: 'Fixed',    ruling: 'Sun/Surya',     stone: 'Peridot / Ruby (Manik)',         vedicGem: 'Ruby (Manik)',         metal: 'Gold / Copper', day: 'Sunday' },
-  Virgo:       { element: 'Earth', modality: 'Mutable',  ruling: 'Mercury/Budha', stone: 'Sapphire / Emerald (Panna)',     vedicGem: 'Emerald (Panna)',      metal: 'Gold', day: 'Wednesday' },
-  Libra:       { element: 'Air',   modality: 'Cardinal', ruling: 'Venus/Shukra',   stone: 'Opal / Diamond (Hira)',          vedicGem: 'Diamond (Hira)',       metal: 'Silver', day: 'Friday' },
-  Scorpio:     { element: 'Water', modality: 'Fixed',    ruling: 'Mars/Mangal',    stone: 'Topaz / Red Coral (Moonga)',     vedicGem: 'Red Coral (Moonga)',   metal: 'Copper', day: 'Tuesday' },
-  Sagittarius: { element: 'Fire',  modality: 'Mutable',  ruling: 'Jupiter/Guru',  stone: 'Turquoise / Yellow Sapphire (Pukhraj)', vedicGem: 'Yellow Sapphire (Pukhraj)', metal: 'Gold', day: 'Thursday' },
-  Capricorn:   { element: 'Earth', modality: 'Cardinal', ruling: 'Saturn/Shani',  stone: 'Garnet / Blue Sapphire (Neelam)', vedicGem: 'Blue Sapphire (Neelam)', metal: 'Iron / Steel', day: 'Saturday' },
-  Aquarius:    { element: 'Air',   modality: 'Fixed',    ruling: 'Saturn/Shani',  stone: 'Amethyst / Blue Sapphire (Neelam)', vedicGem: 'Blue Sapphire (Neelam)', metal: 'Iron / Steel', day: 'Saturday' },
-  Pisces:      { element: 'Water', modality: 'Mutable',  ruling: 'Jupiter/Guru',  stone: 'Aquamarine / Yellow Sapphire (Pukhraj)', vedicGem: 'Yellow Sapphire (Pukhraj)', metal: 'Gold', day: 'Thursday' },
+  Aries: {
+    element: 'Fire', modality: 'Cardinal', ruling: 'Mars/Mangal',
+    stone: 'Diamond / Red Coral', vedicGem: 'Red Coral (Moonga)', metal: 'Copper', day: 'Tuesday',
+    domain: 'Pioneering drive, instinctive courage, and direct initiative.',
+    houseFocus: '1st House of Self & Physical Expression'
+  },
+  Taurus: {
+    element: 'Earth', modality: 'Fixed', ruling: 'Venus/Shukra',
+    stone: 'Emerald / Diamond', vedicGem: 'Diamond (Hira)', metal: 'Silver / White Gold', day: 'Friday',
+    domain: 'Resource preservation, sensory elegance, and grounded stability.',
+    houseFocus: '2nd House of Values & Possessions'
+  },
+  Gemini: {
+    element: 'Air', modality: 'Mutable', ruling: 'Mercury/Budha',
+    stone: 'Pearl / Emerald', vedicGem: 'Emerald (Panna)', metal: 'Gold', day: 'Wednesday',
+    domain: 'Quicksilver intellect, dual curiosity, and articulate agility.',
+    houseFocus: '3rd House of Cognition & Local Connections'
+  },
+  Cancer: {
+    element: 'Water', modality: 'Cardinal', ruling: 'Moon/Chandra',
+    stone: 'Ruby / Pearl', vedicGem: 'Natural Pearl (Moti)', metal: 'Silver', day: 'Monday',
+    domain: 'Deep empathic intuition, protective roots, and lunar sensitivity.',
+    houseFocus: '4th House of Home, Roots & Inner Sanctuary'
+  },
+  Leo: {
+    element: 'Fire', modality: 'Fixed', ruling: 'Sun/Surya',
+    stone: 'Peridot / Ruby', vedicGem: 'Ruby (Manik)', metal: 'Gold / Copper', day: 'Sunday',
+    domain: 'Radiant authority, magnetic warmth, and sovereign creative flame.',
+    houseFocus: '5th House of Sovereignty & Creative Creation'
+  },
+  Virgo: {
+    element: 'Earth', modality: 'Mutable', ruling: 'Mercury/Budha',
+    stone: 'Sapphire / Emerald', vedicGem: 'Emerald (Panna)', metal: 'Gold', day: 'Wednesday',
+    domain: 'Analytical mastery, sacred devotion, and bodily harmony.',
+    houseFocus: '6th House of Devotion, Mastery & Wellness'
+  },
+  Libra: {
+    element: 'Air', modality: 'Cardinal', ruling: 'Venus/Shukra',
+    stone: 'Opal / Diamond', vedicGem: 'Diamond (Hira)', metal: 'Silver', day: 'Friday',
+    domain: 'Cosmic harmony, aesthetic justice, and relational diplomacy.',
+    houseFocus: '7th House of Sacred Union & Counterparts'
+  },
+  Scorpio: {
+    element: 'Water', modality: 'Fixed', ruling: 'Mars/Mangal',
+    stone: 'Topaz / Red Coral', vedicGem: 'Red Coral (Moonga)', metal: 'Copper', day: 'Tuesday',
+    domain: 'Transformative depth, alchemical perception, and intense magnetism.',
+    houseFocus: '8th House of Transformation & Shared Mysteries'
+  },
+  Sagittarius: {
+    element: 'Fire', modality: 'Mutable', ruling: 'Jupiter/Guru',
+    stone: 'Turquoise / Yellow Sapphire', vedicGem: 'Yellow Sapphire (Pukhraj)', metal: 'Gold', day: 'Thursday',
+    domain: 'Expansive philosophy, boundless freedom, and truth-seeking arrows.',
+    houseFocus: '9th House of Higher Learning & Worldly Horizons'
+  },
+  Capricorn: {
+    element: 'Earth', modality: 'Cardinal', ruling: 'Saturn/Shani',
+    stone: 'Garnet / Blue Sapphire', vedicGem: 'Blue Sapphire (Neelam)', metal: 'Iron / Steel', day: 'Saturday',
+    domain: 'Architectural ambition, timeless discipline, and mountain resilience.',
+    houseFocus: '10th House of Public Destiny & Master Legacy'
+  },
+  Aquarius: {
+    element: 'Air', modality: 'Fixed', ruling: 'Saturn/Shani',
+    stone: 'Amethyst / Blue Sapphire', vedicGem: 'Blue Sapphire (Neelam)', metal: 'Iron / Steel', day: 'Saturday',
+    domain: 'Visionary innovation, collective ideals, and electric originality.',
+    houseFocus: '11th House of Higher Networks & Universal Ideals'
+  },
+  Pisces: {
+    element: 'Water', modality: 'Mutable', ruling: 'Jupiter/Guru',
+    stone: 'Aquamarine / Yellow Sapphire', vedicGem: 'Yellow Sapphire (Pukhraj)', metal: 'Gold', day: 'Thursday',
+    domain: 'Mystic transcendence, fluid compassion, and oceanic imagination.',
+    houseFocus: '12th House of Cosmic Unity & Transcendent Subconscious'
+  },
+}
+
+const DEFAULT_SIGN_INFO = SIGN_DATA.Aries
+
+function normalizeSign(rawSign) {
+  if (!rawSign || typeof rawSign !== 'string') return 'Aries'
+  const clean = rawSign.trim()
+  const capitalized = clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase()
+  return SIGN_DATA[capitalized] ? capitalized : 'Aries'
 }
 
 const ELEMENT_GLOWS = {
@@ -101,32 +173,36 @@ export default function CinematicReveal() {
   const isVedic = preferredSystem === 'vedic'
   const sysLabel = isVedic ? 'Vedic Sidereal Formula' : 'Western Tropical Formula'
 
-  // Data Extraction
-  let sunSign = 'Aries'
-  let moonSign = 'Aries'
-  let ascSign = 'Aries'
+  // Robust Data Extraction with optional chaining and fallback normalizers
+  let rawSunSign = 'Aries'
+  let rawMoonSign = 'Taurus'
+  let rawAscSign = 'Gemini'
   let nakshatra = 'Ashwini'
   let pada = 'Pada 1'
   let currentDasha = 'Ketu Mahadasha (Karmic Awakening)'
 
   if (isVedic) {
-    sunSign   = astrologyData?.vedic?.surya_rashi?.rashi || 'Aries'
-    moonSign  = astrologyData?.vedic?.chandra_rashi?.rashi || 'Taurus'
-    ascSign   = astrologyData?.vedic?.lagna?.rashi || 'Gemini'
-    nakshatra = astrologyData?.vedic?.chandra_rashi?.nakshatra?.name || 'Rohini'
-    pada      = `Pada ${astrologyData?.vedic?.chandra_rashi?.nakshatra?.pada || 2}`
+    rawSunSign   = astrologyData?.vedic?.surya_rashi?.rashi
+    rawMoonSign  = astrologyData?.vedic?.chandra_rashi?.rashi
+    rawAscSign   = astrologyData?.vedic?.lagna?.rashi
+    nakshatra    = astrologyData?.vedic?.chandra_rashi?.nakshatra?.name || 'Rohini'
+    pada         = `Pada ${astrologyData?.vedic?.chandra_rashi?.nakshatra?.pada || 2}`
   } else {
     const planets = astrologyData?.western?.planets || []
-    sunSign  = planets.find(p => p.id === 'sun')?.sign || 'Aries'
-    moonSign = planets.find(p => p.id === 'moon')?.sign || 'Taurus'
-    ascSign  = astrologyData?.western?.ascendant?.sign || 'Gemini'
+    rawSunSign  = planets.find(p => p?.id === 'sun')?.sign
+    rawMoonSign = planets.find(p => p?.id === 'moon')?.sign
+    rawAscSign  = astrologyData?.western?.ascendant?.sign
   }
 
-  const sunData  = SIGN_DATA[sunSign]  || SIGN_DATA.Aries
-  const moonData = SIGN_DATA[moonSign] || SIGN_DATA.Taurus
-  const ascData  = SIGN_DATA[ascSign]  || SIGN_DATA.Gemini
+  const sunSign  = normalizeSign(rawSunSign)
+  const moonSign = normalizeSign(rawMoonSign)
+  const ascSign  = normalizeSign(rawAscSign)
 
-  const primaryElement = sunData.element
+  const sunData  = SIGN_DATA[sunSign]  || DEFAULT_SIGN_INFO
+  const moonData = SIGN_DATA[moonSign] || DEFAULT_SIGN_INFO
+  const ascData  = SIGN_DATA[ascSign]  || DEFAULT_SIGN_INFO
+
+  const primaryElement = sunData?.element || 'Air'
   const glow = ELEMENT_GLOWS[primaryElement] || ELEMENT_GLOWS.Air
 
   const handleDownload = useCallback(async () => {
@@ -137,7 +213,7 @@ export default function CinematicReveal() {
         backgroundColor: '#050816', scale: 2, useCORS: true, logging: false
       })
       const link = document.createElement('a')
-      link.download = `astrologica-${preferredSystem}-${(userName || 'chart').toLowerCase().replace(/\s+/g, '-')}.png`
+      link.download = `astrologica-${preferredSystem}-${safeLower(userName || 'chart').replace(/\s+/g, '-')}.png`
       link.href = canvas.toDataURL('image/png')
       link.click()
     } catch (e) {
@@ -160,15 +236,15 @@ export default function CinematicReveal() {
           title={`Sun (Identity) · ${sunSign}`}
           subtitle="Solar Core & Ego Direction"
           icon={SunIcon} glowColor={glow} defaultExpanded
-          summary={`Your central identity operates through ${sunData.element.toLowerCase()} drive.`}
-          details={`Sun in ${sunSign} dictates your conscious purpose, core ego drives, and solar vitality. Governed by ${sunData.ruling}, you channel ${sunData.domain.toLowerCase()}`}
+          summary={`Your central identity operates through ${safeLower(sunData.element)} drive.`}
+          details={`Sun in ${sunSign} dictates your conscious purpose, core ego drives, and solar vitality. Governed by ${sunData.ruling}, you channel ${safeLower(sunData.domain)}`}
         />
         <InteractiveBubble
           title={`Moon (Emotions) · ${moonSign}`}
           subtitle="Subconscious Instincts"
           icon={MoonIcon} glowColor={glow}
-          summary={`Emotional needs align with ${moonData.element.toLowerCase()} safety.`}
-          details={`Moon in ${moonSign} rules your subconscious reactions, emotional safety needs, and private self. You process experiences through ${moonData.domain.toLowerCase()}`}
+          summary={`Emotional needs align with ${safeLower(moonData.element)} safety.`}
+          details={`Moon in ${moonSign} rules your subconscious reactions, emotional safety needs, and private self. You process experiences through ${safeLower(moonData.domain)}`}
         />
         <InteractiveBubble
           title={`Ascendant (Rising Sign) · ${ascSign}`}
@@ -194,21 +270,21 @@ export default function CinematicReveal() {
           subtitle="Communication Engine"
           icon={PlanetIcon} glowColor={glow} defaultExpanded
           summary={`Mercury in ${sunSign} channels analytical processing.`}
-          details={`Mercury governs thought patterns, speech, data processing, and decision-making logic. In ${sunSign}, your mind works through ${sunData.domain.toLowerCase()}`}
+          details={`Mercury governs thought patterns, speech, data processing, and decision-making logic. In ${sunSign}, your mind works through ${safeLower(sunData.domain)}`}
         />
         <InteractiveBubble
           title="Venus (Love & Aesthetics)"
           subtitle="Relational Value System"
           icon={PlanetIcon} glowColor={glow}
           summary={`Venus in ${moonSign} dictates relational attraction.`}
-          details={`Venus rules how you bond, express affection, evaluate beauty, and manage financial value. You seek harmony through ${moonData.domain.toLowerCase()}`}
+          details={`Venus rules how you bond, express affection, evaluate beauty, and manage financial value. You seek harmony through ${safeLower(moonData.domain)}`}
         />
         <InteractiveBubble
           title="Mars (Drive & Ambition)"
           subtitle="Executive Willpower"
           icon={PlanetIcon} glowColor={glow}
-          summary={`Mars governs active initiative and drive.`}
-          details={`Mars is your engine of desire, anger management, physical stamina, and competitive instinct. It pushes you to conquer challenges.`}
+          summary="Mars governs active initiative and drive."
+          details="Mars is your engine of desire, anger management, physical stamina, and competitive instinct. It pushes you to conquer challenges."
         />
       </div>
       <div className="flex items-center justify-center gap-6 pt-2">
@@ -270,7 +346,7 @@ export default function CinematicReveal() {
     </div>,
 
     // Slide 5: Element Dominance
-    <div key="s5" className="space-y-6 text-center">
+    <div key="w5" className="space-y-6 text-center">
       <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 5 of 9 · Elemental Expression</div>
       <div className="text-2xl font-light text-white tracking-widest">{primaryElement} Element Dominance</div>
       <div className="space-y-4 max-w-md mx-auto">
@@ -278,8 +354,8 @@ export default function CinematicReveal() {
           title={`${primaryElement} Core Expression`}
           subtitle="Elemental Fuel"
           icon={ElementIcon} glowColor={glow} defaultExpanded
-          summary={`Your primary motivation is fueled by ${primaryElement.toLowerCase()} energy.`}
-          details={`In Western Tropical astrology, ${primaryElement} dominance means your psychological system thrives on ${sunData.domain.toLowerCase()}`}
+          summary={`Your primary motivation is fueled by ${safeLower(primaryElement)} energy.`}
+          details={`In Western Tropical astrology, ${primaryElement} dominance means your psychological system thrives on ${safeLower(sunData.domain)}`}
         />
       </div>
       <div className="flex items-center justify-center gap-6 pt-2">
@@ -297,7 +373,7 @@ export default function CinematicReveal() {
           title={`${sunData.modality} Momentum`}
           subtitle="Action Pattern"
           icon={ModalityIcon} glowColor={glow} defaultExpanded
-          summary={`Operates with ${sunData.modality.toLowerCase()} operational rhythm.`}
+          summary={`Operates with ${safeLower(sunData.modality)} operational rhythm.`}
           details={`${sunData.modality} modality defines how you handle projects: Cardinal initiates new seasons, Fixed preserves foundations, and Mutable adapts effortlessly.`}
         />
       </div>
@@ -374,7 +450,7 @@ export default function CinematicReveal() {
             <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Gemstone</span><span>{sunData.stone}</span></div>
           </div>
           <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.8)', fontStyle: 'italic' }}>
-            "You embody the {sunData.element.toLowerCase()} drive of {sunSign} with {sunData.modality.toLowerCase()} momentum, guided by {sunData.ruling}."
+            "You embody the {safeLower(sunData.element)} drive of {sunSign} with {safeLower(sunData.modality)} momentum, guided by {sunData.ruling}."
           </p>
         </div>
       </div>
@@ -391,7 +467,7 @@ export default function CinematicReveal() {
   ]
 
   // ═════════════════════════════════════════════════════════════════════════════
-  // VEDIC PIPELINE (9 SLIDES WITH MANDATORY ENGLISH MEANINGS IN BRACKETS)
+  // VEDIC PIPELINE (9 SLIDES WITH DEFENSIVE NORMALIZATION)
   // ═════════════════════════════════════════════════════════════════════════════
   const VEDIC_SLIDES = [
     // Slide 1: The Core
@@ -437,7 +513,7 @@ export default function CinematicReveal() {
           subtitle="Executive Temperament"
           icon={PlanetIcon} glowColor={glow} defaultExpanded
           summary={`Lagna Lord (Ascendant Ruler) ${ascData.ruling} guides your life force.`}
-          details={`The placement of your Lagna Lord (Ascendant Ruler) ${ascData.ruling} determines where your life force is invested. In ${ascSign}, it grants ${ascData.domain.toLowerCase()}`}
+          details={`The placement of your Lagna Lord (Ascendant Ruler) ${ascData.ruling} determines where your life force is invested. In ${ascSign}, it grants ${safeLower(ascData.domain)}`}
         />
       </div>
       <div className="flex items-center justify-center gap-6 pt-2">
@@ -567,7 +643,7 @@ export default function CinematicReveal() {
           subtitle="Mind-Body Balance"
           icon={AyurvedaIcon} glowColor={glow} defaultExpanded
           summary={`Your chart reveals strong ${primaryElement === 'Fire' ? 'Pitta (Fiery/Intense)' : primaryElement === 'Earth' || primaryElement === 'Water' ? 'Kapha (Grounded/Nurturing)' : 'Vata (Airy/Restless)'} alignment.`}
-          details={`Prakriti (Ayurvedic Constitution) reflects your innate mind-body blueprint: Pitta (Fiery/Intense) drives digestion & focus, Kapha (Grounded/Nurturing) builds immunity & composure, Vata (Airy/Restless) drives mental creativity & mobility.`}
+          details="Prakriti (Ayurvedic Constitution) reflects your innate mind-body blueprint: Pitta (Fiery/Intense) drives digestion & focus, Kapha (Grounded/Nurturing) builds immunity & composure, Vata (Airy/Restless) drives mental creativity & mobility."
         />
       </div>
       <div className="flex items-center justify-center gap-6 pt-2">
@@ -613,11 +689,11 @@ export default function CinematicReveal() {
           <div style={{ fontSize: '9px', letterSpacing: '0.35em', color: 'rgba(160,200,255,0.4)', textTransform: 'uppercase', marginBottom: '0.4rem' }}>Astrologica · {sysLabel}</div>
           <div style={{ fontSize: '1.5rem', fontWeight: 300, letterSpacing: '0.12em', color: 'white', marginBottom: '1rem' }}>{userName || 'Cosmic Traveller'}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: '1px solid rgba(160,200,255,0.1)', borderBottom: '1px solid rgba(160,200,255,0.1)', padding: '1rem 0', marginBottom: '1rem', fontSize: '12px' }}>
-            <div style={{ display: 'flex', justify: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Lagna (Ascendant)</span><span>{ascSign}</span></div>
-            <div style={{ display: 'flex', justify: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Rashi (Moon Sign)</span><span>{moonSign}</span></div>
-            <div style={{ display: 'flex', justify: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Janma Nakshatra</span><span>{nakshatra} ({pada})</span></div>
-            <div style={{ display: 'flex', justify: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Lagna Lord</span><span>{ascData.ruling}</span></div>
-            <div style={{ display: 'flex', justify: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Ratna (Gemstone)</span><span>{sunData.vedicGem}</span></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Lagna (Ascendant)</span><span>{ascSign}</span></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Rashi (Moon Sign)</span><span>{moonSign}</span></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Janma Nakshatra</span><span>{nakshatra} ({pada})</span></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Lagna Lord</span><span>{ascData.ruling}</span></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Ratna (Gemstone)</span><span>{sunData.vedicGem}</span></div>
           </div>
           <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.8)', fontStyle: 'italic' }}>
             "Your soul path is guided by {nakshatra} Nakshatra ({pada}) with Lagna Lord {ascData.ruling} protecting your Dharma."

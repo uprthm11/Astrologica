@@ -2,18 +2,19 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function InteractiveBubble({
-  title,
-  subtitle,
-  icon: Icon,
-  summary,
-  details,
+  title = '',
+  subtitle = '',
+  icon: Icon = null,
+  summary = '',
+  details = '',
   glowColor = 'rgba(6, 182, 212, 0.6)', // default cyan
   iconColor = 'text-cyan-400',
   defaultExpanded = false,
 }) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
-  const glowFilter = { filter: `drop-shadow(0 0 16px ${glowColor})` }
+  const safeGlowColor = glowColor || 'rgba(6, 182, 212, 0.6)'
+  const glowFilter = { filter: `drop-shadow(0 0 16px ${safeGlowColor})` }
 
   return (
     <motion.div
@@ -35,7 +36,7 @@ export default function InteractiveBubble({
       <motion.div layout="position" className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           {Icon && (
-            <div style={glowFilter} className={`${iconColor} flex-shrink-0`}>
+            <div style={glowFilter} className={`${iconColor || 'text-cyan-400'} flex-shrink-0`}>
               <Icon className="w-6 h-6" />
             </div>
           )}
