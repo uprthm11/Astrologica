@@ -89,3 +89,13 @@ class ContactMessageResponse(BaseModel):
     category: str
     created_at: str
     is_read: bool = False
+
+# --- Visitor Journey Telemetry Models ---
+
+class VisitorJourney(BaseModel):
+    session_id: str = Field(..., description="Unique browser session UUID")
+    name: str = Field(default="Anonymous", max_length=120)
+    action: Optional[str] = Field(default=None, description="Most recent action taken")
+    action_log: Optional[List[str]] = Field(default_factory=list, description="Ordered sequence of user actions")
+    timestamp: Optional[str] = Field(default=None, description="ISO timestamp of the event")
+

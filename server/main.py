@@ -27,6 +27,7 @@ from services.mbti_engine import (
     synthesize_astrology_and_mbti,
 )
 from routers.admin import router as admin_router
+from routers.tracking import router as tracking_router
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -73,6 +74,7 @@ app.add_middleware(
 
 # Mount Admin Router
 app.include_router(admin_router)
+app.include_router(tracking_router)
 
 # --- Core Public Endpoints ---
 

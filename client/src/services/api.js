@@ -102,5 +102,13 @@ export const deleteAdminMessage = async (messageId, token) => {
   return response.data
 }
 
+export const getAdminVisitors = async (token) => {
+  const response = await apiClient.get('/api/admin/visitors', {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+  return response.data
+}
+
+
 export { API_BASE_URL }
 export default apiClient

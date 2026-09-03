@@ -1,262 +1,284 @@
-import React, { useState, useEffect } from 'react'
+import React, { Suspense, lazy, useState, useEffect, useRef } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { saveBlueprint, checkHealth, getPublicConfig } from './services/api'
+import { checkHealth, getPublicConfig, calculateDual } from './services/api'
 import { useAppStore } from './store/useAppStore'
-import Sidebar from './components/layout/Sidebar'
-import Header from './components/layout/Header'
-import BlueprintForm from './components/BlueprintForm'
-import MBTIQuiz from './components/MBTIQuiz'
-import SharedDossier from './components/SharedDossier'
-import AdminLogin from './components/admin/AdminLogin'
-import AdminDashboard from './components/admin/AdminDashboard'
 
-// Quick Status Metrics Row
-function MetricCardsRow() {
+// Lazy-load the heavy Three.js canvas to keep initial paint fast
+const UniverseCanvas = lazy(() => import('./components/canvas/UniverseCanvas'))
+
+// Cinematic route sub-pages (loaded lazily too)
+const SharedDossier    = lazy(() => import('./components/SharedDossier'))
+const AdminLogin       = lazy(() => import('./components/admin/AdminLogin'))
+const AdminDashboard   = lazy(() => import('./components/admin/AdminDashboard'))
+const CinematicChart   = lazy(() => import('./components/cinematic/CinematicChart'))
+const AboutPanel       = lazy(() => import('./components/cinematic/AboutPanel'))
+const BlueprintForm    = lazy(() => import('./components/BlueprintForm'))
+const MBTIQuiz         = lazy(() => import('./components/MBTIQuiz'))
+
+import {
+  GlassPanel,
+  CinematicButton,
+  CinematicGhostButton,
+  CinematicInput,
+  fadeUp,
+  fadeIn,
+} from './components/cinematic/CinematicPrimitives'
+
+// ─── Step 0 — Intro Screen ─────────────────────────────────────────────────
+function IntroStep() {
+  const { advanceStep } = useAppStore()
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6 text-left">
-      <div className="dashboard-card !p-4 flex items-center gap-3.5">
-        <div className="w-10 h-10 rounded-xl bg-[#3858f6]/15 border border-[#3858f6]/30 flex items-center justify-center text-[#00d2ff] font-bold text-lg shrink-0">
-          ✦
-        </div>
-        <div className="min-w-0">
-          <div className="text-[10px] uppercase font-mono font-bold text-[#7b82b8]">
-            Astronomical Engine
-          </div>
-          <div className="text-sm font-bold text-white truncate">Swiss Ephemeris v2.10</div>
-          <div className="text-[10px] font-mono text-[#00d2ff]">Lahiri &bull; Raman &bull; KP</div>
-        </div>
+    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 pointer-events-none">
+      <motion.div
+        variants={fadeIn}
+        custom={0}
+        initial="hidden"
+        animate="visible"
+        className="mb-3 text-[10px] font-mono uppercase tracking-[0.5em] text-white/30"
+      >
+        A cosmic journey awaits
+      </motion.div>
+
+      <motion.h1
+        variants={fadeUp}
+        custom={1}
+        initial="hidden"
+        animate="visible"
+        className="text-[clamp(3rem,10vw,7rem)] font-black tracking-[0.15em] text-transparent bg-clip-text select-none"
+        style={{
+          backgroundImage: 'linear-gradient(90deg, #a8c4ff 0%, #ffffff 40%, #00d2ff 80%, #3858f6 100%)',
+          textShadow: 'none',
+        }}
+      >
+        ASTROLOGICA
+      </motion.h1>
+
+      <motion.p
+        variants={fadeUp}
+        custom={2}
+        initial="hidden"
+        animate="visible"
+        className="mt-4 text-white/40 text-sm font-light tracking-widest"
+      >
+        Developed by{' '}
+        <span className="text-[#00d2ff] font-semibold">Pratham Upadhyay</span>
+      </motion.p>
+
+      <motion.p
+        variants={fadeUp}
+        custom={3}
+        initial="hidden"
+        animate="visible"
+        className="mt-2 text-white/25 text-xs font-mono max-w-xs"
+      >
+        Dual-spectrum ephemeris · Jungian psychometrics · Swiss Ephemeris v2.10
+      </motion.p>
+
+      <div className="mt-12 pointer-events-auto">
+        <CinematicButton onClick={() => advanceStep(1, 'Opened Astrologica')} delay={4}>
+          ✦ Explore the Universe
+        </CinematicButton>
       </div>
 
-      <div className="dashboard-card !p-4 flex items-center gap-3.5">
-        <div className="w-10 h-10 rounded-xl bg-[#00d2ff]/15 border border-[#00d2ff]/30 flex items-center justify-center text-[#00d2ff] font-bold text-lg shrink-0">
-          🧠
-        </div>
-        <div className="min-w-0">
-          <div className="text-[10px] uppercase font-mono font-bold text-[#7b82b8]">
-            Cognitive Stack
-          </div>
-          <div className="text-sm font-bold text-white truncate">Jungian 8-Function Model</div>
-          <div className="text-[10px] font-mono text-[#10b981]">PCI Clarity Bipolar Index</div>
-        </div>
-      </div>
-
-      <div className="dashboard-card !p-4 flex items-center gap-3.5">
-        <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-lg shrink-0">
-          ⚡
-        </div>
-        <div className="min-w-0">
-          <div className="text-[10px] uppercase font-mono font-bold text-[#7b82b8]">
-            Storage & Synthesis
-          </div>
-          <div className="text-sm font-bold text-white truncate">MongoDB Atlas Cloud</div>
-          <div className="text-[10px] font-mono text-[#7b82b8]">Universal JSON Schemas</div>
-        </div>
-      </div>
+      <motion.div
+        variants={fadeIn}
+        custom={5}
+        initial="hidden"
+        animate="visible"
+        className="mt-8 pointer-events-auto"
+      >
+        <button
+          onClick={() => advanceStep(4, 'Skipped to Dashboard')}
+          className="text-[11px] font-mono text-white/20 hover:text-white/50 transition cursor-pointer underline underline-offset-4"
+        >
+          Skip to Dashboard
+        </button>
+      </motion.div>
     </div>
   )
 }
 
-function MainAssessment() {
-  const navigate = useNavigate()
-  const { astrologyData, mbtiData, activeTab, setActiveTab } = useAppStore()
+// ─── Step 1 — Name Input ───────────────────────────────────────────────────
+function NameStep() {
+  const { userName, setUserName, advanceStep } = useAppStore()
+  const [draft, setDraft] = useState(userName)
 
-  const [saving, setSaving] = useState(false)
-  const [saveError, setSaveError] = useState(null)
-
-  const bothCompleted = Boolean(astrologyData && mbtiData)
-
-  const handleGenerateCosmicBlueprint = async () => {
-    if (!bothCompleted) return
-    setSaving(true)
-    setSaveError(null)
-
-    try {
-      const response = await saveBlueprint(astrologyData, mbtiData)
-      const blueprintId = response.id
-      navigate(`/blueprint/${blueprintId}`)
-    } catch (err) {
-      console.error('Save Blueprint Error:', err)
-      setSaveError(
-        err.response?.data?.detail ||
-          'Failed to save blueprint. Ensure the backend API is reachable.'
-      )
-      setSaving(false)
-    }
+  const handleContinue = () => {
+    const name = draft.trim() || 'Cosmic Traveller'
+    setUserName(name)
+    advanceStep(2, `${name} entered their name`)
   }
 
   return (
-    <div className="w-full flex flex-col items-center">
-      {/* Top Metric Cards */}
-      <div className="w-full max-w-5xl">
-        <MetricCardsRow />
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
+      <motion.div variants={fadeUp} custom={0} initial="hidden" animate="visible" className="space-y-2">
+        <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30">Step 1 of 2</div>
+        <h2 className="text-3xl font-bold text-white tracking-wide">What is your name?</h2>
+        <p className="text-sm text-white/35 font-light">Your identity seeds the cosmic blueprint.</p>
+      </motion.div>
 
-      {/* Module View Tabs */}
-      <section className="relative z-10 flex justify-center px-4 my-2 mb-4">
-        <div className="inline-flex p-1 rounded-xl bg-[#101336] border border-[#262a63] backdrop-blur-xl shadow-lg">
-          {/* Astrology Tab */}
-          <button
-            onClick={() => setActiveTab('astrology')}
-            className={`relative px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors duration-200 cursor-pointer flex items-center gap-2 z-10 ${
-              activeTab === 'astrology' ? 'text-white' : 'text-[#7b82b8] hover:text-white'
-            }`}
-          >
-            {activeTab === 'astrology' && (
-              <motion.div
-                layoutId="activeTabPill"
-                className="absolute inset-0 rounded-lg bg-gradient-to-r from-[#3858f6] to-[#00d2ff] shadow-md shadow-[#3858f6]/30 -z-10"
-                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-              />
-            )}
-            <span>✨</span>
-            <span>1. Ephemeris Engine</span>
-            {astrologyData && (
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            )}
-          </button>
+      <CinematicInput
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && handleContinue()}
+        placeholder="Enter your name…"
+        autoFocus
+      />
 
-          {/* Psychology Tab */}
-          <button
-            onClick={() => setActiveTab('psychology')}
-            className={`relative px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors duration-200 cursor-pointer flex items-center gap-2 z-10 ${
-              activeTab === 'psychology' ? 'text-white' : 'text-[#7b82b8] hover:text-white'
-            }`}
-          >
-            {activeTab === 'psychology' && (
-              <motion.div
-                layoutId="activeTabPill"
-                className="absolute inset-0 rounded-lg bg-gradient-to-r from-[#3858f6] to-[#00d2ff] shadow-md shadow-[#3858f6]/30 -z-10"
-                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-              />
-            )}
-            <span>🧠</span>
-            <span>2. Jungian Psychometrics</span>
-            {mbtiData && (
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            )}
-          </button>
-        </div>
-      </section>
-
-      {/* Main Tab Content Display */}
-      <div className="w-full flex-1 flex items-center justify-center py-2">
-        <AnimatePresence mode="wait">
-          {activeTab === 'astrology' ? (
-            <motion.div
-              key="astrology-tab"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.25 }}
-              className="w-full"
-            >
-              <BlueprintForm />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="psychology-tab"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.25 }}
-              className="w-full"
-            >
-              <MBTIQuiz />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {saveError && (
-        <div className="mb-4 px-4 py-2.5 rounded-xl bg-rose-950/60 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-          <span>⚠️</span>
-          <span>{saveError}</span>
-        </div>
-      )}
-
-      {/* --- Executive Synthesis Trigger Action Bar --- */}
-      <AnimatePresence>
-        {bothCompleted && (
-          <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.96 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-            className="w-full max-w-2xl px-4 pt-4 pb-8"
-          >
-            <div className="dashboard-card p-5 flex flex-col sm:flex-row items-center justify-between gap-4 border-[#3858f6]/50 shadow-xl shadow-[#3858f6]/10">
-              <div className="text-left">
-                <div className="text-xs font-bold uppercase font-mono tracking-wider text-[#00d2ff]">
-                  Assessments Complete
-                </div>
-                <div className="text-sm font-bold text-white mt-0.5">
-                  Synthesize Astrology & Jungian Cognitive Dossier
-                </div>
-              </div>
-
-              <motion.button
-                onClick={handleGenerateCosmicBlueprint}
-                disabled={saving}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="btn-primary w-full sm:w-auto shrink-0 !py-3.5 !px-6"
-              >
-                {saving ? (
-                  <>
-                    <svg
-                      className="animate-spin h-4 w-4 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v8H4z"
-                      />
-                    </svg>
-                    <span>Synthesizing Dossier...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>✦</span>
-                    <span>Generate Complete Dossier</span>
-                  </>
-                )}
-              </motion.button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <CinematicButton onClick={handleContinue} delay={2}>
+        Continue →
+      </CinematicButton>
     </div>
   )
 }
 
-export default function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { setBackendStatus, setBackendReady, setSiteConfig } = useAppStore()
+// ─── Step 2 — Crossroads ──────────────────────────────────────────────────
+function CrossroadsStep() {
+  const { userName, advanceStep, adminToken } = useAppStore()
+  const navigate = useNavigate()
+  const isAdmin = userName.toLowerCase() === 'admin'
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
+      <motion.div variants={fadeUp} custom={0} initial="hidden" animate="visible" className="space-y-2">
+        <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30">
+          Welcome, {userName}
+        </div>
+        <h2 className="text-4xl font-bold text-white tracking-wide">Choose your path</h2>
+        <p className="text-sm text-white/35">Two doors. Only you know which calls to you.</p>
+      </motion.div>
+
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md">
+        <CinematicGhostButton
+          onClick={() => advanceStep(3, `${userName} chose About Website`)}
+          delay={1}
+          className="w-full sm:w-auto"
+        >
+          🔭 Explore the Platform
+        </CinematicGhostButton>
+
+        <CinematicButton
+          onClick={() => advanceStep(4, `${userName} chose Astrologica Journey`)}
+          delay={2}
+          className="w-full sm:w-auto"
+        >
+          ✦ Calculate My Blueprint
+        </CinematicButton>
+      </div>
+
+      {/* Admin Trap — visible only when name is 'admin' */}
+      {isAdmin && (
+        <motion.div variants={fadeUp} custom={3} initial="hidden" animate="visible">
+          <button
+            onClick={() => {
+              advanceStep(99, 'Admin accessed dashboard')
+              navigate(adminToken ? '/admin/dashboard' : '/admin')
+            }}
+            className="text-xs font-mono text-[#00d2ff] hover:text-white transition cursor-pointer border border-[#00d2ff]/30 px-4 py-2 rounded-xl bg-[#00d2ff]/5 hover:bg-[#00d2ff]/10"
+          >
+            🔐 Explore Admin Console
+          </button>
+        </motion.div>
+      )}
+    </div>
+  )
+}
+
+// ─── Step 3 — About / Platform Info ──────────────────────────────────────
+function AboutStep() {
+  const { advanceStep } = useAppStore()
+  return (
+    <div className="flex flex-col items-center justify-start min-h-screen px-4 py-16 gap-6">
+      <motion.div variants={fadeUp} custom={0} initial="hidden" animate="visible" className="text-center space-y-2">
+        <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30">Platform Intelligence</div>
+        <h2 className="text-3xl font-bold text-white">Astrologica</h2>
+      </motion.div>
+
+      <Suspense fallback={null}>
+        <AboutPanel />
+      </Suspense>
+
+      <div className="flex gap-4 pt-4">
+        <CinematicGhostButton onClick={() => advanceStep(2, 'Returned to Crossroads from About')} delay={0}>
+          ← Back
+        </CinematicGhostButton>
+        <CinematicButton onClick={() => advanceStep(4, 'Navigated from About to Blueprint')} delay={1}>
+          Calculate Blueprint →
+        </CinematicButton>
+      </div>
+    </div>
+  )
+}
+
+// ─── Step 4 — Astrologica Form (full dashboard) ───────────────────────────
+function AstrologicaStep() {
+  const { advanceStep, setAstrologyData, userName } = useAppStore()
+  const navigate = useNavigate()
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      {/* Minimal cinematic header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 backdrop-blur-md bg-black/20">
+        <div className="text-sm font-bold tracking-wider text-white/80">✦ ASTROLOGICA</div>
+        <button
+          onClick={() => advanceStep(2, `${userName} returned to Crossroads`)}
+          className="text-xs font-mono text-white/40 hover:text-white cursor-pointer transition"
+        >
+          ← Crossroads
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 sm:p-8">
+        <motion.div variants={fadeUp} custom={0} initial="hidden" animate="visible"
+          className="text-center space-y-1 mb-8">
+          <h2 className="text-2xl font-bold text-white">Birth Ephemeris Calculation</h2>
+          <p className="text-sm text-white/40">Enter your birth details to generate your dual cosmic blueprint.</p>
+        </motion.div>
+
+        <Suspense fallback={
+          <div className="text-center text-white/40 py-12 animate-pulse">Loading calculation engine...</div>
+        }>
+          <BlueprintForm
+            onComplete={(data) => {
+              setAstrologyData(data)
+              advanceStep(5, `${userName} generated ephemeris chart`)
+            }}
+          />
+        </Suspense>
+      </div>
+    </div>
+  )
+}
+
+// ─── Step 5 — Cinematic Chart ─────────────────────────────────────────────
+function ChartStep() {
+  return (
+    <div className="flex flex-col min-h-screen items-center justify-start py-8 px-4">
+      <motion.div variants={fadeUp} custom={0} initial="hidden" animate="visible"
+        className="text-center space-y-1 mb-6">
+        <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/30">Your Cosmic Blueprint</div>
+        <h2 className="text-2xl font-bold text-white">Stellar Dossier</h2>
+      </motion.div>
+      <Suspense fallback={null}>
+        <CinematicChart />
+      </Suspense>
+    </div>
+  )
+}
+
+// ─── Main Cinematic Root ──────────────────────────────────────────────────
+function CinematicRoot() {
+  const { cinematicStep, setBackendStatus, setBackendReady, setSiteConfig } = useAppStore()
 
   const checkServer = async (attempt = 0) => {
     try {
-      if (attempt > 0) {
-        setBackendStatus({ state: 'waking', retries: attempt })
-      } else {
-        setBackendStatus({ state: 'checking', retries: 0 })
-      }
+      if (attempt > 0) setBackendStatus({ state: 'waking', retries: attempt })
+      else setBackendStatus({ state: 'checking', retries: 0 })
       await checkHealth(60000)
       setBackendStatus({ state: 'online', retries: 0 })
       setBackendReady(true)
     } catch (err) {
-      console.warn(`Health check attempt ${attempt + 1} failed:`, err.message)
       if (attempt < 5) {
         setBackendStatus({ state: 'waking', retries: attempt + 1 })
         setTimeout(() => checkServer(attempt + 1), 6000)
@@ -267,52 +289,78 @@ export default function App() {
     }
   }
 
-  // Cold-Start Pre-warming & Initial Site Configuration Fetch
   useEffect(() => {
     checkServer(0)
-
-    // Fire-and-forget public config fetch to display any active site announcements
     getPublicConfig()
-      .then((cfg) => {
-        if (cfg) setSiteConfig(cfg)
-      })
-      .catch((err) => console.log('Public config notice:', err.message))
+      .then(cfg => { if (cfg) setSiteConfig(cfg) })
+      .catch(() => {})
   }, [])
 
+  const STEPS = [
+    <IntroStep />,
+    <NameStep />,
+    <CrossroadsStep />,
+    <AboutStep />,
+    <AstrologicaStep />,
+    <ChartStep />,
+  ]
+
+  const current = STEPS[Math.min(cinematicStep, STEPS.length - 1)]
+
+  return (
+    <div className="relative min-h-screen text-white overflow-x-hidden">
+      {/* Full-screen star field — always behind everything */}
+      <Suspense fallback={
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 0,
+          background: 'radial-gradient(ellipse at 50% 40%, #0a0d2e 0%, #020308 100%)',
+        }} />
+      }>
+        <UniverseCanvas />
+      </Suspense>
+
+      {/* Cinematic step overlay */}
+      <div className="relative z-10">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`step-${cinematicStep}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.7 } }}
+            exit={{ opacity: 0, transition: { duration: 0.4 } }}
+          >
+            {current}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
+
+// ─── App Root with Router ─────────────────────────────────────────────────
+export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-[#0b0e29] text-[#e2e8f0] flex">
-        {/* Left Fixed Sidebar Navigation */}
-        <Sidebar
-          isOpen={sidebarOpen}
-          setIsOpen={setSidebarOpen}
-        />
+      <Routes>
+        {/* Cinematic entry — handles all journey steps 0-5 */}
+        <Route path="/" element={<CinematicRoot />} />
 
-        {/* Main Content Workspace Wrapper */}
-        <div className="flex-1 lg:pl-64 flex flex-col min-h-screen w-full">
-          {/* Top Executive Header */}
-          <Header
-            onRetryHealth={() => checkServer(0)}
-            onOpenSidebar={() => setSidebarOpen(true)}
-          />
+        {/* Saved blueprint dossier page */}
+        <Route path="/blueprint/:id" element={
+          <Suspense fallback={null}><SharedDossier /></Suspense>
+        } />
 
-          {/* Dynamic Route View */}
-          <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full">
-            <Routes>
-              <Route path="/" element={<MainAssessment />} />
-              <Route path="/blueprint/:id" element={<SharedDossier />} />
-              <Route path="/admin" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            </Routes>
-          </main>
-
-          {/* Footer Bar */}
-          <footer className="w-full max-w-6xl mx-auto px-6 py-5 border-t border-[#262a63] text-center text-xs text-[#7b82b8] flex flex-col sm:flex-row items-center justify-between gap-2 font-mono">
-            <div>Astrologica &bull; Enterprise Ephemeris & Jungian Intelligence</div>
-            <div className="text-[#6b729f]">FastAPI &bull; React 19 &bull; Swiss Ephemeris v2.10</div>
-          </footer>
-        </div>
-      </div>
+        {/* Admin routes */}
+        <Route path="/admin" element={
+          <div className="min-h-screen bg-[#0b0e29] flex items-center justify-center p-6">
+            <Suspense fallback={null}><AdminLogin /></Suspense>
+          </div>
+        } />
+        <Route path="/admin/dashboard" element={
+          <div className="min-h-screen bg-[#0b0e29] p-6 sm:p-8">
+            <Suspense fallback={null}><AdminDashboard /></Suspense>
+          </div>
+        } />
+      </Routes>
     </BrowserRouter>
   )
 }
