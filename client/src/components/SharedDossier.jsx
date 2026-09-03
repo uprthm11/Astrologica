@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import axios from 'axios'
-import API_BASE_URL from '../config/api'
+import { getBlueprint, API_BASE_URL } from '../services/api'
 import DualAstroView from './DualAstroView'
 import ClarityBars from './ClarityBars'
 import CognitiveStack from './CognitiveStack'
@@ -35,8 +34,8 @@ export default function SharedDossier() {
       setLoading(true)
       setError(null)
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/blueprint/${id}`)
-        setData(response.data)
+        const responseData = await getBlueprint(id)
+        setData(responseData)
       } catch (err) {
         console.error('Fetch Error:', err)
         setError(

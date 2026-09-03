@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import axios from 'axios'
-import API_BASE_URL from '../config/api'
+import { getMbtiQuestions, evaluateMbti, API_BASE_URL } from '../services/api'
 import ClarityBars from './ClarityBars'
 import CognitiveStack from './CognitiveStack'
 
@@ -220,9 +219,9 @@ export default function MBTIQuiz({ onComplete, completedData }) {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/api/mbti/questions`, { timeout: 3000 })
-        if (res.data && res.data.questions && res.data.questions.length === 24) {
-          setQuestions(res.data.questions)
+        const data = await getMbtiQuestions()
+        if (data && data.questions && data.questions.length === 24) {
+          setQuestions(data.questions)
         }
       } catch (err) {
         console.log('Using local questions bank fallback.')
@@ -251,12 +250,10 @@ export default function MBTIQuiz({ onComplete, completedData }) {
         setLoading(true)
         setError(null)
         try {
-          const response = await axios.post(`${API_BASE_URL}/api/mbti/evaluate`, {
-            responses: updatedAnswers
-          })
-          setResult(response.data)
+          const data = await evaluateMbti(updatedAnswers)
+          setResult(data)
           if (onComplete) {
-            onComplete(response.data)
+            onComplete(data)
           }
         } catch (err) {
           console.error('MBTI Evaluation Error:', err)

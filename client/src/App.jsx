@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import axios from 'axios'
-import API_BASE_URL from './config/api'
+import { saveBlueprint, checkHealth, API_BASE_URL } from './services/api'
 import BlueprintForm from './components/BlueprintForm'
 import MBTIQuiz from './components/MBTIQuiz'
 import SharedDossier from './components/SharedDossier'
@@ -26,15 +25,8 @@ function MainAssessment() {
     setSaveError(null)
 
     try {
-      const payload = {
-        astrology: astrologyData,
-        mbti: mbtiData
-      }
-      const response = await axios.post(
-        `${API_BASE_URL}/api/save-blueprint`,
-        payload
-      )
-      const blueprintId = response.data.id
+      const response = await saveBlueprint(astrologyData, mbtiData)
+      const blueprintId = response.id
       navigate(`/blueprint/${blueprintId}`)
     } catch (err) {
       console.error('Save Blueprint Error:', err)
@@ -210,7 +202,7 @@ export default function App() {
         setBackendStatus({ state: 'checking', retries: 0 })
       }
       // 60s timeout to allow Render free tier cold start (~30-50s)
-      await axios.get(`${API_BASE_URL}/api/health`, { timeout: 60000 })
+      await checkHealth(60000)
       setBackendStatus({ state: 'online', retries: 0 })
     } catch (err) {
       console.warn(`Health check attempt ${attempt + 1} failed:`, err.message)
