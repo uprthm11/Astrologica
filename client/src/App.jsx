@@ -387,7 +387,7 @@ function PathSelectionStep() {
               </CinematicButton>
 
               <CinematicGhostButton onClick={() => handleSelectSystem('western')}>
-                Start Western Cosmic Journey
+                Start Psychological Depth
               </CinematicGhostButton>
             </div>
 

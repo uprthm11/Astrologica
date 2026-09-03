@@ -171,7 +171,7 @@ export default function CinematicReveal() {
   const chartRef = useRef(null)
 
   const isVedic = preferredSystem === 'vedic'
-  const sysLabel = isVedic ? 'Vedic Sidereal Formula' : 'Western Tropical Formula'
+  const sysLabel = isVedic ? 'Vedic Sidereal Formula' : 'Psychological Depth'
 
   // Robust Data Extraction with optional chaining and fallback normalizers
   let rawSunSign = 'Aries'
@@ -224,34 +224,34 @@ export default function CinematicReveal() {
   }, [userName, preferredSystem])
 
   // ═════════════════════════════════════════════════════════════════════════════
-  // WESTERN PIPELINE (9 SLIDES)
+  // PSYCHOLOGICAL DEPTH PIPELINE (9 SLIDES)
   // ═════════════════════════════════════════════════════════════════════════════
   const WESTERN_SLIDES = [
-    // Slide 1: The Core
+    // Slide 1: Foundation (The Big Three)
     <div key="w1" className="space-y-6 text-center">
-      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 1 of 9 · Western Core Triad</div>
+      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 1 of 9 · Foundation (The Big Three)</div>
       <div className="text-2xl font-light text-white tracking-widest">Core Psychological Archetype</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
-          title={`Sun (Identity) · ${sunSign}`}
+          title={`Sun (Core Identity) · ${sunSign}`}
           subtitle="Solar Core & Ego Direction"
           icon={SunIcon} glowColor={glow} defaultExpanded
-          summary={`Your central identity operates through ${safeLower(sunData.element)} drive.`}
-          details={`Sun in ${sunSign} dictates your conscious purpose, core ego drives, and solar vitality. Governed by ${sunData.ruling}, you channel ${safeLower(sunData.domain)}`}
+          summary="Requires birth date. Governs ego, life purpose, and conscious will."
+          details={`Requires birth date. Governs ego, life purpose, and conscious will. In ${sunSign}, you channel ${safeLower(sunData.domain)}`}
         />
         <InteractiveBubble
-          title={`Moon (Emotions) · ${moonSign}`}
+          title={`Moon (Emotional Nature) · ${moonSign}`}
           subtitle="Subconscious Instincts"
           icon={MoonIcon} glowColor={glow}
-          summary={`Emotional needs align with ${safeLower(moonData.element)} safety.`}
-          details={`Moon in ${moonSign} rules your subconscious reactions, emotional safety needs, and private self. You process experiences through ${safeLower(moonData.domain)}`}
+          summary="Requires exact time & location. Governs instincts, subconscious patterns, and inner comfort."
+          details={`Requires exact time & location. Governs instincts, subconscious patterns, and inner comfort. In ${moonSign}, you seek emotional safety through ${safeLower(moonData.domain)}`}
         />
         <InteractiveBubble
-          title={`Ascendant (Rising Sign) · ${ascSign}`}
+          title={`Ascendant (Rising) · ${ascSign}`}
           subtitle="Outer Persona & First Impression"
           icon={AscendantIcon} glowColor={glow}
-          summary={`Your environmental lens is shaped by ${ascSign}.`}
-          details={`Rising Sign ${ascSign} determines your physical presence, initial approach to strangers, and the 1st House filter through which you meet the world.`}
+          summary="Requires exact lat/lon. Governs outward persona, first impressions, and physical appearance tendencies."
+          details={`Requires exact lat/lon. Governs outward persona, first impressions, and physical appearance tendencies. Anchored in ${ascSign}.`}
         />
       </div>
       <div className="flex items-center justify-center gap-6 pt-2">
@@ -260,31 +260,31 @@ export default function CinematicReveal() {
       </div>
     </div>,
 
-    // Slide 2: Planetary Placements
+    // Slide 2: Inner Planetary Placements
     <div key="w2" className="space-y-6 text-center">
-      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 2 of 9 · Planetary Domains</div>
-      <div className="text-2xl font-light text-white tracking-widest">Psychological Domains</div>
+      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 2 of 9 · Inner Planetary Placements</div>
+      <div className="text-2xl font-light text-white tracking-widest">Cognitive & Relational Engines</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
-          title="Mercury (Cognition & Intellect)"
-          subtitle="Communication Engine"
+          title={`Mercury (Cognition & Intellect) · ${sunSign}`}
+          subtitle="Communication & Logic"
           icon={PlanetIcon} glowColor={glow} defaultExpanded
-          summary={`Mercury in ${sunSign} channels analytical processing.`}
-          details={`Mercury governs thought patterns, speech, data processing, and decision-making logic. In ${sunSign}, your mind works through ${safeLower(sunData.domain)}`}
+          summary="Domain: Communication, intellect, learning, logic."
+          details={`Mercury governs thought patterns, speech, data processing, and decision-making logic. In ${sunSign}, your mind processes through ${safeLower(sunData.domain)}`}
         />
         <InteractiveBubble
-          title="Venus (Love & Aesthetics)"
-          subtitle="Relational Value System"
+          title={`Venus (Love & Aesthetics) · ${moonSign}`}
+          subtitle="Relational Values"
           icon={PlanetIcon} glowColor={glow}
-          summary={`Venus in ${moonSign} dictates relational attraction.`}
-          details={`Venus rules how you bond, express affection, evaluate beauty, and manage financial value. You seek harmony through ${safeLower(moonData.domain)}`}
+          summary="Domain: Love, aesthetics, values, harmony."
+          details={`Venus rules how you bond, express affection, evaluate beauty, and manage financial value. In ${moonSign}, you seek relational harmony through ${safeLower(moonData.domain)}`}
         />
         <InteractiveBubble
           title="Mars (Drive & Ambition)"
           subtitle="Executive Willpower"
           icon={PlanetIcon} glowColor={glow}
-          summary="Mars governs active initiative and drive."
-          details="Mars is your engine of desire, anger management, physical stamina, and competitive instinct. It pushes you to conquer challenges."
+          summary="Domain: Drive, assertiveness, courage, conflict style."
+          details="Mars is your engine of desire, anger management, physical stamina, and competitive instinct. It defines your conflict style and active courage."
         />
       </div>
       <div className="flex items-center justify-center gap-6 pt-2">
@@ -293,24 +293,24 @@ export default function CinematicReveal() {
       </div>
     </div>,
 
-    // Slide 3: House System
+    // Slide 3: Outer Planetary Expansion
     <div key="w3" className="space-y-6 text-center">
-      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 3 of 9 · Placidus Houses</div>
-      <div className="text-2xl font-light text-white tracking-widest">Life Area Focus</div>
+      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 3 of 9 · Outer Planetary Expansion</div>
+      <div className="text-2xl font-light text-white tracking-widest">Transpersonal Horizons</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
-          title="1st House (Self & Temperament)"
-          subtitle="Ascendant Domain"
-          icon={HouseIcon} glowColor={glow} defaultExpanded
-          summary={`Anchored by ${ascSign} energy.`}
-          details={`The 1st House rules body chemistry, self-image, and primary life direction. ${ascData.houseFocus} forms your foundational anchor.`}
+          title="Jupiter & Saturn (Growth vs. Structure)"
+          subtitle="Social & Karmic Expansion"
+          icon={PlanetIcon} glowColor={glow} defaultExpanded
+          summary="Jupiter (Growth, optimism, abundance) and Saturn (Discipline, structure, limitation)."
+          details="Jupiter expands your philosophy, optimism, and fortune. Saturn enforces discipline, structure, boundary setting, and mature responsibility through time."
         />
         <InteractiveBubble
-          title="10th House (Midheaven - Career & Public Legacy)"
-          subtitle="Master Achievement"
-          icon={HouseIcon} glowColor={glow}
-          summary="Governs public reputation and vocational mastery."
-          details="The Midheaven (MC) dictates your highest career zenith, authority in society, and the lasting legacy you build over decades."
+          title="Uranus, Neptune & Pluto (Transpersonal Shift)"
+          subtitle="Generational Transformation"
+          icon={PlanetIcon} glowColor={glow}
+          summary="Uranus (Innovation), Neptune (Imagination, spirituality), Pluto (Transformation, depth, rebirth)."
+          details="Uranus breaks outdated paradigms with electric innovation. Neptune dissolves boundaries into imagination and spirituality. Pluto drives total psychological rebirth and deep transformation."
         />
       </div>
       <div className="flex items-center justify-center gap-6 pt-2">
@@ -319,24 +319,31 @@ export default function CinematicReveal() {
       </div>
     </div>,
 
-    // Slide 4: Aspects
+    // Slide 4: Astrological Aspects
     <div key="w4" className="space-y-6 text-center">
-      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 4 of 9 · Planetary Geometry</div>
-      <div className="text-2xl font-light text-white tracking-widest">Aspect Dynamics</div>
+      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 4 of 9 · Astrological Aspects (Geometry)</div>
+      <div className="text-2xl font-light text-white tracking-widest">Planetary Aspects & Clusters</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
-          title="Trines & Sextiles (Harmonious Flow)"
-          subtitle="Natural Talents"
+          title="Harmonious Aspects (Flow)"
+          subtitle="0°, 60°, 120° Geometry"
           icon={ModalityIcon} glowColor={glow} defaultExpanded
-          summary="120° and 60° geometric alignments create effortless talent."
-          details="Trines link planets of the same element, generating innate gifts, creative synchronicity, and smooth energetic cooperation."
+          summary="Conjunction (0° - Fusion/Intensified), Sextile (60° - Easy talent), Trine (120° - Natural flow/ease)."
+          details="Harmonious aspects link planetary energies in smooth elemental cooperation, generating effortless talent, creative synchronicity, and internal alignment."
         />
         <InteractiveBubble
-          title="Squares & Oppositions (Frictional Momentum)"
-          subtitle="Catalysts for Growth"
+          title="Frictional Aspects (Catalysts)"
+          subtitle="90°, 180° Geometry"
           icon={ModalityIcon} glowColor={glow}
-          summary="90° and 180° geometry generates internal drive and tension."
-          details="Squares demand resolution through effort, transforming psychological friction into breakthrough ambition and character resilience."
+          summary="Square (90° - Tension/Growth edge), Opposition (180° - Polarity/Balance-seeking)."
+          details="Frictional geometry generates constructive tension. Squares challenge you to build resilience, while Oppositions push you to seek balance between opposing life polarities."
+        />
+        <InteractiveBubble
+          title="Stellium Clusters (Dominant Themes)"
+          subtitle="Concentrated Energy"
+          icon={ModalityIcon} glowColor={glow}
+          summary="3+ planets in one sign/house create a dominant personality theme."
+          details="A Stellium concentrates intense focus into a single zodiac sign or house, making that life domain the central focal point of your psychological journey."
         />
       </div>
       <div className="flex items-center justify-center gap-6 pt-2">
@@ -345,17 +352,31 @@ export default function CinematicReveal() {
       </div>
     </div>,
 
-    // Slide 5: Element Dominance
+    // Slide 5: Elemental Balance
     <div key="w5" className="space-y-6 text-center">
-      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 5 of 9 · Elemental Expression</div>
-      <div className="text-2xl font-light text-white tracking-widest">{primaryElement} Element Dominance</div>
+      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 5 of 9 · Elemental Balance</div>
+      <div className="text-2xl font-light text-white tracking-widest">{primaryElement} Element Alignment</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
-          title={`${primaryElement} Core Expression`}
-          subtitle="Elemental Fuel"
+          title="Fire & Earth (Passionate Realism)"
+          subtitle="Initiative & Stability"
           icon={ElementIcon} glowColor={glow} defaultExpanded
-          summary={`Your primary motivation is fueled by ${safeLower(primaryElement)} energy.`}
-          details={`In Western Tropical astrology, ${primaryElement} dominance means your psychological system thrives on ${safeLower(sunData.domain)}`}
+          summary="Fire (Aries, Leo, Sag: Initiative, passion) and Earth (Taurus, Virgo, Cap: Practicality, stability)."
+          details="Fire supplies spontaneous motivation, vision, and creative energy. Earth provides practical execution, material stability, and physical endurance."
+        />
+        <InteractiveBubble
+          title="Air & Water (Intellectual Emotion)"
+          subtitle="Cognition & Intuition"
+          icon={ElementIcon} glowColor={glow}
+          summary="Air (Gemini, Libra, Aqua: Intellect, social) and Water (Cancer, Scorpio, Pisces: Emotion, intuition)."
+          details="Air processes abstract concepts, social connection, and objective logic. Water provides deep emotional bonding, empathetic intuition, and subconscious memory."
+        />
+        <InteractiveBubble
+          title="Elemental Synthesis & Life Lessons"
+          subtitle="Chart Balance Analysis"
+          icon={ElementIcon} glowColor={glow}
+          summary="Fire-heavy creates drive, Water-heavy creates intuition, missing elements represent life lessons."
+          details="Your chart's elemental ratio shows where your energy naturally flows. A Fire-heavy chart creates raw drive, Water-heavy creates deep intuition, while missing elements highlight key life development areas."
         />
       </div>
       <div className="flex items-center justify-center gap-6 pt-2">
@@ -364,17 +385,31 @@ export default function CinematicReveal() {
       </div>
     </div>,
 
-    // Slide 6: Modality
+    // Slide 6: Modality (Style of Expression)
     <div key="w6" className="space-y-6 text-center">
-      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 6 of 9 · Dynamic Modality</div>
-      <div className="text-2xl font-light text-white tracking-widest">{sunData.modality} Quality</div>
+      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 6 of 9 · Modality (Style of Expression)</div>
+      <div className="text-2xl font-light text-white tracking-widest">{sunData.modality} Operational Mode</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
-          title={`${sunData.modality} Momentum`}
-          subtitle="Action Pattern"
+          title="Cardinal (Initiator)"
+          subtitle="Action Spark"
           icon={ModalityIcon} glowColor={glow} defaultExpanded
-          summary={`Operates with ${safeLower(sunData.modality)} operational rhythm.`}
-          details={`${sunData.modality} modality defines how you handle projects: Cardinal initiates new seasons, Fixed preserves foundations, and Mutable adapts effortlessly.`}
+          summary="Initiating momentum, sparking new seasons."
+          details="Cardinal modality (Aries, Cancer, Libra, Capricorn) equips you as a pioneer. You spark new projects, take directional initiative, and lead with active impulse."
+        />
+        <InteractiveBubble
+          title="Fixed (Sustainer)"
+          subtitle="Foundational Focus"
+          icon={ModalityIcon} glowColor={glow}
+          summary="Preserving foundations, building unshakeable concentration."
+          details="Fixed modality (Taurus, Leo, Scorpio, Aquarius) endows you with endurance. You sustain momentum, safeguard foundations, and maintain deep concentration."
+        />
+        <InteractiveBubble
+          title="Mutable (Adapter)"
+          subtitle="Fluid Synthesis"
+          icon={ModalityIcon} glowColor={glow}
+          summary="Adapting to changing tides, synthesizing opposing forces."
+          details="Mutable modality (Gemini, Virgo, Sagittarius, Pisces) empowers you as a flexible adapter. You synthesize complex information and navigate changing environments."
         />
       </div>
       <div className="flex items-center justify-center gap-6 pt-2">
@@ -383,29 +418,25 @@ export default function CinematicReveal() {
       </div>
     </div>,
 
-    // Slide 7: Element/Modality Tally
+    // Slide 7: The Calculation Engine (Behind the Scenes)
     <div key="w7" className="space-y-6 text-center">
-      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 7 of 9 · Chart Balance</div>
-      <div className="text-2xl font-light text-white tracking-widest">Chart Composition</div>
-      <div className="p-6 rounded-2xl bg-white/[0.02] border border-blue-200/10 max-w-md mx-auto space-y-4">
-        <div className="grid grid-cols-2 gap-4 text-xs font-mono text-left">
-          <div className="p-3 rounded-lg bg-white/5 space-y-1">
-            <div className="text-blue-200/40 uppercase">Sun Element</div>
-            <div className="text-white font-bold">{sunData.element}</div>
-          </div>
-          <div className="p-3 rounded-lg bg-white/5 space-y-1">
-            <div className="text-blue-200/40 uppercase">Moon Element</div>
-            <div className="text-white font-bold">{moonData.element}</div>
-          </div>
-          <div className="p-3 rounded-lg bg-white/5 space-y-1">
-            <div className="text-blue-200/40 uppercase">Rising Element</div>
-            <div className="text-white font-bold">{ascData.element}</div>
-          </div>
-          <div className="p-3 rounded-lg bg-white/5 space-y-1">
-            <div className="text-blue-200/40 uppercase">Sun Modality</div>
-            <div className="text-white font-bold">{sunData.modality}</div>
-          </div>
-        </div>
+      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 7 of 9 · The Calculation Engine</div>
+      <div className="text-2xl font-light text-white tracking-widest">Behind the Scenes Precision</div>
+      <div className="space-y-4 max-w-md mx-auto">
+        <InteractiveBubble
+          title="Stage 1 & 2: UT Time & Swiss Ephemeris"
+          subtitle="Sub-Arcsecond Precision"
+          icon={TimelineIcon} glowColor={glow} defaultExpanded
+          summary="Local time converted to Universal Time (UT), generating planetary positions via Swiss Ephemeris (<1 arc-second precision)."
+          details="Your local birth time is converted to Universal Time (UT). Swiss Ephemeris algorithms then compute exact geocentric planetary coordinates accurate to within less than 1 arc-second."
+        />
+        <InteractiveBubble
+          title="Stage 3 & 4: LST Sidereal Time & House Cusps"
+          subtitle="Placidus & Koch Geometry"
+          icon={HouseIcon} glowColor={glow}
+          summary="Local Sidereal Time (LST) used to calculate the Ascendant and Placidus/Koch house cusps."
+          details="Using your exact geographic longitude and latitude, Local Sidereal Time (LST) is derived to calculate the precise Ascendant degree and divide the sky into 12 Placidus or Koch house cusps."
+        />
       </div>
       <div className="flex items-center justify-center gap-6 pt-2">
         <CinematicGhostButton onClick={() => setRevealSlide(5)}>← BACK</CinematicGhostButton>
@@ -413,17 +444,31 @@ export default function CinematicReveal() {
       </div>
     </div>,
 
-    // Slide 8: Cosmic Gemstone
+    // Slide 8: Gemstone Correspondence
     <div key="w8" className="space-y-6 text-center">
-      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 8 of 9 · Western Gemstone</div>
-      <div className="text-2xl font-light text-white tracking-widest">{sunData.stone}</div>
+      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 8 of 9 · Gemstone Correspondence</div>
+      <div className="text-2xl font-light text-white tracking-widest">Vibrational Frequency Alignment</div>
       <div className="space-y-4 max-w-md mx-auto">
         <InteractiveBubble
-          title={`Harmonizing Stone · ${sunData.stone}`}
-          subtitle="Elemental Balance"
+          title="Vibrational Frequency & Gemstone Logic"
+          subtitle="Resonance Alignment"
           icon={GemIcon} glowColor={glow} defaultExpanded
-          summary={`Assigned stone to balance ${sunSign} solar energy.`}
-          details={`In Western tradition, wearing or holding ${sunData.stone} aligns your energy field with ${sunData.ruling}, enhancing executive focus and vital stamina.`}
+          summary="Gemstones carry vibrational frequencies of their planets to amplify well-placed energies or balance weak points."
+          details="In classical and modern psychological astrology, gemstones act as physical crystalline resonators. They help focus planetary frequencies to strengthen executive focus or balance energy imbalances."
+        />
+        <InteractiveBubble
+          title="Inner Planetary Gemstones"
+          subtitle="Personal Planet Resonance"
+          icon={GemIcon} glowColor={glow}
+          summary="Sun (Ruby), Moon (Pearl), Mercury (Emerald), Venus (Diamond/Opal), Mars (Red Coral)."
+          details="Sun resonates with Ruby (vitality), Moon with Pearl (emotional peace), Mercury with Emerald (intellect), Venus with Diamond/Opal (relational balance), and Mars with Red Coral (courage)."
+        />
+        <InteractiveBubble
+          title="Outer & Major Gemstones"
+          subtitle="Transpersonal Resonance"
+          icon={GemIcon} glowColor={glow}
+          summary="Jupiter (Yellow Sapphire), Saturn (Blue Sapphire), Uranus (Aquamarine), Neptune (Amethyst)."
+          details="Jupiter aligns with Yellow Sapphire (wisdom & wealth), Saturn with Blue Sapphire (discipline & focus), Uranus with Aquamarine (innovation), and Neptune with Amethyst (transcendence)."
         />
       </div>
       <div className="flex items-center justify-center gap-6 pt-2">
@@ -432,15 +477,25 @@ export default function CinematicReveal() {
       </div>
     </div>,
 
-    // Slide 9: Synthesis & Export
+    // Slide 9: Putting It All Together (The Interpretation Stack)
     <div key="w9" className="space-y-6 text-center">
-      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 9 of 9 · Final Western Synthesis</div>
-      <div className="text-2xl font-light text-white tracking-widest">Complete Psychological Dossier</div>
+      <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-blue-200/40">Slide 9 of 9 · Putting It All Together</div>
+      <div className="text-2xl font-light text-white tracking-widest">The Interpretation Stack</div>
+
+      <div className="space-y-4 max-w-md mx-auto">
+        <InteractiveBubble
+          title="The Interpretation Stack"
+          subtitle="Multi-Layered Framework"
+          icon={DignityIcon} glowColor={glow} defaultExpanded
+          summary="Big Three → Placements → Houses → Aspects → Elements → Gemstones."
+          details="A full astrological reading is an interpretive stack layering: Big Three → Placements → Houses → Aspects → Elements → Gemstones. There is no single equation; it is a multi-layered interpretive framework."
+        />
+      </div>
 
       {/* Printable Card */}
-      <div className="flex justify-center" ref={chartRef}>
+      <div className="flex justify-center pt-2" ref={chartRef}>
         <div style={{ background: 'linear-gradient(160deg, #050816 0%, #080c26 60%, #030511 100%)', padding: '2rem', borderRadius: '1rem', width: '100%', maxWidth: '420px', color: 'white', textAlign: 'center', border: '1px solid rgba(160,200,255,0.1)' }}>
-          <div style={{ fontSize: '9px', letterSpacing: '0.35em', color: 'rgba(160,200,255,0.4)', textTransform: 'uppercase', marginBottom: '0.4rem' }}>Astrologica · Western Tropical</div>
+          <div style={{ fontSize: '9px', letterSpacing: '0.35em', color: 'rgba(160,200,255,0.4)', textTransform: 'uppercase', marginBottom: '0.4rem' }}>Astrologica · Psychological Depth</div>
           <div style={{ fontSize: '1.5rem', fontWeight: 300, letterSpacing: '0.12em', color: 'white', marginBottom: '1rem' }}>{userName || 'Cosmic Traveller'}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: '1px solid rgba(160,200,255,0.1)', borderBottom: '1px solid rgba(160,200,255,0.1)', padding: '1rem 0', marginBottom: '1rem', fontSize: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'rgba(160,200,255,0.4)' }}>Sun Sign</span><span>{sunSign}</span></div>
