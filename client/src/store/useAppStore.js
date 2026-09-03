@@ -2,12 +2,10 @@ import { create } from 'zustand'
 import axios from 'axios'
 import API_BASE_URL from '../config/api'
 
-// Unique session ID for telemetry
 const SESSION_ID = typeof crypto !== 'undefined'
   ? crypto.randomUUID()
   : Math.random().toString(36).slice(2)
 
-// Silently fire telemetry — never blocks the UI
 async function fireJourneyEvent(name, sessionId, action, log) {
   try {
     await axios.post(`${API_BASE_URL}/api/track/journey`, {
@@ -16,41 +14,45 @@ async function fireJourneyEvent(name, sessionId, action, log) {
       action,
       action_log: log,
     }, { timeout: 8000 })
-  } catch (_) { /* silent — telemetry never interrupts UX */ }
+  } catch (_) { /* silent */ }
 }
 
 export const useAppStore = create((set, get) => ({
   // ─── Cinematic Journey State ─────────────────────────────────────────────
-  cinematicStep: 0,          // 0=Intro 1=Name 2=Crossroads 3=About 4=Form 5=Chart
+  cinematicStep: 0,      // 0=Intro 1=Name 2=Crossroads 3=About 4=DOB 5=Location 6=Processing 7=Reveal
+  revealSlide:   0,      // 0-4 within step 7 (paginated cosmic reveal)
   userName: '',
   journeyLog: [],
   sessionId: SESSION_ID,
+
+  // ─── Input Data (collected across cinematic steps) ───────────────────────
+  birthData: null,       // { date, time, lat, lng, locationName, utcOffset }
 
   // ─── Core Assessment State ───────────────────────────────────────────────
   astrologyData: null,
   mbtiData: null,
   activeTab: 'astrology',
 
-  // ─── Platform & Telemetry State ──────────────────────────────────────────
+  // ─── Platform State ───────────────────────────────────────────────────────
   isBackendReady: false,
   backendStatus: { state: 'checking', retries: 0 },
 
-  // ─── Global Site Configuration ───────────────────────────────────────────
-  siteConfig: {
-    banner_message: '',
-    show_banner: false,
-    maintenance_mode: false,
-  },
+  // ─── Global Site Configuration ────────────────────────────────────────────
+  siteConfig: { banner_message: '', show_banner: false, maintenance_mode: false },
 
-  // ─── Admin Session State ─────────────────────────────────────────────────
+  // ─── Admin Session State ──────────────────────────────────────────────────
   adminToken: typeof window !== 'undefined'
     ? localStorage.getItem('astrologica_admin_token') || ''
     : '',
 
-  // ─── Cinematic Actions ───────────────────────────────────────────────────
+  // ─── Cinematic Actions ────────────────────────────────────────────────────
   setCinematicStep: (step) => set({ cinematicStep: step }),
 
+  setRevealSlide: (slide) => set({ revealSlide: slide }),
+
   setUserName: (name) => set({ userName: name }),
+
+  setBirthData: (data) => set({ birthData: data }),
 
   advanceStep: (step, action) => {
     const { userName, sessionId, journeyLog } = get()
@@ -68,8 +70,10 @@ export const useAppStore = create((set, get) => ({
 
   resetJourney: () => set({
     cinematicStep: 0,
+    revealSlide: 0,
     userName: '',
     journeyLog: [],
+    birthData: null,
     astrologyData: null,
     mbtiData: null,
     activeTab: 'astrology',
@@ -77,12 +81,12 @@ export const useAppStore = create((set, get) => ({
 
   // ─── Assessment Actions ───────────────────────────────────────────────────
   setAstrologyData: (data) => set({ astrologyData: data }),
-  setMbtiData: (data) => set({ mbtiData: data }),
-  setActiveTab: (tab) => set({ activeTab: tab }),
-  setBackendReady: (status) => set({ isBackendReady: status }),
-  setBackendStatus: (status) => set({ backendStatus: status }),
+  setMbtiData:      (data) => set({ mbtiData: data }),
+  setActiveTab:     (tab)  => set({ activeTab: tab }),
+  setBackendReady:  (s)    => set({ isBackendReady: s }),
+  setBackendStatus: (s)    => set({ backendStatus: s }),
 
-  setSiteConfig: (config) => set((state) => ({
+  setSiteConfig: (config) => set(state => ({
     siteConfig: { ...state.siteConfig, ...config },
   })),
 
@@ -96,15 +100,9 @@ export const useAppStore = create((set, get) => ({
   },
 
   logoutAdmin: () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('astrologica_admin_token')
-    }
+    if (typeof window !== 'undefined') localStorage.removeItem('astrologica_admin_token')
     set({ adminToken: '' })
   },
 
-  resetAssessment: () => set({
-    astrologyData: null,
-    mbtiData: null,
-    activeTab: 'astrology',
-  }),
+  resetAssessment: () => set({ astrologyData: null, mbtiData: null, activeTab: 'astrology' }),
 }))

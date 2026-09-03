@@ -2,7 +2,7 @@ import React, { useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import html2canvas from 'html2canvas'
 import { useAppStore } from '../../store/useAppStore'
-import { GlassPanel, CinematicButton, CinematicGhostButton, fadeUp } from './CinematicPrimitives'
+import { CinematicButton, CinematicGhostButton, fadeUp } from './CinematicPrimitives'
 
 // ─── Sun Sign Knowledge Base ────────────────────────────────────────────────
 const SUN_SIGN_DB = {

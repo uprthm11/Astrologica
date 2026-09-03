@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { GlassPanel, fadeUp } from './CinematicPrimitives'
+import { fadeUp } from './CinematicPrimitives'
 
 const TABS = [
   { id: 'flow',   label: 'Journey Flow' },
@@ -137,18 +137,25 @@ export default function AboutPanel() {
   const [activeTab, setActiveTab] = useState('flow')
 
   return (
-    <GlassPanel className="w-full max-w-lg mx-auto p-5 space-y-4">
-      {/* Tab Bar */}
-      <div className="flex gap-1 p-1 rounded-xl bg-black/30 border border-white/10">
+    <div className="w-full max-w-lg mx-auto p-5 space-y-4">
+      {/* Tab Bar — pure text, no background */}
+      <div className="flex gap-6 justify-center mb-2">
         {TABS.map(t => (
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id)}
-            className={`flex-1 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition cursor-pointer ${
-              activeTab === t.id
-                ? 'bg-[#3858f6] text-white'
-                : 'text-white/40 hover:text-white/70'
-            }`}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: activeTab === t.id ? 'rgba(200,220,255,0.95)' : 'rgba(160,200,255,0.3)',
+              fontSize: '10px',
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              padding: '4px 0',
+              borderBottom: activeTab === t.id ? '1px solid rgba(160,200,255,0.4)' : '1px solid transparent',
+              transition: 'all 0.25s',
+            }}
           >
             {t.label}
           </button>
@@ -169,6 +176,6 @@ export default function AboutPanel() {
           </motion.div>
         </AnimatePresence>
       </div>
-    </GlassPanel>
+    </div>
   )
 }

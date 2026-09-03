@@ -1,65 +1,62 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 
-// Shared animation presets for cinematic elegance
+// ─── Slow drift-up entrance (used on headings/labels) ───────────────────────
 export const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
+  hidden:  { opacity: 0, y: 24 },
   visible: (i = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.18, duration: 0.9, ease: [0.22, 1, 0.36, 1] },
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.2, duration: 1.5, ease: [0.22, 1, 0.36, 1] },
   }),
-  exit: { opacity: 0, y: -18, transition: { duration: 0.45 } },
+  exit: { opacity: 0, y: -16, transition: { duration: 0.7 } },
 }
 
 export const fadeIn = {
-  hidden: { opacity: 0 },
+  hidden:  { opacity: 0 },
   visible: (i = 0) => ({
     opacity: 1,
-    transition: { delay: i * 0.15, duration: 0.8, ease: 'easeOut' },
+    transition: { delay: i * 0.2, duration: 1.4, ease: 'easeOut' },
   }),
-  exit: { opacity: 0, transition: { duration: 0.35 } },
+  exit: { opacity: 0, transition: { duration: 0.5 } },
 }
 
-// Cinematic glass panel
-export function GlassPanel({ children, className = '' }) {
-  return (
-    <motion.div
-      variants={fadeUp}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-      className={`
-        relative rounded-2xl border border-white/10
-        bg-gradient-to-b from-white/[0.06] to-black/30
-        backdrop-blur-2xl shadow-2xl shadow-black/60
-        ${className}
-      `}
-    >
-      {children}
-    </motion.div>
-  )
-}
-
-// Cinematic primary button
-export function CinematicButton({ onClick, children, delay = 0, className = '', disabled = false }) {
+// ─── Primary CinematicButton — pure pulsating text, no background ────────────
+// Matches the spec: tracking-widest, infinite slow star-pulse, glow on hover
+export function CinematicButton({
+  onClick,
+  children,
+  delay = 0,
+  className = '',
+  disabled = false,
+}) {
   return (
     <motion.button
-      variants={fadeUp}
-      custom={delay}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-      whileHover={{ scale: 1.04, boxShadow: '0 0 28px rgba(56,88,246,0.55)' }}
+      initial={{ opacity: 0 }}
+      animate={{
+        opacity: [0.45, 1, 0.45],
+        transition: {
+          delay,
+          duration: 3,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        },
+      }}
+      whileHover={{
+        opacity: 1,
+        scale: 1.04,
+        transition: { duration: 0.15 },
+      }}
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
       disabled={disabled}
+      onMouseEnter={e => { e.currentTarget.style.textShadow = '0 0 18px rgba(200,220,255,0.9)' }}
+      onMouseLeave={e => { e.currentTarget.style.textShadow = 'none' }}
+      style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
       className={`
-        px-8 py-3 rounded-2xl font-bold tracking-wider text-sm uppercase
-        bg-gradient-to-r from-[#3858f6] via-[#2547e0] to-[#00d2ff]
-        text-white shadow-lg shadow-[#3858f6]/30
-        border border-white/20 cursor-pointer transition-all
-        disabled:opacity-40 disabled:cursor-not-allowed
+        bg-transparent border-0 outline-none
+        text-white/90 font-light
+        text-sm tracking-[0.35em] uppercase
+        disabled:opacity-30 select-none
         ${className}
       `}
     >
@@ -68,23 +65,39 @@ export function CinematicButton({ onClick, children, delay = 0, className = '', 
   )
 }
 
-// Hollow / secondary cinematic button
-export function CinematicGhostButton({ onClick, children, delay = 0, className = '' }) {
+// ─── Ghost / secondary text button — same pulse, slightly dimmer base ────────
+export function CinematicGhostButton({
+  onClick,
+  children,
+  delay = 0,
+  className = '',
+}) {
   return (
     <motion.button
-      variants={fadeUp}
-      custom={delay}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-      whileHover={{ scale: 1.04, borderColor: 'rgba(0,210,255,0.7)' }}
+      initial={{ opacity: 0 }}
+      animate={{
+        opacity: [0.3, 0.75, 0.3],
+        transition: {
+          delay,
+          duration: 3.5,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        },
+      }}
+      whileHover={{
+        opacity: 1,
+        scale: 1.04,
+        transition: { duration: 0.15 },
+      }}
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
+      onMouseEnter={e => { e.currentTarget.style.textShadow = '0 0 12px rgba(160,200,255,0.7)' }}
+      onMouseLeave={e => { e.currentTarget.style.textShadow = 'none' }}
       className={`
-        px-7 py-3 rounded-2xl font-semibold tracking-wider text-sm uppercase
-        border border-white/25 text-white/80 hover:text-white
-        bg-white/5 backdrop-blur-sm cursor-pointer transition-all
-        hover:bg-white/10
+        bg-transparent border-0 outline-none
+        text-blue-200/70 font-light
+        text-sm tracking-[0.3em] uppercase
+        cursor-pointer select-none
         ${className}
       `}
     >
@@ -93,26 +106,96 @@ export function CinematicGhostButton({ onClick, children, delay = 0, className =
   )
 }
 
-// Cinematic text input
-export function CinematicInput({ value, onChange, placeholder, autoFocus, onKeyDown }) {
+// ─── Cinematic text input — thin underline only, no box ──────────────────────
+export function CinematicInput({
+  value,
+  onChange,
+  placeholder,
+  autoFocus,
+  onKeyDown,
+  type = 'text',
+}) {
   return (
     <motion.input
       variants={fadeUp}
       custom={1}
       initial="hidden"
       animate="visible"
-      type="text"
+      type={type}
       value={value}
       onChange={onChange}
       onKeyDown={onKeyDown}
       placeholder={placeholder}
       autoFocus={autoFocus}
+      style={{
+        background: 'transparent',
+        border: 'none',
+        borderBottom: '1px solid rgba(160,200,255,0.25)',
+        outline: 'none',
+        color: 'white',
+        textAlign: 'center',
+        textShadow: '0 0 12px rgba(160,200,255,0.4)',
+        caretColor: 'rgba(160,200,255,0.7)',
+      }}
       className={`
-        w-full max-w-sm bg-transparent border-b-2 border-white/30
-        focus:border-[#00d2ff] outline-none text-white text-center
-        text-xl font-light tracking-widest placeholder-white/30
-        py-3 transition-colors duration-300
+        w-full max-w-xs
+        text-xl font-light tracking-widest
+        placeholder-white/20
+        py-3 transition-all duration-500
+        focus:border-b-blue-300/50
       `}
+    />
+  )
+}
+
+// ─── Date input — same minimal style ─────────────────────────────────────────
+export function CinematicDateInput({ value, onChange, autoFocus }) {
+  return (
+    <motion.input
+      variants={fadeUp}
+      custom={1}
+      initial="hidden"
+      animate="visible"
+      type="date"
+      value={value}
+      onChange={onChange}
+      autoFocus={autoFocus}
+      style={{
+        background: 'transparent',
+        border: 'none',
+        borderBottom: '1px solid rgba(160,200,255,0.25)',
+        outline: 'none',
+        color: 'white',
+        textAlign: 'center',
+        colorScheme: 'dark',
+        caretColor: 'rgba(160,200,255,0.7)',
+      }}
+      className="w-full max-w-xs text-xl font-light tracking-widest py-3"
+    />
+  )
+}
+
+// ─── Time input ───────────────────────────────────────────────────────────────
+export function CinematicTimeInput({ value, onChange }) {
+  return (
+    <motion.input
+      variants={fadeUp}
+      custom={2}
+      initial="hidden"
+      animate="visible"
+      type="time"
+      value={value}
+      onChange={onChange}
+      style={{
+        background: 'transparent',
+        border: 'none',
+        borderBottom: '1px solid rgba(160,200,255,0.15)',
+        outline: 'none',
+        color: 'rgba(200,220,255,0.7)',
+        textAlign: 'center',
+        colorScheme: 'dark',
+      }}
+      className="w-full max-w-xs text-lg font-light tracking-widest py-3"
     />
   )
 }
