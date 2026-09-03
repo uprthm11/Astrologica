@@ -40,25 +40,25 @@ function MainAssessment() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      {/* Sleek Animated Tab Navigation Menu */}
-      <section className="relative z-10 flex justify-center px-4 my-2">
-        <div className="inline-flex p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-xl">
+      {/* Executive Segmented Navigation Tabs */}
+      <section className="relative z-10 flex justify-center px-4 my-3">
+        <div className="inline-flex p-1 rounded-xl bg-zinc-900/90 border border-zinc-800 backdrop-blur-xl shadow-lg">
           {/* Astrology Tab */}
           <button
             onClick={() => setActiveTab('astrology')}
-            className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors duration-200 cursor-pointer flex items-center gap-2 z-10 ${
-              activeTab === 'astrology' ? 'text-white' : 'text-slate-400 hover:text-slate-200'
+            className={`relative px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors duration-200 cursor-pointer flex items-center gap-2 z-10 ${
+              activeTab === 'astrology' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
             {activeTab === 'astrology' && (
               <motion.div
                 layoutId="activeTabPill"
-                className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 shadow-md shadow-purple-900/40 -z-10"
+                className="absolute inset-0 rounded-lg bg-indigo-600 shadow-md -z-10"
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}
             <span>✨</span>
-            <span>Astrology (Blueprint)</span>
+            <span>1. Astrological Ephemeris</span>
             {astrologyData && (
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             )}
@@ -67,19 +67,19 @@ function MainAssessment() {
           {/* Psychology Tab */}
           <button
             onClick={() => setActiveTab('psychology')}
-            className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors duration-200 cursor-pointer flex items-center gap-2 z-10 ${
-              activeTab === 'psychology' ? 'text-white' : 'text-slate-400 hover:text-slate-200'
+            className={`relative px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors duration-200 cursor-pointer flex items-center gap-2 z-10 ${
+              activeTab === 'psychology' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
             {activeTab === 'psychology' && (
               <motion.div
                 layoutId="activeTabPill"
-                className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 shadow-md shadow-indigo-900/40 -z-10"
+                className="absolute inset-0 rounded-lg bg-indigo-600 shadow-md -z-10"
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}
             <span>🧠</span>
-            <span>Psychology (MBTI)</span>
+            <span>2. Jungian Psychometrics</span>
             {mbtiData && (
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             )}
@@ -88,15 +88,15 @@ function MainAssessment() {
       </section>
 
       {/* Main Tab Content Display */}
-      <div className="w-full flex-1 flex items-center justify-center py-6">
+      <div className="w-full flex-1 flex items-center justify-center py-4">
         <AnimatePresence mode="wait">
           {activeTab === 'astrology' ? (
             <motion.div
               key="astrology-tab"
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.3 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.25 }}
               className="w-full"
             >
               <BlueprintForm
@@ -107,10 +107,10 @@ function MainAssessment() {
           ) : (
             <motion.div
               key="psychology-tab"
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.3 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.25 }}
               className="w-full"
             >
               <MBTIQuiz
@@ -123,33 +123,43 @@ function MainAssessment() {
       </div>
 
       {saveError && (
-        <div className="mb-4 px-4 py-2 rounded-xl bg-rose-950/60 border border-rose-500/30 text-rose-300 text-xs">
-          ⚠️ {saveError}
+        <div className="mb-4 px-4 py-2.5 rounded-xl bg-rose-950/60 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+          <span>⚠️</span>
+          <span>{saveError}</span>
         </div>
       )}
 
-      {/* --- Glowing, Animated 'Generate My Cosmic Blueprint' Button --- */}
+      {/* --- Executive Synthesis Trigger Action Bar --- */}
       <AnimatePresence>
         {bothCompleted && (
           <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.9 }}
+            initial={{ opacity: 0, y: 30, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 40, scale: 0.9 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="w-full max-w-xl px-4 pt-4 pb-8"
+            exit={{ opacity: 0, y: 30, scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+            className="w-full max-w-2xl px-4 pt-4 pb-8"
           >
-            <div className="relative p-1 rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-400 animate-pulse shadow-[0_0_40px_rgba(168,85,247,0.4)]">
+            <div className="p-4 rounded-2xl bg-zinc-900 border border-indigo-500/40 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-left">
+                <div className="text-xs font-bold uppercase tracking-wider text-indigo-400">
+                  Assessment Matrices Complete
+                </div>
+                <div className="text-sm font-semibold text-zinc-100 mt-0.5">
+                  Ready to synthesize Astrology & Jungian Cognitive Dossier
+                </div>
+              </div>
+
               <motion.button
                 onClick={handleGenerateCosmicBlueprint}
                 disabled={saving}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-4 px-8 rounded-xl font-extrabold text-base sm:text-lg text-white bg-slate-950 hover:bg-slate-900 transition flex items-center justify-center gap-3 cursor-pointer shadow-inner disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/30 border border-indigo-400/30 transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shrink-0 cursor-pointer"
               >
                 {saving ? (
                   <>
                     <svg
-                      className="animate-spin h-5 w-5 text-purple-400"
+                      className="animate-spin h-4 w-4 text-white"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -161,22 +171,19 @@ function MainAssessment() {
                         r="10"
                         stroke="currentColor"
                         strokeWidth="4"
-                      ></circle>
+                      />
                       <path
                         className="opacity-75"
                         fill="currentColor"
                         d="M4 12a8 8 0 018-8v8H4z"
-                      ></path>
+                      />
                     </svg>
-                    <span>Synthesizing & Storing Cosmic Blueprint...</span>
+                    <span>Synthesizing Dossier...</span>
                   </>
                 ) : (
                   <>
-                    <span className="text-xl animate-bounce">🔮</span>
-                    <span className="bg-gradient-to-r from-purple-300 via-pink-200 to-cyan-300 bg-clip-text text-transparent">
-                      Generate My Cosmic Blueprint
-                    </span>
-                    <span className="text-xl">✨</span>
+                    <span>✦</span>
+                    <span>Generate Complete Dossier</span>
                   </>
                 )}
               </motion.button>
@@ -221,48 +228,47 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="relative min-h-screen flex flex-col justify-between bg-slate-950 text-slate-100 selection:bg-purple-500 selection:text-white overflow-x-hidden">
-        {/* Background Starry / Nebula Ambience */}
+      <div className="relative min-h-screen flex flex-col justify-between bg-zinc-950 text-zinc-100 selection:bg-indigo-500 selection:text-white overflow-x-hidden">
+        {/* Background Ambience Subtle Radial Gradients */}
         <div className="fixed inset-0 pointer-events-none z-0">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-purple-900/15 rounded-full blur-[140px]" />
-          <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-indigo-900/15 rounded-full blur-[120px]" />
-          <div className="absolute top-1/3 left-0 w-[500px] h-[350px] bg-cyan-900/10 rounded-full blur-[130px]" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-indigo-950/20 rounded-full blur-[140px]" />
+          <div className="absolute bottom-0 right-0 w-[500px] h-[300px] bg-purple-950/15 rounded-full blur-[120px]" />
         </div>
 
-        {/* Top Header & Brand */}
-        <header className="relative z-10 w-full max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Top Executive Header Bar */}
+        <header className="relative z-10 w-full max-w-6xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-zinc-800/80">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 flex items-center justify-center font-bold text-lg shadow-lg shadow-purple-900/40">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-500 flex items-center justify-center font-bold text-base shadow-lg shadow-indigo-950">
               ✦
             </div>
-            <div>
-              <h1 className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-purple-300 via-slate-100 to-indigo-300 bg-clip-text text-transparent">
+            <div className="text-left">
+              <h1 className="font-extrabold text-lg tracking-tight text-white">
                 Astrologica
               </h1>
-              <p className="text-[10px] text-slate-400 uppercase tracking-widest -mt-1 font-semibold">
-                Cosmic &bull; Psychological Blueprint
+              <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">
+                Full-Spectrum Astronomical & Psychometric Console
               </p>
             </div>
           </div>
 
-          {/* Server Status Badge with Cold-Start Awareness */}
+          {/* Telemetry Server Status Badge */}
           <div className="flex items-center gap-2">
             {backendStatus.state === 'online' ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 shadow-sm shadow-emerald-900/20">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-emerald-950/80 border border-emerald-500/30 text-emerald-300">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                API: Online
+                API: Online (Connected)
               </span>
             ) : backendStatus.state === 'waking' ? (
               <button
                 onClick={() => checkServer(0)}
                 title="Render free tier spinning up"
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-950/60 border border-amber-500/40 text-amber-300 cursor-pointer animate-pulse"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-amber-950/80 border border-amber-500/40 text-amber-300 cursor-pointer animate-pulse"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                 API: Waking Up (Cold Start)...
               </button>
             ) : backendStatus.state === 'checking' ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-zinc-900 border border-zinc-800 text-zinc-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
                 API: Connecting...
               </span>
@@ -270,7 +276,7 @@ export default function App() {
               <button
                 onClick={() => checkServer(0)}
                 title="Click to retry connecting to API"
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-950/60 border border-rose-500/30 text-rose-300 hover:bg-rose-900/60 transition cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-rose-950/80 border border-rose-500/30 text-rose-300 hover:bg-rose-900/80 transition cursor-pointer"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
                 API: Offline (Click to Retry)
@@ -279,17 +285,18 @@ export default function App() {
           </div>
         </header>
 
-        {/* Routes View Container */}
-        <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-4">
+        {/* Main Content Area */}
+        <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-6">
           <Routes>
             <Route path="/" element={<MainAssessment />} />
             <Route path="/blueprint/:id" element={<SharedDossier />} />
           </Routes>
         </main>
 
-        {/* Footer */}
-        <footer className="relative z-10 w-full max-w-6xl mx-auto px-6 py-6 text-center text-xs text-slate-500">
-          Astrologica &bull; FastAPI + React 19 + MongoDB + Flatlib Ephemeris &bull; Cognitive Personality Archetypes
+        {/* Executive Footer */}
+        <footer className="relative z-10 w-full max-w-6xl mx-auto px-6 py-5 border-t border-zinc-800/80 text-center text-xs text-zinc-500 flex flex-col sm:flex-row items-center justify-between gap-2 font-mono">
+          <div>Astrologica &bull; Enterprise Ephemeris & Jungian Intelligence</div>
+          <div className="text-zinc-600">FastAPI &bull; React 19 &bull; Swiss Ephemeris v2.10</div>
         </footer>
       </div>
     </BrowserRouter>
