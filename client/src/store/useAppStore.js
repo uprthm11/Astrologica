@@ -21,8 +21,9 @@ async function fireJourneyEvent(name, sessionId, action, log, dob, location) {
 
 export const useAppStore = create((set, get) => ({
   // ─── Cinematic Journey State ─────────────────────────────────────────────
-  cinematicStep: 0,      // 0=Intro 1=Name 2=Crossroads 25=AdminLogin 3=About 4=DOB 5=Location 6=Processing 7=Reveal
-  revealSlide:   0,      // 0-4 within step 7 (paginated cosmic reveal)
+  cinematicStep: 0,      // 0=Intro 1=Name 2=Crossroads 25=Admin 3=About 4=DOB 5=Location 55=PathSelection 6=Processing 7=Reveal
+  revealSlide:   0,      // 0-8 within step 7 (paginated single-column cosmic reveal)
+  preferredSystem: 'vedic', // 'vedic' | 'western'
   userName: '',
   journeyLog: [],
   sessionId: SESSION_ID,
@@ -52,6 +53,8 @@ export const useAppStore = create((set, get) => ({
 
   setRevealSlide: (slide) => set({ revealSlide: slide }),
 
+  setPreferredSystem: (sys) => set({ preferredSystem: sys }),
+
   setUserName: (name) => set({ userName: name }),
 
   setBirthData: (data) => set({ birthData: data }),
@@ -70,6 +73,8 @@ export const useAppStore = create((set, get) => ({
       target = 2
     } else if (cinematicStep === 5) {
       target = 4
+    } else if (cinematicStep === 55) {
+      target = 5
     } else if (cinematicStep > 0) {
       target = cinematicStep - 1
     }
@@ -89,6 +94,7 @@ export const useAppStore = create((set, get) => ({
   resetJourney: () => set({
     cinematicStep: 0,
     revealSlide: 0,
+    preferredSystem: 'vedic',
     userName: '',
     journeyLog: [],
     birthData: null,
@@ -96,6 +102,7 @@ export const useAppStore = create((set, get) => ({
     mbtiData: null,
     activeTab: 'astrology',
   }),
+
 
 
   // ─── Assessment Actions ───────────────────────────────────────────────────

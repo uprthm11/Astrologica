@@ -12,9 +12,11 @@ const REVEAL_Z = [22, 18, 15, 12, 8]
 
 function getCameraTarget(step, revealSlide) {
   if (step === 25) return 45
+  if (step === 55) return 36
   if (step === 7) return REVEAL_Z[Math.min(revealSlide, REVEAL_Z.length - 1)]
   return STEP_Z[Math.min(step, STEP_Z.length - 1)]
 }
+
 
 // Generate circular alpha map texture to guarantee round particle spheres
 function createCircleTexture() {

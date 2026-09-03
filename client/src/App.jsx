@@ -31,7 +31,6 @@ function IntroStep() {
   const { advanceStep } = useAppStore()
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center px-6">
-      {/* Eyebrow */}
       <motion.div
         variants={fadeIn} custom={0} initial="hidden" animate="visible"
         style={{ ...TS, color: 'rgba(160,200,255,0.5)', fontSize: '10px',
@@ -40,7 +39,6 @@ function IntroStep() {
         a cosmic journey awaits
       </motion.div>
 
-      {/* Logotype: Interstellar Aesthetic — Pure White, Wide Tracking (0.4em), No Cyan Glow */}
       <motion.h1
         variants={fadeUp} custom={1} initial="hidden" animate="visible"
         style={{
@@ -56,7 +54,6 @@ function IntroStep() {
         ASTROLOGICA
       </motion.h1>
 
-      {/* Developer credit — exact text per spec */}
       <motion.p
         variants={fadeUp} custom={2} initial="hidden" animate="visible"
         style={{ ...TS, color: 'rgba(200,220,255,0.7)', fontSize: '13px',
@@ -65,7 +62,6 @@ function IntroStep() {
         Developed by Pratham Upadhyay
       </motion.p>
 
-      {/* CTA — exact text per spec */}
       <div style={{ marginTop: '3.5rem' }}>
         <CinematicButton onClick={() => advanceStep(1, 'Entered Astrologica')} delay={0.8}>
           Explore
@@ -76,70 +72,96 @@ function IntroStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 1 — NAME
+// STEP 1 — NAME (Strict Full Name Validation)
 // ═══════════════════════════════════════════════════════════════════════════════
 function NameStep() {
   const { userName, setUserName, advanceStep } = useAppStore()
   const [draft, setDraft] = useState(userName)
 
+  // Validation: Must contain at least one space (e.g. "Pratham Upadhyay") OR be exact string "admin"
+  const isValidName = (str) => {
+    const trimmed = str.trim()
+    if (trimmed.toLowerCase() === 'admin') return true
+    return trimmed.length >= 3 && trimmed.includes(' ')
+  }
+
+  const canSubmit = isValidName(draft)
+
   const submit = () => {
-    const name = draft.trim() || 'Cosmic Traveller'
+    if (!canSubmit) return
+    const name = draft.trim()
     setUserName(name)
     advanceStep(2, `${name} entered their name`)
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-12">
+    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
       <motion.h2
         variants={fadeUp} custom={0} initial="hidden" animate="visible"
         style={{ ...TS, color: 'white', fontSize: 'clamp(1.6rem,4vw,2.6rem)',
           fontWeight: 300, letterSpacing: '0.08em' }}
       >
-        What is your name?
+        May I have your name?
       </motion.h2>
 
       <CinematicInput
         value={draft}
         onChange={e => setDraft(e.target.value)}
-        onKeyDown={e => e.key === 'Enter' && submit()}
-        placeholder="your name…"
+        onKeyDown={e => e.key === 'Enter' && canSubmit && submit()}
+        placeholder="Your full name..."
         autoFocus
       />
 
-      <CinematicButton onClick={submit} delay={0.4}>Continue</CinematicButton>
+      {canSubmit ? (
+        <CinematicButton onClick={submit} delay={0.2}>Continue</CinematicButton>
+      ) : (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs font-mono text-blue-200/40 tracking-widest pt-2">
+          Please enter your full name (first & last)
+        </motion.div>
+      )}
     </div>
   )
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 2 — CROSSROADS
+// STEP 2 — CROSSROADS (Correct Text Order & Glowing Name)
 // ═══════════════════════════════════════════════════════════════════════════════
 function CrossroadsStep() {
   const { userName, advanceStep, goBack } = useAppStore()
   const isAdmin = userName.toLowerCase() === 'admin'
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-12">
-      {/* Personalized Welcome Eyebrow */}
-      <motion.div
-        variants={fadeIn} custom={0} initial="hidden" animate="visible"
-        style={{ ...TS, color: 'rgba(160,200,255,0.6)', fontSize: '12px',
-          letterSpacing: '0.45em', textTransform: 'uppercase' }}
-      >
-        WELCOME, {userName.toUpperCase()}
+    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
+      {/* Fixed Text Order: WELCOME on top, userName below in larger glowing font */}
+      <motion.div variants={fadeIn} custom={0} initial="hidden" animate="visible" className="space-y-2">
+        <div style={{ ...TS, color: 'rgba(160,200,255,0.5)', fontSize: '11px',
+          letterSpacing: '0.5em', textTransform: 'uppercase' }}>
+          WELCOME
+        </div>
+        <div
+          style={{
+            color: '#ffffff',
+            textShadow: '0 0 20px rgba(0, 210, 255, 0.7), 0 0 40px rgba(0, 210, 255, 0.3)',
+            fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+            fontWeight: 300,
+            letterSpacing: '0.12em',
+          }}
+        >
+          {userName}
+        </div>
       </motion.div>
 
       {/* Main question */}
       <motion.h2
         variants={fadeUp} custom={1} initial="hidden" animate="visible"
-        style={{ ...TS, color: 'white', fontSize: 'clamp(1.5rem,4.5vw,2.8rem)',
+        style={{ ...TS, color: 'white', fontSize: 'clamp(1.4rem,3.8vw,2.4rem)',
           fontWeight: 300, letterSpacing: '0.06em', lineHeight: 1.3 }}
       >
         What seeks you in the cosmos?
       </motion.h2>
 
-      {/* Choices — exact text per spec */}
-      <div className="flex flex-col items-center gap-7">
+      {/* Choices */}
+      <div className="flex flex-col items-center gap-6">
         <CinematicButton
           onClick={() => advanceStep(4, `${userName} chose astro calculation`)}
           delay={0.2}
@@ -154,7 +176,7 @@ function CrossroadsStep() {
           About the web
         </CinematicGhostButton>
 
-        {/* Admin Trap -> Step 25 (Admin Login) */}
+        {/* Admin Trap -> Step 25 */}
         {isAdmin && (
           <motion.div variants={fadeIn} custom={2} initial="hidden" animate="visible">
             <CinematicGhostButton
@@ -176,7 +198,7 @@ function CrossroadsStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 25 — ADMIN LOGIN (WebGL Cinematic Flow)
+// STEP 25 — ADMIN LOGIN
 // ═══════════════════════════════════════════════════════════════════════════════
 function AdminLoginStep() {
   return (
@@ -205,7 +227,6 @@ function AboutStep() {
         <AboutPanel />
       </Suspense>
 
-      {/* Universal Back Button as ONLY navigation out */}
       <div className="pt-4">
         <CinematicGhostButton onClick={goBack} delay={0}>
           ← BACK
@@ -216,16 +237,14 @@ function AboutStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 4 — DATE & TIME OF BIRTH (Frictionless Dropdowns)
+// STEP 4 — DATE & TIME OF BIRTH (Blank Initial Defaults)
 // ═══════════════════════════════════════════════════════════════════════════════
 function DobStep() {
   const { advanceStep, setBirthData, birthData, goBack } = useAppStore()
-  const [chronData, setChronData] = useState({
-    date: birthData?.date || '2000-01-01',
-    time: birthData?.time || '12:00',
-  })
+  const [chronData, setChronData] = useState({ date: '', time: '', isComplete: false })
 
   const submit = () => {
+    if (!chronData.isComplete) return
     setBirthData({ ...birthData, date: chronData.date, time: chronData.time })
     advanceStep(5, `DOB set: ${chronData.date} at ${chronData.time}`)
   }
@@ -241,16 +260,18 @@ function DobStep() {
       </motion.h2>
 
       <Suspense fallback={null}>
-        <CinematicChronologicalInputs
-          onChange={setChronData}
-          initialDate={birthData?.date}
-          initialTime={birthData?.time}
-        />
+        <CinematicChronologicalInputs onComplete={setChronData} />
       </Suspense>
 
       <div className="flex flex-col items-center gap-5 pt-4">
-        <CinematicButton onClick={submit} delay={0.3}>Continue</CinematicButton>
-        <CinematicGhostButton onClick={goBack} delay={0.5}>
+        {chronData.isComplete ? (
+          <CinematicButton onClick={submit} delay={0.2}>Continue</CinematicButton>
+        ) : (
+          <div className="text-xs font-mono text-blue-200/40 tracking-widest">
+            Select all date & time fields to continue
+          </div>
+        )}
+        <CinematicGhostButton onClick={goBack} delay={0.4}>
           ← BACK
         </CinematicGhostButton>
       </div>
@@ -259,14 +280,14 @@ function DobStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 5 — LOCATION (3-Tier Autocorrecting Autocomplete Flow)
+// STEP 5 — LOCATION (Hierarchical Country-State-City)
 // ═══════════════════════════════════════════════════════════════════════════════
 function LocationStep() {
   const { advanceStep, setBirthData, birthData, goBack } = useAppStore()
 
   const handleSelect = (locationResult) => {
     setBirthData({ ...birthData, ...locationResult })
-    advanceStep(6, `Location set: ${locationResult.locationName}`)
+    advanceStep(55, `Location set: ${locationResult.locationName}`)
   }
 
   return (
@@ -291,7 +312,72 @@ function LocationStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 6 — PROCESSING (Strict Payload Calculation)
+// STEP 55 — PATH SELECTION (NEW STEP)
+// ═══════════════════════════════════════════════════════════════════════════════
+function PathSelectionStep() {
+  const { advanceStep, setPreferredSystem, goBack } = useAppStore()
+  const [showChartOptions, setShowChartOptions] = useState(false)
+  const [notice, setNotice] = useState('')
+
+  const handleSelectSystem = (sys) => {
+    setPreferredSystem(sys)
+    advanceStep(6, `Selected path system: ${sys}`)
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
+      <motion.h2
+        variants={fadeUp} custom={0} initial="hidden" animate="visible"
+        style={{ ...TS, color: 'white', fontSize: 'clamp(1.5rem,4vw,2.5rem)',
+          fontWeight: 300, letterSpacing: '0.07em' }}
+      >
+        What path shall we illuminate?
+      </motion.h2>
+
+      <div className="flex flex-col items-center gap-6 w-full max-w-sm">
+        {/* Main Option 1 */}
+        <CinematicButton onClick={() => setShowChartOptions(!showChartOptions)}>
+          Show Astro Chart
+        </CinematicButton>
+
+        {/* Sub-options revealed under Show Astro Chart */}
+        <AnimatePresence>
+          {showChartOptions && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              className="flex flex-col items-center gap-4 py-2 border-t border-b border-blue-200/10 w-full"
+            >
+              <CinematicButton onClick={() => handleSelectSystem('vedic')}>
+                Vedic (Preferred)
+              </CinematicButton>
+              <CinematicGhostButton onClick={() => handleSelectSystem('western')}>
+                Western
+              </CinematicGhostButton>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Main Option 2: Compatibility Checker (Coming soon state) */}
+        <CinematicGhostButton onClick={() => setNotice('Compatibility Checker coming soon in v2.5!')}>
+          Compatibility Checker
+        </CinematicGhostButton>
+
+        {notice && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs font-mono text-cyan-300/80 tracking-widest">
+            {notice}
+          </motion.div>
+        )}
+      </div>
+
+      <CinematicGhostButton onClick={goBack} delay={0.5}>
+        ← BACK
+      </CinematicGhostButton>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// STEP 6 — PROCESSING
 // ═══════════════════════════════════════════════════════════════════════════════
 function ProcessingStep() {
   const { birthData, userName, setAstrologyData, advanceStep, setRevealSlide } = useAppStore()
@@ -356,7 +442,7 @@ function ProcessingStep() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 7 — COSMIC REVEAL (Dual-Column & Fusion)
+// STEP 7 — COSMIC REVEAL (9-Slide Paginated Deep Dive)
 // ═══════════════════════════════════════════════════════════════════════════════
 function RevealStep() {
   return (
@@ -403,6 +489,7 @@ function CinematicRoot() {
       case 3:  return <AboutStep key="s3" />
       case 4:  return <DobStep key="s4" />
       case 5:  return <LocationStep key="s5" />
+      case 55: return <PathSelectionStep key="s55" />
       case 6:  return <ProcessingStep key="s6" />
       case 7:  return <RevealStep key="s7" />
       default: return <IntroStep key="s0" />
@@ -411,7 +498,6 @@ function CinematicRoot() {
 
   return (
     <div className="relative min-h-screen text-white overflow-x-hidden">
-      {/* Star field — always present, always behind */}
       <Suspense fallback={
         <div style={{
           position: 'fixed', inset: 0, zIndex: 0,
@@ -421,7 +507,6 @@ function CinematicRoot() {
         <UniverseCanvas />
       </Suspense>
 
-      {/* Cinematic step overlay */}
       <div className="relative z-10">
         <AnimatePresence mode="wait">
           <motion.div
