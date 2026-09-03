@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { calculateDual } from '../services/api'
+import { useAppStore } from '../store/useAppStore'
 import LocationPicker from './LocationPicker'
 import DualAstroView from './DualAstroView'
 
@@ -31,6 +32,8 @@ const SparklesIcon = ({ className = 'w-4 h-4' }) => (
 )
 
 export default function BlueprintForm({ onComplete, completedData }) {
+  const { astrologyData, setAstrologyData } = useAppStore()
+
   // Birth details state
   const [date, setDate] = useState('2003/06/11')
   const [time, setTime] = useState('12:00')
@@ -45,13 +48,15 @@ export default function BlueprintForm({ onComplete, completedData }) {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [result, setResult] = useState(completedData || null)
+  const [result, setResult] = useState(completedData || astrologyData || null)
 
   useEffect(() => {
     if (completedData) {
       setResult(completedData)
+    } else if (astrologyData) {
+      setResult(astrologyData)
     }
-  }, [completedData])
+  }, [completedData, astrologyData])
 
   const handleLocationChange = (loc) => {
     setLat(loc.lat)
@@ -79,6 +84,7 @@ export default function BlueprintForm({ onComplete, completedData }) {
     try {
       const data = await calculateDual(payload)
       setResult(data)
+      setAstrologyData(data)
       if (onComplete) {
         onComplete(data)
       }
@@ -110,6 +116,7 @@ export default function BlueprintForm({ onComplete, completedData }) {
 
   const handleReset = () => {
     setResult(null)
+    setAstrologyData(null)
     setError(null)
   }
 
@@ -148,7 +155,7 @@ export default function BlueprintForm({ onComplete, completedData }) {
               <div className="flex items-center gap-2">
                 <span className="badge-status bg-[#101336] border border-[#262a63] text-[#7b82b8]">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Engine: v2.1.0 Ready
+                  Engine: v2.2.0 Ready
                 </span>
               </div>
             </div>

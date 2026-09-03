@@ -207,13 +207,17 @@ const FALLBACK_QUESTIONS = [
   }
 ]
 
+import { useAppStore } from '../store/useAppStore'
+
 export default function MBTIQuiz({ onComplete, completedData }) {
+  const { mbtiData, setMbtiData } = useAppStore()
+
   const [questions, setQuestions] = useState(FALLBACK_QUESTIONS)
   const [currentStep, setCurrentStep] = useState(0)
   const [answers, setAnswers] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [result, setResult] = useState(completedData || null)
+  const [result, setResult] = useState(completedData || mbtiData || null)
 
   // Fetch server questions if available
   useEffect(() => {
@@ -233,8 +237,10 @@ export default function MBTIQuiz({ onComplete, completedData }) {
   useEffect(() => {
     if (completedData) {
       setResult(completedData)
+    } else if (mbtiData) {
+      setResult(mbtiData)
     }
-  }, [completedData])
+  }, [completedData, mbtiData])
 
   const totalQuestions = questions.length
 
@@ -296,6 +302,7 @@ export default function MBTIQuiz({ onComplete, completedData }) {
     setCurrentStep(0)
     setAnswers([])
     setResult(null)
+    setMbtiData(null)
     setError(null)
     setLoading(false)
   }

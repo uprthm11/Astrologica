@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, memo } from 'react'
 import { motion } from 'framer-motion'
 
 const ZODIAC_SYMBOLS = {
@@ -31,7 +31,7 @@ const ASPECT_COLORS = {
   Opposition: '#fb923c'
 }
 
-export default function WesternWheelChart({ westernData }) {
+function WesternWheelChartComponent({ westernData }) {
   const [hoveredPlanet, setHoveredPlanet] = useState(null)
 
   if (!westernData || !westernData.planets) return null
@@ -49,7 +49,6 @@ export default function WesternWheelChart({ westernData }) {
 
   // Helper to convert ecliptic longitude to SVG angle (oriented with Ascendant on left: 180°)
   const lonToAngle = (lon) => {
-    // Standard astrological orientation: Ascendant is at 9 o'clock (180° in standard math, or math angle PI)
     const diff = (lon - ascLon + 360) % 360
     return (180 - diff + 360) % 360
   }
@@ -58,110 +57,109 @@ export default function WesternWheelChart({ westernData }) {
     const rad = (angleInDegrees * Math.PI) / 180.0
     return {
       x: cx + radius * Math.cos(rad),
-      y: cy - radius * Math.sin(rad)
+      y: cy + radius * Math.sin(rad)
     }
   }
 
-  // 12 Zodiac Arcs (each 30 degrees)
-  const zodiacSigns = [
-    { name: 'Aries', element: 'Fire' },
-    { name: 'Taurus', element: 'Earth' },
-    { name: 'Gemini', element: 'Air' },
-    { name: 'Cancer', element: 'Water' },
-    { name: 'Leo', element: 'Fire' },
-    { name: 'Virgo', element: 'Earth' },
-    { name: 'Libra', element: 'Air' },
-    { name: 'Scorpio', element: 'Water' },
-    { name: 'Sagittarius', element: 'Fire' },
-    { name: 'Capricorn', element: 'Earth' },
-    { name: 'Aquarius', element: 'Air' },
-    { name: 'Pisces', element: 'Water' }
-  ]
+  // Draw arc segment path
+  const describeArc = (x, y, radius, startAngle, endAngle) => {
+    const start = polarToCartesian(radius, endAngle)
+    const end = polarToCartesian(radius, startAngle)
+    const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1'
+    return [
+      'M', start.x, start.y,
+      'A', radius, radius, 0, largeArcFlag, 0, end.x, end.y
+    ].join(' ')
+  }
 
   return (
-    <div className="relative w-full flex flex-col items-center">
-      <div className="relative w-full max-w-[540px] aspect-square p-2">
+    <div className="w-full flex flex-col items-center">
+      <div className="relative w-full max-w-[500px] aspect-square">
         <svg
           viewBox="0 0 600 600"
-          className="w-full h-full drop-shadow-[0_0_30px_rgba(168,85,247,0.15)]"
+          className="w-full h-full drop-shadow-2xl select-none"
         >
-          {/* Background Circles */}
-          <circle cx={cx} cy={cy} r={rOuter} className="fill-slate-950/80 stroke-purple-500/30 stroke-2" />
-          <circle cx={cx} cy={cy} r={rZodiac} className="fill-slate-900/60 stroke-purple-500/20 stroke-1" />
-          <circle cx={cx} cy={cy} r={rHouses} className="fill-slate-950/90 stroke-indigo-500/20 stroke-1" />
-          <circle cx={cx} cy={cy} r={rInner} className="fill-slate-900/40 stroke-purple-500/30 stroke-1" />
+          {/* Outer Background Circle */}
+          <circle cx={cx} cy={cy} r={rOuter} fill="#0d1033" stroke="#262a63" strokeWidth="2" />
 
-          {/* Zodiac 12 Arcs & Glyphs */}
-          {zodiacSigns.map((z, idx) => {
-            const startLon = idx * 30
-            const midLon = startLon + 15
-            const startAng = lonToAngle(startLon)
-            const endAng = lonToAngle(startLon + 30)
-            const midAng = lonToAngle(midLon)
+          {/* 12 Zodiac Sign Segments (Outer Ring) */}
+          {Array.from({ length: 12 }, (_, i) => {
+            const startLon = i * 30
+            const endLon = (i + 1) * 30
+            const a1 = lonToAngle(startLon)
+            const a2 = lonToAngle(endLon)
+            const signCenterAngle = lonToAngle(startLon + 15)
+            const signPos = polarToCartesian((rOuter + rZodiac) / 2, signCenterAngle)
+            const signNames = Object.keys(ZODIAC_SYMBOLS)
+            const signName = signNames[i]
 
-            const pStart = polarToCartesian(rOuter, startAng)
-            const pEnd = polarToCartesian(rOuter, endAng)
-            const pInnerStart = polarToCartesian(rZodiac, startAng)
-            const pInnerEnd = polarToCartesian(rZodiac, endAng)
+            const isEven = i % 2 === 0
+            const sliceColor = isEven ? '#12163b' : '#101336'
 
-            const pGlyph = polarToCartesian((rOuter + rZodiac) / 2, midAng)
+            const p1 = polarToCartesian(rOuter, a1)
+            const p2 = polarToCartesian(rOuter, a2)
+            const p3 = polarToCartesian(rZodiac, a2)
+            const p4 = polarToCartesian(rZodiac, a1)
 
             return (
-              <g key={z.name}>
-                {/* Sector divider line */}
-                <line
-                  x1={pStart.x}
-                  y1={pStart.y}
-                  x2={pInnerStart.x}
-                  y2={pInnerStart.y}
-                  className="stroke-purple-500/30 stroke-1"
+              <g key={`sign-${i}`}>
+                <path
+                  d={`M ${p1.x} ${p1.y} A ${rOuter} ${rOuter} 0 0 0 ${p2.x} ${p2.y} L ${p3.x} ${p3.y} A ${rZodiac} ${rZodiac} 0 0 1 ${p4.x} ${p4.y} Z`}
+                  fill={sliceColor}
+                  stroke="#262a63"
+                  strokeWidth="1"
                 />
-                {/* Zodiac Glyph */}
                 <text
-                  x={pGlyph.x}
-                  y={pGlyph.y + 6}
+                  x={signPos.x}
+                  y={signPos.y + 6}
+                  fill="#c5c9f5"
+                  fontSize="16"
+                  fontWeight="bold"
                   textAnchor="middle"
-                  fill={ELEMENT_COLORS[z.element] || '#c084fc'}
-                  className="text-lg font-bold select-none"
                 >
-                  {ZODIAC_SYMBOLS[z.name]}
+                  {ZODIAC_SYMBOLS[signName]}
                 </text>
               </g>
             )
           })}
 
-          {/* House Cusps Lines & Labels */}
-          {houses.map((h, idx) => {
-            const cLon = h.cusp_longitude
-            const ang = lonToAngle(cLon)
-            const pOut = polarToCartesian(rZodiac, ang)
-            const pIn = polarToCartesian(rInner, ang)
+          {/* House Slices Ring */}
+          <circle cx={cx} cy={cy} r={rHouses} fill="#161942" stroke="#262a63" strokeWidth="1.5" />
 
-            // Label position halfway into house
-            const nextCusp = houses[(idx + 1) % 12].cusp_longitude
-            const span = (nextCusp - cLon + 360) % 360
-            const midHouseLon = (cLon + span / 2) % 360
-            const midHouseAng = lonToAngle(midHouseLon)
-            const pNum = polarToCartesian((rHouses + rInner) / 2, midHouseAng)
+          {/* House Cusp Lines */}
+          {houses.map((h, idx) => {
+            const hAngle = lonToAngle(h.cusp_longitude)
+            const pOuter = polarToCartesian(rZodiac, hAngle)
+            const pInner = polarToCartesian(rInner, hAngle)
+
+            // Calculate next house cusp to place house number in center
+            const nextH = houses[(idx + 1) % 12]
+            const nextAngle = lonToAngle(nextH.cusp_longitude)
+            // Mid angle calculation taking care of wrap around
+            const midAngle = lonToAngle((h.cusp_longitude + 15) % 360)
+            const numPos = polarToCartesian((rHouses + rInner) / 2, midAngle)
+
+            const isMajorAxis = idx === 0 || idx === 3 || idx === 6 || idx === 9
 
             return (
               <g key={`house-${h.house}`}>
                 <line
-                  x1={pOut.x}
-                  y1={pOut.y}
-                  x2={pIn.x}
-                  y2={pIn.y}
-                  className={`${
-                    idx % 3 === 0
-                      ? 'stroke-purple-400/60 stroke-2'
-                      : 'stroke-slate-700/50 stroke-1'
-                  }`}
+                  x1={pInner.x}
+                  y1={pInner.y}
+                  x2={pOuter.x}
+                  y2={pOuter.y}
+                  stroke={isMajorAxis ? '#00d2ff' : '#262a63'}
+                  strokeWidth={isMajorAxis ? '2.5' : '1'}
+                  strokeDasharray={isMajorAxis ? 'none' : '3 3'}
                 />
                 <text
-                  x={pNum.x}
-                  y={pNum.y + 4}
+                  x={numPos.x}
+                  y={numPos.y + 4}
+                  fill="#6b729f"
+                  fontSize="10"
+                  fontFamily="monospace"
+                  fontWeight="bold"
                   textAnchor="middle"
-                  className="fill-slate-400 text-[11px] font-mono font-semibold select-none"
                 >
                   {h.house}
                 </text>
@@ -169,71 +167,112 @@ export default function WesternWheelChart({ westernData }) {
             )
           })}
 
-          {/* Aspect Lines in Inner Core */}
-          {aspects.slice(0, 20).map((asp, idx) => {
-            const p1 = planets.find((p) => p.name === asp.planet_1)
-            const p2 = planets.find((p) => p.name === asp.planet_2)
+          {/* Inner Aspect Ring Circle */}
+          <circle cx={cx} cy={cy} r={rInner} fill="#0b0e29" stroke="#262a63" strokeWidth="1.5" />
+
+          {/* Aspect Chords Inside Wheel */}
+          {aspects.map((asp, idx) => {
+            const p1 = planets.find((p) => p.name === asp.body1)
+            const p2 = planets.find((p) => p.name === asp.body2)
             if (!p1 || !p2) return null
 
-            const p1Pt = polarToCartesian(rInner - 8, lonToAngle(p1.longitude))
-            const p2Pt = polarToCartesian(rInner - 8, lonToAngle(p2.longitude))
-            const color = ASPECT_COLORS[asp.aspect] || '#a855f7'
+            const a1 = lonToAngle(p1.longitude)
+            const a2 = lonToAngle(p2.longitude)
 
-            const isHighlighted =
-              hoveredPlanet &&
-              (hoveredPlanet.name === asp.planet_1 || hoveredPlanet.name === asp.planet_2)
+            const pos1 = polarToCartesian(rInner - 8, a1)
+            const pos2 = polarToCartesian(rInner - 8, a2)
+
+            const aspColor = ASPECT_COLORS[asp.aspect] || '#7b82b8'
 
             return (
               <line
                 key={`asp-${idx}`}
-                x1={p1Pt.x}
-                y1={p1Pt.y}
-                x2={p2Pt.x}
-                y2={p2Pt.y}
-                stroke={color}
-                strokeWidth={isHighlighted ? 2.5 : 1}
-                strokeOpacity={isHighlighted ? 0.9 : 0.25}
-                className="transition-all duration-200"
+                x1={pos1.x}
+                y1={pos1.y}
+                x2={pos2.x}
+                y2={pos2.y}
+                stroke={aspColor}
+                strokeWidth={asp.orb < 2.0 ? '1.5' : '0.8'}
+                strokeOpacity={asp.orb < 3.0 ? '0.7' : '0.4'}
               />
             )
           })}
 
-          {/* Planet Placement Markers */}
-          {planets.map((p, idx) => {
-            const ang = lonToAngle(p.longitude)
-            // Stagger radius slightly to prevent glyph overlap
-            const rPlanet = rHouses - 20 + (idx % 2 === 0 ? 8 : -8)
-            const pos = polarToCartesian(rPlanet, ang)
-            const isHovered = hoveredPlanet && hoveredPlanet.id === p.id
+          {/* Center Emblem */}
+          <circle cx={cx} cy={cy} r="24" fill="#161942" stroke="#3858f6" strokeWidth="1.5" />
+          <text
+            x={cx}
+            y={cy + 4}
+            fill="#00d2ff"
+            fontSize="12"
+            fontWeight="bold"
+            textAnchor="middle"
+          >
+            ✦
+          </text>
+
+          {/* Planet Glyphs Positioned on Wheel */}
+          {planets.map((planet) => {
+            const pAngle = lonToAngle(planet.longitude)
+            const glyphPos = polarToCartesian((rZodiac + rHouses) / 2, pAngle)
 
             return (
               <g
-                key={p.id}
-                onMouseEnter={() => setHoveredPlanet(p)}
+                key={planet.id}
+                onMouseEnter={() => setHoveredPlanet(planet)}
                 onMouseLeave={() => setHoveredPlanet(null)}
-                className="cursor-pointer transition-transform"
+                className="cursor-pointer transition-transform duration-200"
               >
                 <circle
-                  cx={pos.x}
-                  cy={pos.y}
-                  r={isHovered ? 14 : 11}
-                  className="fill-slate-900 stroke-purple-400 stroke-1 shadow-md"
+                  cx={glyphPos.x}
+                  cy={glyphPos.y}
+                  r="12"
+                  fill="#101336"
+                  stroke={hoveredPlanet?.id === planet.id ? '#00d2ff' : '#262a63'}
+                  strokeWidth={hoveredPlanet?.id === planet.id ? '2' : '1'}
                 />
                 <text
-                  x={pos.x}
-                  y={pos.y + 4}
+                  x={glyphPos.x}
+                  y={glyphPos.y + 4.5}
+                  fill={planet.color || '#ffffff'}
+                  fontSize="12"
+                  fontWeight="bold"
                   textAnchor="middle"
-                  fill={p.color || '#e0e7ff'}
-                  className="text-xs font-black select-none pointer-events-none"
                 >
-                  {p.glyph}
+                  {planet.glyph}
                 </text>
               </g>
             )
           })}
 
-          {/* Center Point */}
-          <circle cx={cx} cy={cy} r={3} className="fill-purple-400" />
+          {/* Ascendant Marker (ASC) at 9 o'clock */}
+          <g>
+            <line x1="20" y1={cy} x2={cx - rOuter} y2={cy} stroke="#00d2ff" strokeWidth="3" />
+            <rect x="2" y={cy - 10} width="34" height="20" rx="4" fill="#00d2ff" />
+            <text x="19" y={cy + 4} fill="#0b0e29" fontSize="10" fontWeight="black" textAnchor="middle">
+              ASC
+            </text>
+          </g>
+
+          {/* Midheaven Marker (MC) */}
+          {westernData.mc && (
+            <g>
+              {(() => {
+                const mcAngle = lonToAngle(westernData.mc.longitude)
+                const pMC = polarToCartesian(rOuter, mcAngle)
+                const pMCTip = polarToCartesian(rOuter + 18, mcAngle)
+                return (
+                  <>
+                    <line x1={pMC.x} y1={pMC.y} x2={pMCTip.x} y2={pMCTip.y} stroke="#3858f6" strokeWidth="2.5" />
+                    <rect x={pMCTip.x - 12} y={pMCTip.y - 8} width="24" height="16" rx="3" fill="#3858f6" />
+                    <text x={pMCTip.x} y={pMCTip.y + 4} fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
+                      MC
+                    </text>
+                  </>
+                )
+              })()}
+            </g>
+          )}
         </svg>
       </div>
 
@@ -243,17 +282,17 @@ export default function WesternWheelChart({ westernData }) {
           <motion.div
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="px-4 py-2 rounded-xl bg-slate-900/90 border border-purple-500/40 text-xs text-slate-200 flex items-center gap-3 shadow-lg"
+            className="px-4 py-2 rounded-xl bg-[#101336] border border-[#3858f6]/40 text-xs text-[#c5c9f5] flex items-center gap-3 shadow-lg"
           >
             <span className="text-base font-bold" style={{ color: hoveredPlanet.color }}>
               {hoveredPlanet.glyph} {hoveredPlanet.name}
             </span>
-            <span className="text-slate-400">&bull;</span>
-            <span className="font-semibold text-purple-300">
+            <span className="text-[#6b729f]">&bull;</span>
+            <span className="font-semibold text-[#00d2ff]">
               {hoveredPlanet.sign} {hoveredPlanet.dms}
             </span>
-            <span className="text-slate-400">&bull;</span>
-            <span className="text-indigo-300">House {hoveredPlanet.house}</span>
+            <span className="text-[#6b729f]">&bull;</span>
+            <span className="text-white">House {hoveredPlanet.house}</span>
             {hoveredPlanet.is_retrograde && (
               <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono text-[10px]">
                 Rx
@@ -261,7 +300,7 @@ export default function WesternWheelChart({ westernData }) {
             )}
           </motion.div>
         ) : (
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-[#7b82b8] font-mono">
             Hover over any planet glyph on the wheel chart to inspect placement details
           </span>
         )}
@@ -269,3 +308,11 @@ export default function WesternWheelChart({ westernData }) {
     </div>
   )
 }
+
+// React.memo with custom comparison check for performance optimization
+const WesternWheelChart = memo(WesternWheelChartComponent, (prevProps, nextProps) => {
+  return prevProps.westernData?.meta?.julian_day === nextProps.westernData?.meta?.julian_day &&
+         prevProps.westernData?.house_system === nextProps.westernData?.house_system
+})
+
+export default WesternWheelChart

@@ -22,6 +22,9 @@ const CrossIcon = ({ className = 'w-4 h-4' }) => (
   </svg>
 )
 
+// In-memory client-side geocoding cache outside the component render cycle
+const NOMINATIM_CACHE = new Map()
+
 /**
  * Estimates UTC offset formatted string (+HH:MM) from longitude or country
  */
@@ -76,11 +79,20 @@ export default function LocationPicker({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Debounced search effect (350ms)
+  // Debounced search effect (350ms) with in-memory caching
   useEffect(() => {
-    if (!query.trim() || query.length < 2) {
+    const trimmed = query.trim().toLowerCase()
+    if (!trimmed || trimmed.length < 2) {
       setResults([])
       setLoading(false)
+      return
+    }
+
+    // Fast-path: Check memory cache before firing request
+    if (NOMINATIM_CACHE.has(trimmed)) {
+      setResults(NOMINATIM_CACHE.get(trimmed))
+      setLoading(false)
+      setIsOpen(true)
       return
     }
 
@@ -126,6 +138,8 @@ export default function LocationPicker({
               countryCode
             }
           })
+          // Save to memory cache
+          NOMINATIM_CACHE.set(trimmed, mapped)
           setResults(mapped)
           setIsOpen(true)
         }

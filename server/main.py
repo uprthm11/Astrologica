@@ -6,9 +6,18 @@ from contextlib import asynccontextmanager
 from typing import Union, List, Dict, Any, Optional
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
 
 from database import connect_to_mongo, close_mongo_connection, ping_database, get_database
+from models import (
+    BaseBirthDataRequest,
+    WesternRequest,
+    VedicRequest,
+    DualRequest,
+    MBTILegacyRequest,
+    MBTIEvaluateRequest,
+    SaveBlueprintRequest,
+    SaveBlueprintResponse,
+)
 from services.astro_western import calculate_western_chart
 from services.astro_vedic import calculate_vedic_chart
 from services.astro_dual import calculate_dual_chart
@@ -16,9 +25,8 @@ from services.mbti_engine import (
     ASSESSMENT_QUESTIONS,
     evaluate_psychometric_assessment,
     synthesize_astrology_and_mbti,
-    calculate_jungian_cognitive_stack,
-    MBTI_ARCHETYPES_DATABASE
 )
+from routers.admin import router as admin_router
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -37,7 +45,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Astrologica Astrological & Psychometric Engine",
     description="Full-Spectrum Astrological Engine with Western (Tropical), Vedic (Sidereal / Jyotish), Dual Synthesis, and 24-Item Jungian Psychometric Cognitive Function Assessment.",
-    version="2.1.0",
+    version="2.2.0",
     lifespan=lifespan
 )
 
@@ -63,49 +71,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Pydantic Models ---
+# Mount Admin Router
+app.include_router(admin_router)
 
-class BaseBirthDataRequest(BaseModel):
-    date: str = Field(..., description="Date of birth in YYYY/MM/DD or YYYY-MM-DD format", example="2003/06/11")
-    time: str = Field(..., description="Time of birth in HH:MM or HH:MM:SS format (24h)", example="12:00")
-    utc_offset: str = Field(..., description="UTC time offset string, e.g. '+05:30'", example="+05:30")
-    lat: Union[float, str] = Field(..., description="Latitude in decimal degrees", example=22.7196)
-    lon: Union[float, str] = Field(..., description="Longitude in decimal degrees", example=75.8577)
-
-class WesternRequest(BaseBirthDataRequest):
-    house_system: Optional[str] = Field("placidus", description="House system ('placidus' or 'whole_sign')")
-
-class VedicRequest(BaseBirthDataRequest):
-    ayanamsha: Optional[str] = Field("lahiri", description="Ayanamsha ('lahiri', 'raman', or 'kp')")
-
-class DualRequest(BaseBirthDataRequest):
-    ayanamsha: Optional[str] = Field("lahiri", description="Ayanamsha ('lahiri', 'raman', or 'kp')")
-    house_system: Optional[str] = Field("placidus", description="House system ('placidus' or 'whole_sign')")
-
-class MBTILegacyRequest(BaseModel):
-    answers: List[Any] = Field(..., description="Array of answers (4 legacy integers or full 24 responses)", example=[1, -1, 1, -1])
-
-class MBTIEvaluateRequest(BaseModel):
-    responses: List[Any] = Field(..., description="Array of 24 responses (+1/-1 or 'A'/'B')", example=[1]*24)
-
-class SaveBlueprintRequest(BaseModel):
-    astrology: Dict[str, Any] = Field(..., description="Astrology data (Western, Vedic, or Dual)")
-    mbti: Dict[str, Any] = Field(..., description="MBTI psychometric & cognitive profile data")
-    preferences: Optional[Dict[str, Any]] = Field(default_factory=dict, description="User settings/preferences")
-
-class SaveBlueprintResponse(BaseModel):
-    status: str = "success"
-    id: str
-    message: str = "Blueprint saved successfully"
-
-# --- Endpoints ---
+# --- Core Public Endpoints ---
 
 @app.get("/")
 async def root():
     return {
         "app": "Astrologica Astrological & Psychometric Engine",
         "status": "online",
-        "version": "2.1.0",
+        "version": "2.2.0",
         "endpoints": {
             "docs": "/docs",
             "health": "/api/health",
@@ -116,7 +92,12 @@ async def root():
             "mbti_evaluate": "/api/mbti/evaluate",
             "calculate_mbti": "/api/calculate-mbti",
             "save_blueprint": "/api/save-blueprint",
-            "get_blueprint": "/api/blueprint/{id}"
+            "get_blueprint": "/api/blueprint/{id}",
+            "public_config": "/api/public/config",
+            "contact": "/api/contact",
+            "admin_login": "/api/admin/login",
+            "admin_config": "/api/admin/config",
+            "admin_messages": "/api/admin/messages"
         }
     }
 
@@ -128,7 +109,7 @@ async def health_check():
         "timestamp": datetime.utcnow().isoformat(),
         "database": "connected" if db_connected else "disconnected",
         "service": "Astrologica Engine",
-        "version": "2.1.0"
+        "version": "2.2.0"
     }
 
 @app.post("/api/calculate/western", status_code=status.HTTP_200_OK)
@@ -301,7 +282,7 @@ async def save_blueprint(request: SaveBlueprintRequest):
         "astrology": request.astrology,
         "mbti": request.mbti,
         "synthesis": synthesis_report,
-        "preferences": request.preferences,
+        "preferences": request.preferences or {},
         "created_at": timestamp
     }
     

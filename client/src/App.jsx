@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { saveBlueprint, checkHealth } from './services/api'
+import { saveBlueprint, checkHealth, getPublicConfig } from './services/api'
+import { useAppStore } from './store/useAppStore'
 import Sidebar from './components/layout/Sidebar'
 import Header from './components/layout/Header'
 import BlueprintForm from './components/BlueprintForm'
 import MBTIQuiz from './components/MBTIQuiz'
 import SharedDossier from './components/SharedDossier'
+import AdminLogin from './components/admin/AdminLogin'
+import AdminDashboard from './components/admin/AdminDashboard'
 
 // Quick Status Metrics Row
 function MetricCardsRow() {
@@ -54,12 +57,9 @@ function MetricCardsRow() {
   )
 }
 
-function MainAssessment({ activeTab, setActiveTab }) {
+function MainAssessment() {
   const navigate = useNavigate()
-
-  // Centralized lifted state
-  const [astrologyData, setAstrologyData] = useState(null)
-  const [mbtiData, setMbtiData] = useState(null)
+  const { astrologyData, mbtiData, activeTab, setActiveTab } = useAppStore()
 
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
@@ -151,10 +151,7 @@ function MainAssessment({ activeTab, setActiveTab }) {
               transition={{ duration: 0.25 }}
               className="w-full"
             >
-              <BlueprintForm
-                onComplete={(data) => setAstrologyData(data)}
-                completedData={astrologyData}
-              />
+              <BlueprintForm />
             </motion.div>
           ) : (
             <motion.div
@@ -165,10 +162,7 @@ function MainAssessment({ activeTab, setActiveTab }) {
               transition={{ duration: 0.25 }}
               className="w-full"
             >
-              <MBTIQuiz
-                onComplete={(data) => setMbtiData(data)}
-                completedData={mbtiData}
-              />
+              <MBTIQuiz />
             </motion.div>
           )}
         </AnimatePresence>
@@ -248,12 +242,8 @@ function MainAssessment({ activeTab, setActiveTab }) {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('astrology') // 'astrology' | 'psychology'
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [backendStatus, setBackendStatus] = useState({
-    state: 'checking', // 'checking' | 'waking' | 'online' | 'offline'
-    retries: 0
-  })
+  const { setBackendStatus, setBackendReady, setSiteConfig } = useAppStore()
 
   const checkServer = async (attempt = 0) => {
     try {
@@ -262,9 +252,9 @@ export default function App() {
       } else {
         setBackendStatus({ state: 'checking', retries: 0 })
       }
-      // 60s timeout to allow Render free tier cold start (~30-50s)
       await checkHealth(60000)
       setBackendStatus({ state: 'online', retries: 0 })
+      setBackendReady(true)
     } catch (err) {
       console.warn(`Health check attempt ${attempt + 1} failed:`, err.message)
       if (attempt < 5) {
@@ -272,12 +262,21 @@ export default function App() {
         setTimeout(() => checkServer(attempt + 1), 6000)
       } else {
         setBackendStatus({ state: 'offline', retries: attempt })
+        setBackendReady(false)
       }
     }
   }
 
+  // Cold-Start Pre-warming & Initial Site Configuration Fetch
   useEffect(() => {
     checkServer(0)
+
+    // Fire-and-forget public config fetch to display any active site announcements
+    getPublicConfig()
+      .then((cfg) => {
+        if (cfg) setSiteConfig(cfg)
+      })
+      .catch((err) => console.log('Public config notice:', err.message))
   }, [])
 
   return (
@@ -285,8 +284,6 @@ export default function App() {
       <div className="min-h-screen bg-[#0b0e29] text-[#e2e8f0] flex">
         {/* Left Fixed Sidebar Navigation */}
         <Sidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
           isOpen={sidebarOpen}
           setIsOpen={setSidebarOpen}
         />
@@ -295,8 +292,6 @@ export default function App() {
         <div className="flex-1 lg:pl-64 flex flex-col min-h-screen w-full">
           {/* Top Executive Header */}
           <Header
-            activeTab={activeTab}
-            backendStatus={backendStatus}
             onRetryHealth={() => checkServer(0)}
             onOpenSidebar={() => setSidebarOpen(true)}
           />
@@ -304,16 +299,10 @@ export default function App() {
           {/* Dynamic Route View */}
           <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full">
             <Routes>
-              <Route
-                path="/"
-                element={
-                  <MainAssessment
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                  />
-                }
-              />
+              <Route path="/" element={<MainAssessment />} />
               <Route path="/blueprint/:id" element={<SharedDossier />} />
+              <Route path="/admin" element={<AdminLogin />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
             </Routes>
           </main>
 

@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, memo } from 'react'
 import { motion } from 'framer-motion'
 
-export default function NorthIndianChart({ vedicData }) {
+function NorthIndianChartComponent({ vedicData }) {
   const [chartType, setChartType] = useState('D1') // 'D1' (Rashi) | 'D9' (Navamsha)
 
   if (!vedicData || !vedicData.planets || !vedicData.lagna) return null
@@ -16,12 +16,10 @@ export default function NorthIndianChart({ vedicData }) {
     const houseNum = i + 1
     const rashiNum = ((lagnaRashiIdx - 1 + i) % 12) + 1
     
-    // Find planets in this house for selected chart type
     let housePlanets = []
     if (chartType === 'D1') {
       housePlanets = planets.filter((p) => p.bhava === houseNum)
     } else {
-      // D9 Navamsha: house relative to D9 Lagna
       const d9LagnaIdx = lagna.navamsha_d9.sign_index
       housePlanets = planets.filter((p) => {
         const pD9SignIdx = p.navamsha_d9.sign_index
@@ -59,95 +57,110 @@ export default function NorthIndianChart({ vedicData }) {
       <div className="flex items-center gap-2 mb-4">
         <button
           onClick={() => setChartType('D1')}
-          className={`px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
             chartType === 'D1'
-              ? 'bg-purple-600 text-white shadow-md'
-              : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+              ? 'bg-[#3858f6] text-white shadow-md'
+              : 'bg-[#101336] text-[#7b82b8] border border-[#262a63] hover:text-white'
           }`}
         >
-          Rashi Chart (D1)
+          D1 Rashi Chart
         </button>
         <button
           onClick={() => setChartType('D9')}
-          className={`px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
             chartType === 'D9'
-              ? 'bg-purple-600 text-white shadow-md'
-              : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+              ? 'bg-[#3858f6] text-white shadow-md'
+              : 'bg-[#101336] text-[#7b82b8] border border-[#262a63] hover:text-white'
           }`}
         >
-          Navamsha Chart (D9)
+          D9 Navamsha Chart
         </button>
       </div>
 
-      <div className="relative w-full max-w-[480px] aspect-square p-2">
-        <svg
-          viewBox="0 0 500 500"
-          className="w-full h-full drop-shadow-[0_0_25px_rgba(168,85,247,0.15)]"
-        >
-          {/* Outer Border */}
-          <rect
-            x="10"
-            y="10"
-            width="480"
-            height="480"
-            className="fill-slate-950/90 stroke-purple-500/40 stroke-2"
+      <div className="relative w-full max-w-[460px] aspect-square">
+        <svg viewBox="0 0 500 500" className="w-full h-full drop-shadow-2xl select-none">
+          {/* Outer Border Square */}
+          <rect x="10" y="10" width="480" height="480" fill="#0d1033" stroke="#262a63" strokeWidth="2.5" />
+
+          {/* Diagonal Lines creating 12 Diamond & Triangle Houses */}
+          <line x1="10" y1="10" x2="490" y2="490" stroke="#262a63" strokeWidth="2" />
+          <line x1="10" y1="490" x2="490" y2="10" stroke="#262a63" strokeWidth="2" />
+
+          {/* Inner Diamond connecting Midpoints */}
+          <polygon
+            points="250,10 490,250 250,490 10,250"
+            fill="#12163b"
+            stroke="#3858f6"
+            strokeWidth="2"
+            strokeOpacity="0.8"
           />
 
-          {/* Diagonal Corner-to-Corner Lines */}
-          <line x1="10" y1="10" x2="490" y2="490" className="stroke-purple-500/30 stroke-1.5" />
-          <line x1="490" y1="10" x2="10" y2="490" className="stroke-purple-500/30 stroke-1.5" />
+          {/* Lagna (Ascendant) Indicator Badge in House 1 */}
+          <g>
+            <rect x="232" y="30" width="36" height="18" rx="4" fill="#00d2ff" />
+            <text x="250" y="43" fill="#0b0e29" fontSize="10" fontWeight="black" textAnchor="middle">
+              Asc
+            </text>
+          </g>
 
-          {/* Central Diamond Lines connecting midpoints */}
-          <line x1="250" y1="10" x2="10" y2="250" className="stroke-purple-500/40 stroke-2" />
-          <line x1="10" y1="250" x2="250" y2="490" className="stroke-purple-500/40 stroke-2" />
-          <line x1="250" y1="490" x2="490" y2="250" className="stroke-purple-500/40 stroke-2" />
-          <line x1="490" y1="250" x2="250" y2="10" className="stroke-purple-500/40 stroke-2" />
-
-          {/* House Content: Rashi Numbers & Occupying Planets */}
-          {housesMap.map((hData) => {
-            const pos = houseLabelPositions[hData.house]
+          {/* Render House Labels & Occupying Planets */}
+          {housesMap.map((hInfo) => {
+            const pos = houseLabelPositions[hInfo.house]
             if (!pos) return null
 
             return (
-              <g key={`n-house-${hData.house}`}>
+              <g key={`h-${hInfo.house}`}>
                 {/* Rashi Number */}
                 <text
                   x={pos.rashi.x}
                   y={pos.rashi.y}
+                  fill="#7b82b8"
+                  fontSize="12"
+                  fontWeight="bold"
+                  fontFamily="monospace"
                   textAnchor="middle"
-                  className="fill-amber-400/80 font-mono text-xs font-bold select-none"
                 >
-                  {hData.rashiNumber}
+                  {hInfo.rashiNumber}
                 </text>
 
                 {/* Occupying Planets */}
-                <text
-                  x={pos.body.x}
-                  y={pos.body.y}
-                  textAnchor="middle"
-                  className="fill-slate-100 font-sans text-xs font-semibold select-none leading-relaxed"
-                >
-                  {hData.planets.map((p, pIdx) => (
-                    <tspan
-                      key={p.id}
-                      x={pos.body.x}
-                      dy={pIdx === 0 ? 0 : 13}
-                      fill={p.color || '#e0e7ff'}
-                    >
-                      {p.name.slice(0, 2)}
-                      {p.is_retrograde ? '(R)' : ''}
-                    </tspan>
-                  ))}
-                </text>
+                <g transform={`translate(${pos.body.x}, ${pos.body.y})`}>
+                  {hInfo.planets.map((p, pIdx) => {
+                    const yOffset = (pIdx - (hInfo.planets.length - 1) / 2) * 16
+                    const isRetro = p.is_retrograde
+
+                    return (
+                      <text
+                        key={p.id}
+                        x="0"
+                        y={yOffset}
+                        fill={p.color || '#ffffff'}
+                        fontSize="11"
+                        fontWeight="bold"
+                        textAnchor="middle"
+                      >
+                        {p.glyph} {p.name.slice(0, 2)}
+                        {isRetro && <tspan fill="#f59e0b" fontSize="9"> (R)</tspan>}
+                      </text>
+                    )
+                  })}
+                </g>
               </g>
             )
           })}
         </svg>
       </div>
 
-      <p className="text-[11px] text-slate-500 mt-2">
-        North Indian Diamond Format &bull; House 1 (Lagna) is at the Top Center &bull; Numbers indicate Rashis (1=Aries ... 12=Pisces)
-      </p>
+      <div className="text-[11px] font-mono text-[#7b82b8] mt-3 text-center">
+        North Indian Diamond Chart &bull; Fixed House 1 at Top &bull; Numbers indicate Rashis (1=Aries ... 12=Pisces)
+      </div>
     </div>
   )
 }
+
+const NorthIndianChart = memo(NorthIndianChartComponent, (prevProps, nextProps) => {
+  return prevProps.vedicData?.meta?.ayanamsha_degrees === nextProps.vedicData?.meta?.ayanamsha_degrees &&
+         prevProps.vedicData?.lagna?.longitude === nextProps.vedicData?.lagna?.longitude
+})
+
+export default NorthIndianChart

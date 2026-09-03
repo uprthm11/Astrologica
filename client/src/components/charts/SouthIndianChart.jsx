@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, memo } from 'react'
 
 const SIGN_BOX_POSITIONS = {
   Pisces: { row: 0, col: 0, name: 'Pisces', rashiNum: 12 },
@@ -15,7 +15,7 @@ const SIGN_BOX_POSITIONS = {
   Aquarius: { row: 1, col: 0, name: 'Aquarius', rashiNum: 11 }
 }
 
-export default function SouthIndianChart({ vedicData }) {
+function SouthIndianChartComponent({ vedicData }) {
   const [chartType, setChartType] = useState('D1') // 'D1' | 'D9'
 
   if (!vedicData || !vedicData.planets || !vedicData.lagna) return null
@@ -47,133 +47,131 @@ export default function SouthIndianChart({ vedicData }) {
       <div className="flex items-center gap-2 mb-4">
         <button
           onClick={() => setChartType('D1')}
-          className={`px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
             chartType === 'D1'
-              ? 'bg-indigo-600 text-white shadow-md'
-              : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+              ? 'bg-[#3858f6] text-white shadow-md'
+              : 'bg-[#101336] text-[#7b82b8] border border-[#262a63] hover:text-white'
           }`}
         >
-          Rashi Chart (D1)
+          D1 Rashi Chart
         </button>
         <button
           onClick={() => setChartType('D9')}
-          className={`px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
             chartType === 'D9'
-              ? 'bg-indigo-600 text-white shadow-md'
-              : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+              ? 'bg-[#3858f6] text-white shadow-md'
+              : 'bg-[#101336] text-[#7b82b8] border border-[#262a63] hover:text-white'
           }`}
         >
-          Navamsha Chart (D9)
+          D9 Navamsha Chart
         </button>
       </div>
 
-      <div className="relative w-full max-w-[480px] aspect-square p-2">
-        <svg
-          viewBox="0 0 500 500"
-          className="w-full h-full drop-shadow-[0_0_25px_rgba(99,102,241,0.15)]"
-        >
-          {/* Outer Border */}
-          <rect
-            x="20"
-            y="20"
-            width="460"
-            height="460"
-            className="fill-slate-950/90 stroke-indigo-500/40 stroke-2"
-          />
+      <div className="relative w-full max-w-[500px] aspect-square">
+        <svg viewBox="0 0 500 500" className="w-full h-full drop-shadow-2xl select-none">
+          {/* Outer Grid 4x4 */}
+          <rect x={offset} y={offset} width={boxSize * 4} height={boxSize * 4} fill="#0d1033" stroke="#262a63" strokeWidth="2" />
 
-          {/* Central Void */}
+          {/* Central Void (2x2 center) */}
           <rect
-            x="135"
-            y="135"
-            width="230"
-            height="230"
-            className="fill-slate-900/60 stroke-indigo-500/30 stroke-1"
+            x={offset + boxSize}
+            y={offset + boxSize}
+            width={boxSize * 2}
+            height={boxSize * 2}
+            fill="#101336"
+            stroke="#262a63"
+            strokeWidth="1.5"
           />
-
-          {/* Center Brand Text */}
           <text
-            x="250"
-            y="245"
+            x={offset + boxSize * 2}
+            y={offset + boxSize * 2 - 8}
+            fill="#00d2ff"
+            fontSize="14"
+            fontWeight="bold"
             textAnchor="middle"
-            className="fill-indigo-300 font-bold text-sm select-none"
           >
-            {chartType === 'D1' ? 'RASHI (D1)' : 'NAVAMSHA (D9)'}
+            ✦ South Indian
           </text>
           <text
-            x="250"
-            y="265"
+            x={offset + boxSize * 2}
+            y={offset + boxSize * 2 + 14}
+            fill="#7b82b8"
+            fontSize="10"
+            fontFamily="monospace"
             textAnchor="middle"
-            className="fill-slate-500 font-mono text-[10px] select-none"
           >
-            South Indian Format
+            Fixed Zodiac (Aries Top-2)
           </text>
 
-          {/* 12 Sign Boxes */}
+          {/* 12 Zodiac Sign Boxes */}
           {Object.entries(SIGN_BOX_POSITIONS).map(([sName, pos]) => {
-            const bx = offset + pos.col * boxSize
-            const by = offset + pos.row * boxSize
+            const x = offset + pos.col * boxSize
+            const y = offset + pos.row * boxSize
+            const pList = planetsBySign[sName] || []
             const isLagna = sName === lagnaRashiName
-            const occupants = planetsBySign[sName] || []
 
             return (
               <g key={sName}>
                 {/* Box Boundary */}
                 <rect
-                  x={bx}
-                  y={by}
+                  x={x}
+                  y={y}
                   width={boxSize}
                   height={boxSize}
-                  className="fill-transparent stroke-indigo-500/30 stroke-1"
+                  fill={isLagna ? '#161942' : '#0d1033'}
+                  stroke="#262a63"
+                  strokeWidth="1"
                 />
 
-                {/* Sign Label (Top-Left of Box) */}
+                {/* Sign Label & Rashi Number */}
                 <text
-                  x={bx + 6}
-                  y={by + 14}
-                  className="fill-slate-500 font-mono text-[9px] uppercase font-bold select-none"
+                  x={x + 8}
+                  y={y + 16}
+                  fill="#6b729f"
+                  fontSize="10"
+                  fontFamily="monospace"
+                  fontWeight="bold"
                 >
                   {sName.slice(0, 3)}
                 </text>
 
-                {/* Lagna Marker if applicable */}
+                {/* Lagna / ASC Indicator in Box */}
                 {isLagna && (
                   <g>
-                    <line
-                      x1={bx}
-                      y1={by}
-                      x2={bx + 30}
-                      y2={by + 30}
-                      className="stroke-amber-400 stroke-2"
-                    />
+                    <rect x={x + boxSize - 32} y={y + 6} width="26" height="14" rx="3" fill="#00d2ff" />
                     <text
-                      x={bx + boxSize - 6}
-                      y={by + 14}
-                      textAnchor="end"
-                      className="fill-amber-400 font-bold text-[10px] select-none"
+                      x={x + boxSize - 19}
+                      y={y + 16.5}
+                      fill="#0b0e29"
+                      fontSize="8.5"
+                      fontWeight="black"
+                      textAnchor="middle"
                     >
-                      ASC
+                      Asc
                     </text>
                   </g>
                 )}
 
-                {/* Occupying Planets */}
-                <g transform={`translate(${bx + 12}, ${by + 32})`}>
-                  {occupants.map((p, pIdx) => (
-                    <text
-                      key={p.id}
-                      x={0}
-                      y={pIdx * 14}
-                      fill={p.color || '#e0e7ff'}
-                      className="text-[11px] font-semibold select-none font-sans"
-                    >
-                      {p.name.slice(0, 2)}
-                      {p.is_retrograde ? '(R)' : ''}
-                      <tspan className="fill-slate-400 font-mono text-[9px] ml-1">
-                        {' '}
-                        {Math.floor(p.degrees)}°
-                      </tspan>
-                    </text>
-                  ))}
+                {/* Planets inside Box */}
+                <g transform={`translate(${x + boxSize / 2}, ${y + 36})`}>
+                  {pList.map((p, pIdx) => {
+                    const yOff = pIdx * 15
+                    const isRetro = p.is_retrograde
+                    return (
+                      <text
+                        key={p.id}
+                        x="0"
+                        y={yOff}
+                        fill={p.color || '#ffffff'}
+                        fontSize="11"
+                        fontWeight="bold"
+                        textAnchor="middle"
+                      >
+                        {p.glyph} {p.name.slice(0, 2)}
+                        {isRetro && <tspan fill="#f59e0b" fontSize="9"> (R)</tspan>}
+                      </text>
+                    )
+                  })}
                 </g>
               </g>
             )
@@ -181,9 +179,16 @@ export default function SouthIndianChart({ vedicData }) {
         </svg>
       </div>
 
-      <p className="text-[11px] text-slate-500 mt-2">
-        South Indian Square Format &bull; Signs are Fixed Clockwise &bull; 'ASC' marks the Ascendant (Lagna)
-      </p>
+      <div className="text-[11px] font-mono text-[#7b82b8] mt-3 text-center">
+        South Indian Square Chart &bull; Fixed Sign Boxes &bull; Traverses Clockwise from Pisces (Top Left)
+      </div>
     </div>
   )
 }
+
+const SouthIndianChart = memo(SouthIndianChartComponent, (prevProps, nextProps) => {
+  return prevProps.vedicData?.meta?.ayanamsha_degrees === nextProps.vedicData?.meta?.ayanamsha_degrees &&
+         prevProps.vedicData?.lagna?.longitude === nextProps.vedicData?.lagna?.longitude
+})
+
+export default SouthIndianChart

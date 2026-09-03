@@ -1,4 +1,6 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
+import { useAppStore } from '../../store/useAppStore'
 
 const SearchIcon = ({ className = 'w-4 h-4' }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -18,7 +20,9 @@ const MenuIcon = ({ className = 'w-5 h-5' }) => (
   </svg>
 )
 
-export default function Header({ backendStatus, onRetryHealth, activeTab, onOpenSidebar }) {
+export default function Header({ onRetryHealth, onOpenSidebar }) {
+  const { activeTab, backendStatus, siteConfig, adminToken } = useAppStore()
+
   const sectionTitle =
     activeTab === 'astrology'
       ? 'Dual Ephemeris Calculation Console'
@@ -26,12 +30,20 @@ export default function Header({ backendStatus, onRetryHealth, activeTab, onOpen
 
   return (
     <header className="sticky top-0 z-30 w-full bg-[#0b0e29]/90 backdrop-blur-xl border-b border-[#262a63]">
+      {/* Global Announcement Banner (if toggled on by Admin) */}
+      {siteConfig?.show_banner && siteConfig?.banner_message && (
+        <div className="w-full bg-gradient-to-r from-[#3858f6]/30 via-[#161942] to-[#00d2ff]/30 border-b border-[#3858f6]/40 px-4 py-1.5 text-center text-[11px] font-medium text-white flex items-center justify-center gap-2">
+          <span className="text-[#00d2ff]">✦</span>
+          <span>{siteConfig.banner_message}</span>
+        </div>
+      )}
+
       <div className="px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
         {/* Left: Mobile Toggle & Breadcrumb */}
         <div className="flex items-center gap-3">
           <button
             onClick={onOpenSidebar}
-            className="lg:hidden p-2 rounded-xl bg-[#161942] border border-[#262a63] text-[#9aa0cf] hover:text-white"
+            className="lg:hidden p-2 rounded-xl bg-[#161942] border border-[#262a63] text-[#9aa0cf] hover:text-white cursor-pointer"
           >
             <MenuIcon className="w-5 h-5" />
           </button>
@@ -97,30 +109,35 @@ export default function Header({ backendStatus, onRetryHealth, activeTab, onOpen
             </button>
           )}
 
-          {/* Notification Hub */}
-          <div className="relative">
-            <button className="p-2 rounded-xl bg-[#161942] border border-[#262a63] text-[#9aa0cf] hover:text-white transition relative">
-              <BellIcon className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#00d2ff]" />
-            </button>
-          </div>
+          {/* Admin Notification Link */}
+          <Link
+            to={adminToken ? '/admin/dashboard' : '/admin'}
+            className="p-2 rounded-xl bg-[#161942] border border-[#262a63] text-[#9aa0cf] hover:text-white transition relative"
+            title="Admin Portal"
+          >
+            <BellIcon className="w-4 h-4" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#00d2ff]" />
+          </Link>
 
           {/* User Profile Pill */}
-          <div className="flex items-center gap-2.5 pl-2 border-l border-[#262a63]">
+          <Link
+            to={adminToken ? '/admin/dashboard' : '/admin'}
+            className="flex items-center gap-2.5 pl-2 border-l border-[#262a63] cursor-pointer group"
+          >
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#3858f6] to-[#00d2ff] p-0.5 flex items-center justify-center shadow-md shadow-[#3858f6]/30">
               <div className="w-full h-full bg-[#101336] rounded-[10px] flex items-center justify-center font-bold text-xs text-[#00d2ff]">
                 ✦
               </div>
             </div>
             <div className="hidden lg:block text-left">
-              <div className="text-xs font-bold text-white leading-none">
-                Cosmic Admin
+              <div className="text-xs font-bold text-white group-hover:text-[#00d2ff] transition leading-none">
+                {adminToken ? 'Admin Active' : 'Cosmic Admin'}
               </div>
               <div className="text-[10px] font-mono text-[#7b82b8] leading-none mt-1">
-                Astrologer Pro
+                {adminToken ? 'Console Ready' : 'Astrologer Pro'}
               </div>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
     </header>
