@@ -11,12 +11,6 @@ const CalendarIcon = ({ className = 'w-4 h-4' }) => (
   </svg>
 )
 
-const ClockIcon = ({ className = 'w-4 h-4' }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-)
-
 const SettingsIcon = ({ className = 'w-4 h-4' }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -120,38 +114,41 @@ export default function BlueprintForm({ onComplete, completedData }) {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full max-w-5xl mx-auto">
       <AnimatePresence mode="wait">
         {!result ? (
-          /* --- Executive Admin Dashboard Form Card --- */
+          /* --- Executive Admin Dashboard Panel --- */
           <motion.div
             key="dashboard-form"
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.3 }}
-            className="rounded-2xl bg-zinc-950 border border-zinc-800/80 shadow-2xl overflow-hidden text-left"
+            className="dashboard-card overflow-hidden text-left"
           >
             {/* Dashboard Header Bar */}
-            <div className="px-6 py-5 border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-md flex flex-wrap items-center justify-between gap-4">
+            <div className="px-6 py-5 border-b border-[#262a63] bg-[#12163b]/70 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                <div className="w-10 h-10 rounded-xl bg-[#3858f6]/15 border border-[#3858f6]/40 flex items-center justify-center text-[#00d2ff] shadow-sm">
                   <SparklesIcon className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-zinc-100 tracking-tight">
-                    Astrological Blueprint & Ephemeris Engine
+                  <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                    <span>Ephemeris Calculation Console</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#1c2154] text-[#00d2ff] border border-[#2e3682]">
+                      Tropical + Sidereal
+                    </span>
                   </h2>
-                  <p className="text-xs text-zinc-400">
-                    Dual-Spectrum Tropical & Sidereal Jyotish Calculation Console
+                  <p className="text-xs text-[#7b82b8] mt-0.5">
+                    High-precision Swiss Ephemeris matrix with equinoctial precession shift analysis
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold bg-zinc-900 border border-zinc-700 text-zinc-300">
+                <span className="badge-status bg-[#101336] border border-[#262a63] text-[#7b82b8]">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Engine: v2.1.0 Active
+                  Engine: v2.1.0 Ready
                 </span>
               </div>
             </div>
@@ -159,18 +156,18 @@ export default function BlueprintForm({ onComplete, completedData }) {
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               {/* Structured Dashboard Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {/* --- Panel 1: Identity & Birth Timing --- */}
-                <div className="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-4">
-                  <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
-                    <CalendarIcon className="w-4 h-4 text-indigo-400" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
-                      1. Date & Chronological Time
+                {/* --- Panel 1: Identity & Chronological Anchor --- */}
+                <div className="p-5 rounded-xl bg-[#101336]/80 border border-[#262a63] space-y-4">
+                  <div className="flex items-center gap-2 border-b border-[#262a63] pb-3">
+                    <CalendarIcon className="w-4 h-4 text-[#00d2ff]" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-white">
+                      1. Chronological Anchor
                     </span>
                   </div>
 
                   <div className="space-y-3.5">
                     <div>
-                      <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                      <label className="block text-xs font-medium text-[#9aa0cf] mb-1.5">
                         Date of Birth (YYYY/MM/DD)
                       </label>
                       <input
@@ -179,13 +176,13 @@ export default function BlueprintForm({ onComplete, completedData }) {
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
                         placeholder="2003/06/11"
-                        className="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 placeholder-zinc-600 text-sm rounded-lg px-3.5 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition font-mono"
+                        className="dashboard-input w-full font-mono"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                        <label className="block text-xs font-medium text-[#9aa0cf] mb-1.5">
                           Time (24h HH:MM)
                         </label>
                         <input
@@ -194,12 +191,12 @@ export default function BlueprintForm({ onComplete, completedData }) {
                           value={time}
                           onChange={(e) => setTime(e.target.value)}
                           placeholder="12:00"
-                          className="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 placeholder-zinc-600 text-sm rounded-lg px-3.5 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition font-mono"
+                          className="dashboard-input w-full font-mono"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                        <label className="block text-xs font-medium text-[#9aa0cf] mb-1.5">
                           UTC Offset
                         </label>
                         <input
@@ -208,19 +205,19 @@ export default function BlueprintForm({ onComplete, completedData }) {
                           value={utcOffset}
                           onChange={(e) => setUtcOffset(e.target.value)}
                           placeholder="+05:30"
-                          className="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 placeholder-zinc-600 text-sm rounded-lg px-3.5 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition font-mono"
+                          className="dashboard-input w-full font-mono"
                         />
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* --- Panel 2: Geolocation & Coordinates --- */}
-                <div className="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-4">
-                  <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
-                    <GlobeIcon className="w-4 h-4 text-cyan-400" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
-                      2. Geolocation & Spatial Anchor
+                {/* --- Panel 2: Spatial & Geodetic Anchor --- */}
+                <div className="p-5 rounded-xl bg-[#101336]/80 border border-[#262a63] space-y-4">
+                  <div className="flex items-center gap-2 border-b border-[#262a63] pb-3">
+                    <GlobeIcon className="w-4 h-4 text-[#3858f6]" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-white">
+                      2. Spatial & Geodetic Anchor
                     </span>
                   </div>
 
@@ -234,26 +231,26 @@ export default function BlueprintForm({ onComplete, completedData }) {
               </div>
 
               {/* --- Panel 3: Calculation Parameters & Engine Config --- */}
-              <div className="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-4">
-                <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+              <div className="p-5 rounded-xl bg-[#101336]/80 border border-[#262a63] space-y-4">
+                <div className="flex items-center justify-between border-b border-[#262a63] pb-3">
                   <div className="flex items-center gap-2">
-                    <SettingsIcon className="w-4 h-4 text-purple-400" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+                    <SettingsIcon className="w-4 h-4 text-[#00d2ff]" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-white">
                       3. Astrological Engine Parameters
                     </span>
                   </div>
-                  <span className="text-[11px] font-mono text-zinc-500">Swiss Ephemeris v2.10</span>
+                  <span className="text-[11px] font-mono text-[#7b82b8]">Swiss Ephemeris v2.10</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                    <label className="block text-xs font-medium text-[#9aa0cf] mb-1.5">
                       Vedic Sidereal Ayanamsha
                     </label>
                     <select
                       value={ayanamsha}
                       onChange={(e) => setAyanamsha(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 text-sm rounded-lg px-3.5 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition cursor-pointer"
+                      className="dashboard-input w-full cursor-pointer"
                     >
                       <option value="lahiri">Lahiri (Chitrapaksha) &bull; Standard Official</option>
                       <option value="raman">B.V. Raman (397 AD Epoch)</option>
@@ -262,13 +259,13 @@ export default function BlueprintForm({ onComplete, completedData }) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                    <label className="block text-xs font-medium text-[#9aa0cf] mb-1.5">
                       Western Tropical House System
                     </label>
                     <select
                       value={houseSystem}
                       onChange={(e) => setHouseSystem(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 text-zinc-100 text-sm rounded-lg px-3.5 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition cursor-pointer"
+                      className="dashboard-input w-full cursor-pointer"
                     >
                       <option value="placidus">Placidus (Quadrant Semi-Arc)</option>
                       <option value="whole_sign">Whole Sign (Equal 30° Houses)</option>
@@ -291,7 +288,7 @@ export default function BlueprintForm({ onComplete, completedData }) {
 
               {/* Executive Submit Action */}
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-xs text-zinc-500 font-mono">
+                <div className="text-xs text-[#7b82b8] font-mono">
                   Calculates 10+ planetary bodies, Nakshatras, Navamsha & Vimshottari Timeline
                 </div>
 
@@ -300,7 +297,7 @@ export default function BlueprintForm({ onComplete, completedData }) {
                   disabled={loading}
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
-                  className="w-full sm:w-auto min-w-[260px] py-3 px-6 rounded-xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 border border-indigo-500/30 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2.5 cursor-pointer"
+                  className="btn-primary w-full sm:w-auto min-w-[280px] !py-3.5"
                 >
                   {loading ? (
                     <>
@@ -347,16 +344,16 @@ export default function BlueprintForm({ onComplete, completedData }) {
             className="w-full space-y-4"
           >
             {/* Top Action Bar to Re-adjust Inputs */}
-            <div className="flex items-center justify-between p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-xs">
-              <div className="flex items-center gap-2 text-zinc-300">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-[#161942] border border-[#262a63] text-xs">
+              <div className="flex items-center gap-2 text-[#9aa0cf]">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span className="font-semibold">Calculated for:</span>
-                <span className="text-zinc-100">{locationName}</span>
-                <span className="text-zinc-500">({date} at {time})</span>
+                <span className="font-semibold text-white">Calculated for:</span>
+                <span className="text-[#00d2ff] font-medium">{locationName}</span>
+                <span className="text-[#7b82b8]">({date} at {time})</span>
               </div>
               <button
                 onClick={handleReset}
-                className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold border border-zinc-700 transition cursor-pointer"
+                className="btn-secondary text-xs"
               >
                 ↺ Modify Parameters
               </button>

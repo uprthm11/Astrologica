@@ -4,9 +4,9 @@ export default function PlanetaryMatrix({ planets = [], isVedic = false }) {
   if (!planets || planets.length === 0) return null
 
   return (
-    <div className="w-full overflow-x-auto rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl shadow-xl">
-      <table className="w-full text-left text-xs text-slate-300">
-        <thead className="bg-slate-950/80 text-[11px] uppercase font-bold text-slate-400 border-b border-slate-800 tracking-wider">
+    <div className="w-full overflow-x-auto rounded-2xl bg-[#161942] border border-[#262a63] backdrop-blur-xl shadow-xl">
+      <table className="w-full text-left text-xs text-[#c5c9f5]">
+        <thead className="bg-[#101336] text-[10px] uppercase font-mono font-bold text-[#7b82b8] border-b border-[#262a63] tracking-wider">
           <tr>
             <th className="px-4 py-3.5">Body</th>
             <th className="px-4 py-3.5">{isVedic ? 'Rashi & Degree' : 'Sign & Degree'}</th>
@@ -16,7 +16,7 @@ export default function PlanetaryMatrix({ planets = [], isVedic = false }) {
             <th className="px-4 py-3.5">Planetary State</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-800/60 font-medium">
+        <tbody className="divide-y divide-[#262a63]/60 font-medium">
           {planets.map((p) => {
             const signText = isVedic
               ? `${p.sanskrit_rashi || p.rashi} (${p.rashi})`
@@ -25,20 +25,20 @@ export default function PlanetaryMatrix({ planets = [], isVedic = false }) {
             return (
               <tr
                 key={p.id}
-                className="hover:bg-slate-800/40 transition-colors duration-150"
+                className="hover:bg-[#1c2154] transition-colors duration-150"
               >
                 {/* Planet Name & Glyph */}
-                <td className="px-4 py-3 font-semibold text-slate-100 flex items-center gap-2">
+                <td className="px-4 py-3 font-semibold text-white flex items-center gap-2.5">
                   <span
-                    className="text-base font-bold w-6 h-6 rounded-lg bg-slate-950/80 border border-slate-800 flex items-center justify-center shrink-0"
-                    style={{ color: p.color || '#e0e7ff' }}
+                    className="text-base font-bold w-6 h-6 rounded-lg bg-[#101336] border border-[#262a63] flex items-center justify-center shrink-0 shadow-sm"
+                    style={{ color: p.color || '#00d2ff' }}
                   >
                     {p.glyph}
                   </span>
                   <div>
-                    <div className="text-slate-100">{p.name}</div>
+                    <div className="text-white font-bold">{p.name}</div>
                     {isVedic && p.vedic_name && (
-                      <div className="text-[10px] text-slate-500 font-mono">
+                      <div className="text-[10px] text-[#7b82b8] font-mono">
                         {p.vedic_name}
                       </div>
                     )}
@@ -47,18 +47,18 @@ export default function PlanetaryMatrix({ planets = [], isVedic = false }) {
 
                 {/* Sign & Degree */}
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-1.5 text-purple-300 font-semibold">
+                  <div className="flex items-center gap-1.5 text-[#00d2ff] font-semibold">
                     <span>{p.sign_glyph || p.rashi_glyph}</span>
                     <span>{signText}</span>
                   </div>
-                  <div className="text-[11px] font-mono text-slate-400 mt-0.5">
+                  <div className="text-[11px] font-mono text-[#7b82b8] mt-0.5">
                     {p.dms || `${p.degrees}°`}
                   </div>
                 </td>
 
                 {/* House / Bhava */}
                 <td className="px-4 py-3">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-950 border border-slate-800 font-mono text-[11px] text-indigo-300 font-bold">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#101336] border border-[#262a63] font-mono text-[11px] text-[#3858f6] font-bold">
                     {isVedic ? `H${p.bhava}` : `H${p.house}`}
                   </span>
                 </td>
@@ -68,18 +68,18 @@ export default function PlanetaryMatrix({ planets = [], isVedic = false }) {
                   <td className="px-4 py-3">
                     {p.nakshatra ? (
                       <div>
-                        <div className="text-slate-200 font-semibold">
+                        <div className="text-white font-semibold">
                           {p.nakshatra.name}{' '}
                           <span className="text-amber-400 text-[10px] font-mono">
                             (P{p.nakshatra.pada})
                           </span>
                         </div>
-                        <div className="text-[10px] text-slate-500 font-mono">
+                        <div className="text-[10px] text-[#7b82b8] font-mono">
                           {p.nakshatra.lord_formatted}
                         </div>
                       </div>
                     ) : (
-                      <span className="text-slate-600">-</span>
+                      <span className="text-[#6b729f]">-</span>
                     )}
                   </td>
                 )}
@@ -88,11 +88,11 @@ export default function PlanetaryMatrix({ planets = [], isVedic = false }) {
                 {isVedic && (
                   <td className="px-4 py-3">
                     {p.navamsha_d9 ? (
-                      <div className="text-cyan-300 font-medium">
+                      <div className="text-[#00d2ff] font-medium font-mono">
                         {p.navamsha_d9.glyph} {p.navamsha_d9.sanskrit}
                       </div>
                     ) : (
-                      <span className="text-slate-600">-</span>
+                      <span className="text-[#6b729f]">-</span>
                     )}
                   </td>
                 )}
@@ -121,12 +121,12 @@ export default function PlanetaryMatrix({ planets = [], isVedic = false }) {
                       </span>
                     )}
                     {p.dignity && p.dignity.startsWith('Own') && (
-                      <span className="px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/30 text-blue-300 text-[10px] font-bold">
+                      <span className="px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/30 text-[#00d2ff] text-[10px] font-bold">
                         Own Sign
                       </span>
                     )}
                     {!p.is_retrograde && !p.is_combust && (!p.dignity || p.dignity === 'Neutral') && (
-                      <span className="text-slate-500 text-[11px]">Direct / Neutral</span>
+                      <span className="text-[#6b729f] text-[11px] font-mono">Direct / Neutral</span>
                     )}
                   </div>
                 </td>

@@ -304,7 +304,7 @@ export default function MBTIQuiz({ onComplete, completedData }) {
   const progressPct = Math.round(((currentStep + 1) / totalQuestions) * 100)
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-3xl mx-auto">
       <AnimatePresence mode="wait">
         {!result && !loading ? (
           /* --- Interactive Question Card --- */
@@ -314,26 +314,22 @@ export default function MBTIQuiz({ onComplete, completedData }) {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -25, scale: 0.96 }}
             transition={{ duration: 0.35, ease: 'easeInOut' }}
-            className="relative p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-indigo-500/20 shadow-2xl backdrop-blur-xl text-left"
+            className="dashboard-card p-6 sm:p-8 text-left space-y-6"
           >
-            {/* Ambient Nebula Glow */}
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
-
             {/* Header: Section + Step Counter */}
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-300 bg-indigo-950/70 border border-indigo-500/30 px-3 py-1 rounded-full">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#262a63] pb-4">
+              <span className="badge-status bg-[#101336] text-[#00d2ff] border border-[#262a63]">
                 Question {currentStep + 1} of {totalQuestions}
               </span>
-              <span className="text-xs font-semibold text-slate-400">
+              <span className="text-xs font-semibold text-[#9aa0cf]">
                 {currentQ.axis_name}
               </span>
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full h-2 bg-slate-950 rounded-full mb-6 overflow-hidden border border-slate-800">
+            <div className="w-full h-2 bg-[#101336] rounded-full overflow-hidden border border-[#262a63]">
               <motion.div
-                className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400"
+                className="h-full bg-gradient-to-r from-[#3858f6] to-[#00d2ff]"
                 initial={{ width: `${(currentStep / totalQuestions) * 100}%` }}
                 animate={{ width: `${progressPct}%` }}
                 transition={{ duration: 0.3 }}
@@ -341,17 +337,17 @@ export default function MBTIQuiz({ onComplete, completedData }) {
             </div>
 
             {/* Question Prompt */}
-            <div className="mb-6">
-              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
                 {currentQ.prompt}
               </h2>
-              <div className="text-[11px] font-mono text-slate-500 mt-1 flex items-center gap-2">
-                <span>⌨️ Press <strong className="text-indigo-300">1 / A</strong> for Option A, <strong className="text-purple-300">2 / B</strong> for Option B</span>
+              <div className="text-[11px] font-mono text-[#7b82b8] mt-1.5 flex items-center gap-2">
+                <span>⌨️ Press <strong className="text-[#00d2ff]">1 / A</strong> for Option A, <strong className="text-[#3858f6]">2 / B</strong> for Option B</span>
               </div>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-950/50 border border-rose-500/30 text-rose-300 text-xs">
+              <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs">
                 ⚠️ {error}
               </div>
             )}
@@ -361,15 +357,15 @@ export default function MBTIQuiz({ onComplete, completedData }) {
               {/* Option A */}
               <motion.button
                 onClick={() => handleSelectOption(1)}
-                whileHover={{ scale: 1.015, y: -2 }}
-                whileTap={{ scale: 0.985 }}
-                className="w-full p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-950/50 via-slate-900 to-slate-950 border border-indigo-500/30 hover:border-indigo-400 text-left transition duration-200 cursor-pointer flex items-start gap-4 shadow-lg group"
+                whileHover={{ scale: 1.01, y: -2 }}
+                whileTap={{ scale: 0.99 }}
+                className="w-full p-4 sm:p-5 rounded-xl bg-[#101336] border border-[#262a63] hover:border-[#3858f6] hover:bg-[#151a4a] text-left transition duration-200 cursor-pointer flex items-start gap-4 shadow-md group"
               >
-                <span className="w-8 h-8 rounded-xl bg-indigo-950/80 border border-indigo-500/40 text-indigo-300 font-mono font-black text-sm flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition">
+                <span className="w-8 h-8 rounded-lg bg-[#161942] border border-[#262a63] text-[#00d2ff] font-mono font-bold text-sm flex items-center justify-center shrink-0 group-hover:bg-[#3858f6] group-hover:text-white transition">
                   A
                 </span>
                 <div className="flex-1">
-                  <div className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-400 mb-1">
+                  <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#00d2ff] mb-1">
                     Option A &bull; {currentQ.option_a.trait} Preference
                   </div>
                   <div className="text-sm sm:text-base font-medium text-slate-100 leading-snug">
@@ -381,15 +377,15 @@ export default function MBTIQuiz({ onComplete, completedData }) {
               {/* Option B */}
               <motion.button
                 onClick={() => handleSelectOption(-1)}
-                whileHover={{ scale: 1.015, y: -2 }}
-                whileTap={{ scale: 0.985 }}
-                className="w-full p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-950/50 via-slate-900 to-slate-950 border border-purple-500/30 hover:border-purple-400 text-left transition duration-200 cursor-pointer flex items-start gap-4 shadow-lg group"
+                whileHover={{ scale: 1.01, y: -2 }}
+                whileTap={{ scale: 0.99 }}
+                className="w-full p-4 sm:p-5 rounded-xl bg-[#101336] border border-[#262a63] hover:border-[#3858f6] hover:bg-[#151a4a] text-left transition duration-200 cursor-pointer flex items-start gap-4 shadow-md group"
               >
-                <span className="w-8 h-8 rounded-xl bg-purple-950/80 border border-purple-500/40 text-purple-300 font-mono font-black text-sm flex items-center justify-center shrink-0 group-hover:bg-purple-600 group-hover:text-white transition">
+                <span className="w-8 h-8 rounded-lg bg-[#161942] border border-[#262a63] text-[#9aa0cf] font-mono font-bold text-sm flex items-center justify-center shrink-0 group-hover:bg-[#3858f6] group-hover:text-white transition">
                   B
                 </span>
                 <div className="flex-1">
-                  <div className="text-xs font-mono font-bold uppercase tracking-wider text-purple-400 mb-1">
+                  <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#9aa0cf] mb-1">
                     Option B &bull; {currentQ.option_b.trait} Preference
                   </div>
                   <div className="text-sm sm:text-base font-medium text-slate-100 leading-snug">
@@ -401,32 +397,34 @@ export default function MBTIQuiz({ onComplete, completedData }) {
 
             {/* Back Button */}
             {currentStep > 0 && (
-              <button
-                onClick={() => {
-                  setCurrentStep(currentStep - 1)
-                  setAnswers(answers.slice(0, -1))
-                }}
-                className="mt-6 text-xs text-slate-500 hover:text-slate-300 transition flex items-center gap-1 mx-auto cursor-pointer"
-              >
-                ← Back to Question {currentStep}
-              </button>
+              <div className="pt-2 text-center">
+                <button
+                  onClick={() => {
+                    setCurrentStep(currentStep - 1)
+                    setAnswers(answers.slice(0, -1))
+                  }}
+                  className="text-xs font-mono text-[#7b82b8] hover:text-white transition cursor-pointer"
+                >
+                  ← Back to Question {currentStep}
+                </button>
+              </div>
             )}
           </motion.div>
         ) : loading ? (
           /* --- Loading Transition Card --- */
           <motion.div
             key="loading-card"
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="p-12 rounded-3xl bg-slate-900/90 border border-indigo-500/20 shadow-2xl backdrop-blur-xl text-center space-y-6"
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="dashboard-card p-12 text-center space-y-6"
           >
-            <div className="w-16 h-16 mx-auto rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center animate-pulse">
-              <span className="text-3xl animate-spin">🔮</span>
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-[#3858f6]/10 border border-[#3858f6]/30 flex items-center justify-center animate-pulse">
+              <span className="text-3xl animate-spin text-[#00d2ff]">✦</span>
             </div>
             <div>
               <h3 className="text-xl font-bold text-white">Synthesizing Psychometric Profile...</h3>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-[#7b82b8] mt-1 font-mono">
                 Calculating Preference Clarity Index & Jungian Cognitive Stack
               </p>
             </div>
@@ -435,21 +433,21 @@ export default function MBTIQuiz({ onComplete, completedData }) {
           /* --- Comprehensive Psychometric Result View --- */
           <motion.div
             key="mbti-result-card"
-            initial={{ opacity: 0, scale: 0.92, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: -20 }}
-            transition={{ duration: 0.5, type: 'spring', bounce: 0.2 }}
+            exit={{ opacity: 0, scale: 0.95, y: -15 }}
+            transition={{ duration: 0.4 }}
             className="space-y-6 text-left"
           >
             {/* Top Archetype Banner */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-indigo-950/90 via-slate-900 to-purple-950/90 border border-indigo-500/30 shadow-2xl backdrop-blur-xl">
-              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-mono font-bold uppercase tracking-wider text-indigo-300 bg-indigo-900/60 border border-indigo-500/30 rounded-full">
+            <div className="dashboard-card p-6 sm:p-8 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#262a63] pb-4">
+                <div className="badge-status bg-[#101336] text-[#00d2ff] border border-[#262a63]">
                   🧠 Psychometric Assessment &bull; 24-Item Complete
                 </div>
                 <button
                   onClick={handleReset}
-                  className="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer"
+                  className="btn-secondary text-xs"
                 >
                   ↺ Retake
                 </button>
@@ -463,7 +461,7 @@ export default function MBTIQuiz({ onComplete, completedData }) {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 + idx * 0.08, type: 'spring' }}
-                    className="w-12 h-14 sm:w-14 sm:h-16 rounded-2xl bg-gradient-to-b from-indigo-800/80 via-slate-950 to-slate-900 border border-indigo-400/40 shadow-xl flex items-center justify-center font-black text-2xl sm:text-3xl text-indigo-200 tracking-wider"
+                    className="w-12 h-14 sm:w-14 sm:h-16 rounded-xl bg-[#101336] border border-[#3858f6]/40 shadow-lg flex items-center justify-center font-black text-2xl sm:text-3xl text-[#00d2ff] tracking-wider"
                   >
                     {letter}
                   </motion.div>
@@ -472,32 +470,32 @@ export default function MBTIQuiz({ onComplete, completedData }) {
                   <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                     {result.archetype}
                   </h2>
-                  <div className="text-xs text-purple-300 font-semibold">{result.title}</div>
+                  <div className="text-xs text-[#00d2ff] font-semibold">{result.title}</div>
                 </div>
               </div>
 
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed italic border-l-2 border-indigo-500 pl-3 my-4">
+              <p className="text-sm sm:text-base text-[#c5c9f5] leading-relaxed italic border-l-2 border-[#3858f6] pl-3 my-4">
                 "{result.description}"
               </p>
 
               {/* Strengths & Growth Tags */}
               {result.strengths && (
-                <div className="mt-4 pt-4 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="mt-4 pt-4 border-t border-[#262a63] grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <span className="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">
                       Core Strengths:
                     </span>
-                    <ul className="mt-1 space-y-0.5 text-slate-300 list-disc list-inside">
+                    <ul className="mt-1 space-y-0.5 text-[#c5c9f5] list-disc list-inside">
                       {result.strengths.slice(0, 3).map((s, idx) => (
                         <li key={idx}>{s}</li>
                       ))}
                     </ul>
                   </div>
                   <div>
-                    <span className="font-bold text-amber-400 uppercase tracking-wider text-[10px]">
+                    <span className="font-bold text-[#f97316] uppercase tracking-wider text-[10px]">
                       Growth Frontiers:
                     </span>
-                    <ul className="mt-1 space-y-0.5 text-slate-300 list-disc list-inside">
+                    <ul className="mt-1 space-y-0.5 text-[#c5c9f5] list-disc list-inside">
                       {result.growth_areas.slice(0, 2).map((g, idx) => (
                         <li key={idx}>{g}</li>
                       ))}
@@ -508,22 +506,22 @@ export default function MBTIQuiz({ onComplete, completedData }) {
             </div>
 
             {/* Preference Clarity Index Bipolar Bars */}
-            <div className="p-6 rounded-3xl bg-slate-900/90 border border-purple-500/20 shadow-xl backdrop-blur-xl">
+            <div className="dashboard-card p-6">
               <ClarityBars preferenceClarity={result.preference_clarity} />
             </div>
 
             {/* Jungian Cognitive Architecture Matrix */}
-            <div className="p-6 rounded-3xl bg-slate-900/90 border border-indigo-500/20 shadow-xl backdrop-blur-xl">
+            <div className="dashboard-card p-6">
               <CognitiveStack cognitiveStack={result.cognitive_stack} />
             </div>
 
             {/* Astrological Synergy Insight */}
             {result.astrological_synergy && (
-              <div className="p-5 rounded-2xl bg-gradient-to-r from-purple-950/60 via-slate-900 to-indigo-950/60 border border-purple-500/30 text-xs text-slate-300 space-y-1">
-                <div className="font-bold uppercase tracking-wider text-purple-300">
+              <div className="p-5 rounded-2xl bg-[#161942] border border-[#3858f6]/30 text-xs text-[#c5c9f5] space-y-1">
+                <div className="font-bold uppercase tracking-wider text-[#00d2ff]">
                   ✦ Astrological & Cognitive Synergy
                 </div>
-                <p className="text-slate-400 leading-relaxed">
+                <p className="text-[#9aa0cf] leading-relaxed">
                   {result.astrological_synergy}
                 </p>
               </div>

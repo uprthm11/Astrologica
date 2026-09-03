@@ -16,12 +16,6 @@ const SearchIcon = ({ className = 'w-4 h-4' }) => (
   </svg>
 )
 
-const CheckIcon = ({ className = 'w-4 h-4' }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-  </svg>
-)
-
 const CrossIcon = ({ className = 'w-4 h-4' }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -40,7 +34,6 @@ function estimateUtcOffset(lon, countryCode) {
   const absHours = Math.abs(rawHours)
   const h = Math.floor(absHours)
   const m = Math.round((absHours - h) * 60)
-  // Clamp minutes to standard quarters
   const roundedM = Math.round(m / 15) * 15
   const finalH = roundedM === 60 ? h + 1 : h
   const finalM = roundedM === 60 ? 0 : roundedM
@@ -192,14 +185,14 @@ export default function LocationPicker({
     <div className="w-full space-y-3" ref={dropdownRef}>
       {/* Header Label */}
       <div className="flex items-center justify-between">
-        <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-          <MapPinIcon className="w-3.5 h-3.5 text-indigo-400" />
-          <span>Birth Location & Geocoordinates</span>
+        <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#9aa0cf] flex items-center gap-1.5">
+          <MapPinIcon className="w-3.5 h-3.5 text-[#00d2ff]" />
+          <span>Birth Location & Ephemeris Coordinates</span>
         </label>
         <button
           type="button"
           onClick={() => setIsManual(!isManual)}
-          className="text-[11px] font-mono text-zinc-500 hover:text-indigo-400 transition cursor-pointer underline underline-offset-2"
+          className="text-[10px] font-mono text-[#7b82b8] hover:text-[#00d2ff] transition cursor-pointer underline underline-offset-2"
         >
           {isManual ? 'Switch to Smart Search' : 'Manual Lat/Lon'}
         </button>
@@ -207,23 +200,23 @@ export default function LocationPicker({
 
       {!isManual ? (
         <div className="space-y-3">
-          {/* Confirmed Location Badge if Selected & Not Searching */}
+          {/* Confirmed Location Badge */}
           {selectedLocation && !isOpen && query === '' ? (
-            <div className="p-3.5 rounded-xl bg-zinc-900/90 border border-zinc-800 shadow-sm flex items-center justify-between gap-3">
+            <div className="p-3.5 rounded-xl bg-[#101336] border border-[#262a63] shadow-inner flex items-center justify-between gap-3">
               <div className="flex items-start gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center shrink-0 text-indigo-400 mt-0.5">
+                <div className="w-8 h-8 rounded-lg bg-[#3858f6]/15 border border-[#3858f6]/30 flex items-center justify-center shrink-0 text-[#00d2ff] mt-0.5 shadow-sm">
                   <MapPinIcon className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold text-zinc-100 truncate">
+                  <div className="text-sm font-bold text-white truncate">
                     {selectedLocation.name}
                   </div>
-                  <div className="text-xs font-mono text-zinc-400 mt-0.5 flex flex-wrap items-center gap-2">
-                    <span className="text-emerald-400 font-medium">
+                  <div className="text-xs font-mono text-[#9aa0cf] mt-0.5 flex flex-wrap items-center gap-2">
+                    <span className="text-[#00d2ff] font-medium">
                       {selectedLocation.lat.toFixed(4)}°N, {selectedLocation.lon.toFixed(4)}°E
                     </span>
-                    <span className="text-zinc-600">&bull;</span>
-                    <span className="text-zinc-500">UTC {selectedLocation.utc_offset}</span>
+                    <span className="text-[#262a63]">&bull;</span>
+                    <span className="text-[#10b981] font-semibold">UTC {selectedLocation.utc_offset}</span>
                   </div>
                 </div>
               </div>
@@ -235,7 +228,7 @@ export default function LocationPicker({
                   setQuery('')
                   setIsOpen(true)
                 }}
-                className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 transition shrink-0 cursor-pointer"
+                className="btn-secondary text-xs !py-1.5 !px-3 shrink-0"
               >
                 Change
               </button>
@@ -244,7 +237,7 @@ export default function LocationPicker({
             /* Search Input Bar */
             <div className="relative">
               <div className="relative flex items-center">
-                <div className="absolute left-3.5 text-zinc-500 pointer-events-none">
+                <div className="absolute left-3.5 text-[#6b729f] pointer-events-none">
                   <SearchIcon className="w-4 h-4" />
                 </div>
                 <input
@@ -258,10 +251,10 @@ export default function LocationPicker({
                     if (results.length > 0) setIsOpen(true)
                   }}
                   placeholder="Type city, state, or country (e.g., London, Tokyo, Mumbai)..."
-                  className="w-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 placeholder-zinc-500 text-sm rounded-xl pl-10 pr-10 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition shadow-inner"
+                  className="dashboard-input w-full pl-10 pr-10"
                 />
                 {loading ? (
-                  <div className="absolute right-3.5 text-zinc-500">
+                  <div className="absolute right-3.5 text-[#00d2ff]">
                     <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
@@ -275,7 +268,7 @@ export default function LocationPicker({
                       setResults([])
                       setIsOpen(false)
                     }}
-                    className="absolute right-3.5 text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                    className="absolute right-3.5 text-[#6b729f] hover:text-white cursor-pointer"
                   >
                     <CrossIcon className="w-4 h-4" />
                   </button>
@@ -290,25 +283,25 @@ export default function LocationPicker({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute left-0 right-0 top-full mt-1.5 z-50 rounded-xl bg-zinc-900 border border-zinc-700/90 shadow-2xl overflow-hidden backdrop-blur-xl max-h-60 overflow-y-auto"
+                    className="absolute left-0 right-0 top-full mt-1.5 z-50 rounded-xl bg-[#101336] border border-[#262a63] shadow-2xl overflow-hidden backdrop-blur-xl max-h-60 overflow-y-auto"
                   >
-                    <div className="p-1">
+                    <div className="p-1.5 space-y-0.5">
                       {results.map((place) => (
                         <button
                           key={place.id}
                           type="button"
                           onClick={() => handleSelectPlace(place)}
-                          className="w-full text-left px-3.5 py-2.5 rounded-lg hover:bg-zinc-800/90 text-zinc-200 transition flex items-center justify-between group cursor-pointer"
+                          className="w-full text-left px-3.5 py-2.5 rounded-lg hover:bg-[#1c2154] text-white transition flex items-center justify-between group cursor-pointer"
                         >
                           <div className="min-w-0 pr-2">
-                            <div className="text-sm font-semibold text-zinc-100 group-hover:text-indigo-300 transition truncate">
+                            <div className="text-sm font-bold text-white group-hover:text-[#00d2ff] transition truncate">
                               {place.name}
                             </div>
-                            <div className="text-xs text-zinc-400 truncate mt-0.5">
+                            <div className="text-xs text-[#7b82b8] truncate mt-0.5">
                               {place.subtext || place.fullName}
                             </div>
                           </div>
-                          <div className="text-[11px] font-mono text-zinc-500 shrink-0 text-right">
+                          <div className="text-[11px] font-mono text-[#6b729f] shrink-0 text-right group-hover:text-[#9aa0cf]">
                             {place.lat.toFixed(2)}°, {place.lon.toFixed(2)}°
                           </div>
                         </button>
@@ -322,10 +315,10 @@ export default function LocationPicker({
         </div>
       ) : (
         /* Manual Latitude & Longitude Fallback Inputs */
-        <div className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-3">
+        <div className="p-4 rounded-xl bg-[#101336] border border-[#262a63] space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[11px] uppercase font-mono font-semibold text-zinc-400 block mb-1">
+              <label className="text-[10px] uppercase font-mono font-bold text-[#7b82b8] block mb-1">
                 Latitude (Decimal °)
               </label>
               <input
@@ -334,11 +327,11 @@ export default function LocationPicker({
                 value={manualLat}
                 onChange={(e) => setManualLat(e.target.value)}
                 placeholder="22.7196"
-                className="w-full bg-zinc-950 border border-zinc-700 text-zinc-100 text-xs rounded-lg px-3 py-2 focus:border-indigo-500 outline-none font-mono"
+                className="dashboard-input w-full text-xs font-mono !py-2"
               />
             </div>
             <div>
-              <label className="text-[11px] uppercase font-mono font-semibold text-zinc-400 block mb-1">
+              <label className="text-[10px] uppercase font-mono font-bold text-[#7b82b8] block mb-1">
                 Longitude (Decimal °)
               </label>
               <input
@@ -347,14 +340,14 @@ export default function LocationPicker({
                 value={manualLon}
                 onChange={(e) => setManualLon(e.target.value)}
                 placeholder="75.8577"
-                className="w-full bg-zinc-950 border border-zinc-700 text-zinc-100 text-xs rounded-lg px-3 py-2 focus:border-indigo-500 outline-none font-mono"
+                className="dashboard-input w-full text-xs font-mono !py-2"
               />
             </div>
           </div>
           <button
             type="button"
             onClick={handleManualApply}
-            className="w-full py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-zinc-200 border border-zinc-600 transition cursor-pointer"
+            className="btn-secondary w-full text-xs font-semibold"
           >
             Apply Manual Coordinates
           </button>

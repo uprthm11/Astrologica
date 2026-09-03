@@ -10,17 +10,17 @@ export default function CognitiveStack({ cognitiveStack }) {
 
   return (
     <div className="w-full space-y-4 text-left">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-2 mb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#262a63] pb-2 mb-3">
         <div>
-          <h4 className="text-xs uppercase font-bold text-slate-400 tracking-wider">
+          <h4 className="text-xs uppercase font-mono font-bold text-white tracking-wider">
             Jungian Cognitive Architecture (Beebe 8-Function Model)
           </h4>
-          <span className="text-[11px] text-slate-500 font-mono">Conscious Ego & Unconscious Shadow</span>
+          <span className="text-[11px] text-[#7b82b8] font-mono">Conscious Ego & Unconscious Shadow</span>
         </div>
 
         <button
           onClick={() => setShowShadow(!showShadow)}
-          className="px-3 py-1 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 transition cursor-pointer flex items-center gap-1.5"
+          className="btn-secondary text-xs"
         >
           <span>{showShadow ? 'Hide Shadow Stack' : '✦ Reveal 4 Shadow Functions'}</span>
         </button>
@@ -32,15 +32,15 @@ export default function CognitiveStack({ cognitiveStack }) {
           <motion.div
             key={fn.code}
             whileHover={{ y: -2 }}
-            className="p-4 rounded-2xl bg-slate-900/90 border border-purple-500/20 backdrop-blur-md shadow-lg flex flex-col justify-between"
+            className="p-4 rounded-xl bg-[#101336] border border-[#262a63] shadow-md flex flex-col justify-between"
           >
             <div>
               {/* Header Badge */}
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] uppercase font-mono font-bold tracking-wider text-purple-400 bg-purple-950/80 px-2 py-0.5 rounded-md border border-purple-500/30">
+                <span className="text-[10px] uppercase font-mono font-bold tracking-wider text-[#00d2ff] bg-[#161942] px-2 py-0.5 rounded-md border border-[#262a63]">
                   {fn.archetype}
                 </span>
-                <span className="text-xs font-mono font-bold" style={{ color: fn.color }}>
+                <span className="text-xs font-mono font-bold" style={{ color: fn.color || '#3858f6' }}>
                   {fn.attitude}
                 </span>
               </div>
@@ -49,20 +49,20 @@ export default function CognitiveStack({ cognitiveStack }) {
               <div className="flex items-center gap-2.5 my-1.5">
                 <span className="text-2xl">{fn.glyph}</span>
                 <div>
-                  <div className="text-base font-extrabold text-white">
-                    {fn.name} <span className="font-mono text-xs text-purple-300">({fn.code})</span>
+                  <div className="text-base font-bold text-white">
+                    {fn.name} <span className="font-mono text-xs text-[#00d2ff]">({fn.code})</span>
                   </div>
-                  <div className="text-[11px] text-slate-400 font-mono">{fn.process}</div>
+                  <div className="text-[11px] text-[#7b82b8] font-mono">{fn.process}</div>
                 </div>
               </div>
 
               {/* Description */}
-              <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+              <p className="text-xs text-[#c5c9f5] mt-2 leading-relaxed">
                 {fn.description}
               </p>
             </div>
 
-            <div className="mt-3 pt-2.5 border-t border-slate-800/80 text-[10px] text-slate-400 italic">
+            <div className="mt-3 pt-2.5 border-t border-[#262a63] text-[10px] text-[#7b82b8] italic">
               &bull; {fn.role}
             </div>
           </motion.div>
@@ -79,7 +79,7 @@ export default function CognitiveStack({ cognitiveStack }) {
             transition={{ duration: 0.3 }}
             className="space-y-3 pt-2 overflow-hidden"
           >
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 pl-1">
+            <div className="text-xs font-mono font-bold uppercase tracking-wider text-[#7b82b8] pl-1">
               Shadow Archetypes (Unconscious Defensive Stack)
             </div>
 
@@ -87,29 +87,29 @@ export default function CognitiveStack({ cognitiveStack }) {
               {shadow_stack.map((fn) => (
                 <div
                   key={fn.code}
-                  className="p-3.5 rounded-2xl bg-slate-950/80 border border-indigo-900/40 shadow-inner flex flex-col justify-between"
+                  className="p-3.5 rounded-xl bg-[#0d1033] border border-[#262a63] shadow-inner flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] uppercase font-mono font-bold text-slate-400 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800">
+                      <span className="text-[10px] uppercase font-mono font-bold text-[#7b82b8] bg-[#161942] px-2 py-0.5 rounded-md border border-[#262a63]">
                         {fn.archetype}
                       </span>
-                      <span className="text-[11px] font-mono text-indigo-300 font-semibold">
+                      <span className="text-[11px] font-mono text-[#00d2ff] font-semibold">
                         {fn.code}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2 my-1">
                       <span className="text-xl">{fn.glyph}</span>
-                      <div className="text-sm font-bold text-slate-200">{fn.name}</div>
+                      <div className="text-sm font-bold text-white">{fn.name}</div>
                     </div>
 
-                    <p className="text-[11px] text-slate-400 mt-1 leading-snug">
+                    <p className="text-[11px] text-[#9aa0cf] mt-1 leading-snug">
                       {fn.description}
                     </p>
                   </div>
 
-                  <div className="mt-2.5 pt-2 border-t border-slate-900 text-[10px] text-slate-500 italic">
+                  <div className="mt-2.5 pt-2 border-t border-[#262a63] text-[10px] text-[#7b82b8] italic">
                     &bull; {fn.role}
                   </div>
                 </div>

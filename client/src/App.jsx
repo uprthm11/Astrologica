@@ -1,14 +1,61 @@
 import React, { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { saveBlueprint, checkHealth, API_BASE_URL } from './services/api'
+import { saveBlueprint, checkHealth } from './services/api'
+import Sidebar from './components/layout/Sidebar'
+import Header from './components/layout/Header'
 import BlueprintForm from './components/BlueprintForm'
 import MBTIQuiz from './components/MBTIQuiz'
 import SharedDossier from './components/SharedDossier'
 
-function MainAssessment() {
+// Quick Status Metrics Row
+function MetricCardsRow() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6 text-left">
+      <div className="dashboard-card !p-4 flex items-center gap-3.5">
+        <div className="w-10 h-10 rounded-xl bg-[#3858f6]/15 border border-[#3858f6]/30 flex items-center justify-center text-[#00d2ff] font-bold text-lg shrink-0">
+          ✦
+        </div>
+        <div className="min-w-0">
+          <div className="text-[10px] uppercase font-mono font-bold text-[#7b82b8]">
+            Astronomical Engine
+          </div>
+          <div className="text-sm font-bold text-white truncate">Swiss Ephemeris v2.10</div>
+          <div className="text-[10px] font-mono text-[#00d2ff]">Lahiri &bull; Raman &bull; KP</div>
+        </div>
+      </div>
+
+      <div className="dashboard-card !p-4 flex items-center gap-3.5">
+        <div className="w-10 h-10 rounded-xl bg-[#00d2ff]/15 border border-[#00d2ff]/30 flex items-center justify-center text-[#00d2ff] font-bold text-lg shrink-0">
+          🧠
+        </div>
+        <div className="min-w-0">
+          <div className="text-[10px] uppercase font-mono font-bold text-[#7b82b8]">
+            Cognitive Stack
+          </div>
+          <div className="text-sm font-bold text-white truncate">Jungian 8-Function Model</div>
+          <div className="text-[10px] font-mono text-[#10b981]">PCI Clarity Bipolar Index</div>
+        </div>
+      </div>
+
+      <div className="dashboard-card !p-4 flex items-center gap-3.5">
+        <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-lg shrink-0">
+          ⚡
+        </div>
+        <div className="min-w-0">
+          <div className="text-[10px] uppercase font-mono font-bold text-[#7b82b8]">
+            Storage & Synthesis
+          </div>
+          <div className="text-sm font-bold text-white truncate">MongoDB Atlas Cloud</div>
+          <div className="text-[10px] font-mono text-[#7b82b8]">Universal JSON Schemas</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MainAssessment({ activeTab, setActiveTab }) {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('astrology') // 'astrology' | 'psychology'
 
   // Centralized lifted state
   const [astrologyData, setAstrologyData] = useState(null)
@@ -40,25 +87,30 @@ function MainAssessment() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      {/* Executive Segmented Navigation Tabs */}
-      <section className="relative z-10 flex justify-center px-4 my-3">
-        <div className="inline-flex p-1 rounded-xl bg-zinc-900/90 border border-zinc-800 backdrop-blur-xl shadow-lg">
+      {/* Top Metric Cards */}
+      <div className="w-full max-w-5xl">
+        <MetricCardsRow />
+      </div>
+
+      {/* Module View Tabs */}
+      <section className="relative z-10 flex justify-center px-4 my-2 mb-4">
+        <div className="inline-flex p-1 rounded-xl bg-[#101336] border border-[#262a63] backdrop-blur-xl shadow-lg">
           {/* Astrology Tab */}
           <button
             onClick={() => setActiveTab('astrology')}
-            className={`relative px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors duration-200 cursor-pointer flex items-center gap-2 z-10 ${
-              activeTab === 'astrology' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+            className={`relative px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors duration-200 cursor-pointer flex items-center gap-2 z-10 ${
+              activeTab === 'astrology' ? 'text-white' : 'text-[#7b82b8] hover:text-white'
             }`}
           >
             {activeTab === 'astrology' && (
               <motion.div
                 layoutId="activeTabPill"
-                className="absolute inset-0 rounded-lg bg-indigo-600 shadow-md -z-10"
+                className="absolute inset-0 rounded-lg bg-gradient-to-r from-[#3858f6] to-[#00d2ff] shadow-md shadow-[#3858f6]/30 -z-10"
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}
             <span>✨</span>
-            <span>1. Astrological Ephemeris</span>
+            <span>1. Ephemeris Engine</span>
             {astrologyData && (
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             )}
@@ -67,14 +119,14 @@ function MainAssessment() {
           {/* Psychology Tab */}
           <button
             onClick={() => setActiveTab('psychology')}
-            className={`relative px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors duration-200 cursor-pointer flex items-center gap-2 z-10 ${
-              activeTab === 'psychology' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+            className={`relative px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors duration-200 cursor-pointer flex items-center gap-2 z-10 ${
+              activeTab === 'psychology' ? 'text-white' : 'text-[#7b82b8] hover:text-white'
             }`}
           >
             {activeTab === 'psychology' && (
               <motion.div
                 layoutId="activeTabPill"
-                className="absolute inset-0 rounded-lg bg-indigo-600 shadow-md -z-10"
+                className="absolute inset-0 rounded-lg bg-gradient-to-r from-[#3858f6] to-[#00d2ff] shadow-md shadow-[#3858f6]/30 -z-10"
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}
@@ -88,7 +140,7 @@ function MainAssessment() {
       </section>
 
       {/* Main Tab Content Display */}
-      <div className="w-full flex-1 flex items-center justify-center py-4">
+      <div className="w-full flex-1 flex items-center justify-center py-2">
         <AnimatePresence mode="wait">
           {activeTab === 'astrology' ? (
             <motion.div
@@ -139,13 +191,13 @@ function MainAssessment() {
             transition={{ type: 'spring', stiffness: 300, damping: 22 }}
             className="w-full max-w-2xl px-4 pt-4 pb-8"
           >
-            <div className="p-4 rounded-2xl bg-zinc-900 border border-indigo-500/40 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="dashboard-card p-5 flex flex-col sm:flex-row items-center justify-between gap-4 border-[#3858f6]/50 shadow-xl shadow-[#3858f6]/10">
               <div className="text-left">
-                <div className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-                  Assessment Matrices Complete
+                <div className="text-xs font-bold uppercase font-mono tracking-wider text-[#00d2ff]">
+                  Assessments Complete
                 </div>
-                <div className="text-sm font-semibold text-zinc-100 mt-0.5">
-                  Ready to synthesize Astrology & Jungian Cognitive Dossier
+                <div className="text-sm font-bold text-white mt-0.5">
+                  Synthesize Astrology & Jungian Cognitive Dossier
                 </div>
               </div>
 
@@ -154,7 +206,7 @@ function MainAssessment() {
                 disabled={saving}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/30 border border-indigo-400/30 transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                className="btn-primary w-full sm:w-auto shrink-0 !py-3.5 !px-6"
               >
                 {saving ? (
                   <>
@@ -196,6 +248,8 @@ function MainAssessment() {
 }
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState('astrology') // 'astrology' | 'psychology'
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [backendStatus, setBackendStatus] = useState({
     state: 'checking', // 'checking' | 'waking' | 'online' | 'offline'
     retries: 0
@@ -228,76 +282,47 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="relative min-h-screen flex flex-col justify-between bg-zinc-950 text-zinc-100 selection:bg-indigo-500 selection:text-white overflow-x-hidden">
-        {/* Background Ambience Subtle Radial Gradients */}
-        <div className="fixed inset-0 pointer-events-none z-0">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-indigo-950/20 rounded-full blur-[140px]" />
-          <div className="absolute bottom-0 right-0 w-[500px] h-[300px] bg-purple-950/15 rounded-full blur-[120px]" />
+      <div className="min-h-screen bg-[#0b0e29] text-[#e2e8f0] flex">
+        {/* Left Fixed Sidebar Navigation */}
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          isOpen={sidebarOpen}
+          setIsOpen={setSidebarOpen}
+        />
+
+        {/* Main Content Workspace Wrapper */}
+        <div className="flex-1 lg:pl-64 flex flex-col min-h-screen w-full">
+          {/* Top Executive Header */}
+          <Header
+            activeTab={activeTab}
+            backendStatus={backendStatus}
+            onRetryHealth={() => checkServer(0)}
+            onOpenSidebar={() => setSidebarOpen(true)}
+          />
+
+          {/* Dynamic Route View */}
+          <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full">
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <MainAssessment
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                  />
+                }
+              />
+              <Route path="/blueprint/:id" element={<SharedDossier />} />
+            </Routes>
+          </main>
+
+          {/* Footer Bar */}
+          <footer className="w-full max-w-6xl mx-auto px-6 py-5 border-t border-[#262a63] text-center text-xs text-[#7b82b8] flex flex-col sm:flex-row items-center justify-between gap-2 font-mono">
+            <div>Astrologica &bull; Enterprise Ephemeris & Jungian Intelligence</div>
+            <div className="text-[#6b729f]">FastAPI &bull; React 19 &bull; Swiss Ephemeris v2.10</div>
+          </footer>
         </div>
-
-        {/* Top Executive Header Bar */}
-        <header className="relative z-10 w-full max-w-6xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-zinc-800/80">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-500 flex items-center justify-center font-bold text-base shadow-lg shadow-indigo-950">
-              ✦
-            </div>
-            <div className="text-left">
-              <h1 className="font-extrabold text-lg tracking-tight text-white">
-                Astrologica
-              </h1>
-              <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">
-                Full-Spectrum Astronomical & Psychometric Console
-              </p>
-            </div>
-          </div>
-
-          {/* Telemetry Server Status Badge */}
-          <div className="flex items-center gap-2">
-            {backendStatus.state === 'online' ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-emerald-950/80 border border-emerald-500/30 text-emerald-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                API: Online (Connected)
-              </span>
-            ) : backendStatus.state === 'waking' ? (
-              <button
-                onClick={() => checkServer(0)}
-                title="Render free tier spinning up"
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-amber-950/80 border border-amber-500/40 text-amber-300 cursor-pointer animate-pulse"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                API: Waking Up (Cold Start)...
-              </button>
-            ) : backendStatus.state === 'checking' ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-zinc-900 border border-zinc-800 text-zinc-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-                API: Connecting...
-              </span>
-            ) : (
-              <button
-                onClick={() => checkServer(0)}
-                title="Click to retry connecting to API"
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-rose-950/80 border border-rose-500/30 text-rose-300 hover:bg-rose-900/80 transition cursor-pointer"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-                API: Offline (Click to Retry)
-              </button>
-            )}
-          </div>
-        </header>
-
-        {/* Main Content Area */}
-        <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-6">
-          <Routes>
-            <Route path="/" element={<MainAssessment />} />
-            <Route path="/blueprint/:id" element={<SharedDossier />} />
-          </Routes>
-        </main>
-
-        {/* Executive Footer */}
-        <footer className="relative z-10 w-full max-w-6xl mx-auto px-6 py-5 border-t border-zinc-800/80 text-center text-xs text-zinc-500 flex flex-col sm:flex-row items-center justify-between gap-2 font-mono">
-          <div>Astrologica &bull; Enterprise Ephemeris & Jungian Intelligence</div>
-          <div className="text-zinc-600">FastAPI &bull; React 19 &bull; Swiss Ephemeris v2.10</div>
-        </footer>
       </div>
     </BrowserRouter>
   )

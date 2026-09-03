@@ -22,17 +22,17 @@ export default function DualAstroView({
   const { western, vedic, comparison } = dualData
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6 text-left">
+    <div className="w-full max-w-5xl mx-auto space-y-6 text-left">
       {/* Top Controls: System Switcher & Settings Bar */}
-      <div className="p-4 rounded-2xl bg-slate-900/90 border border-purple-500/20 backdrop-blur-xl shadow-xl flex flex-wrap items-center justify-between gap-4">
+      <div className="dashboard-card p-4 flex flex-wrap items-center justify-between gap-4">
         {/* System Switcher */}
-        <div className="inline-flex p-1 rounded-xl bg-slate-950/80 border border-slate-800">
+        <div className="inline-flex p-1 rounded-xl bg-[#101336] border border-[#262a63]">
           <button
             onClick={() => setActiveSystem('western')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
               activeSystem === 'western'
-                ? 'bg-purple-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#3858f6] text-white shadow-md'
+                : 'text-[#7b82b8] hover:text-white'
             }`}
           >
             Western (Tropical)
@@ -41,8 +41,8 @@ export default function DualAstroView({
             onClick={() => setActiveSystem('vedic')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
               activeSystem === 'vedic'
-                ? 'bg-indigo-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#3858f6] text-white shadow-md'
+                : 'text-[#7b82b8] hover:text-white'
             }`}
           >
             Vedic (Sidereal)
@@ -51,8 +51,8 @@ export default function DualAstroView({
             onClick={() => setActiveSystem('dual')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
               activeSystem === 'dual'
-                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-gradient-to-r from-[#3858f6] to-[#00d2ff] text-white shadow-md'
+                : 'text-[#7b82b8] hover:text-white'
             }`}
           >
             ✦ Dual Comparison
@@ -60,14 +60,14 @@ export default function DualAstroView({
         </div>
 
         {/* Engine Settings (Ayanamsha & House System) */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {activeSystem !== 'western' && (
-            <div className="flex items-center gap-1.5 text-xs text-slate-400">
-              <span className="text-[10px] uppercase font-bold text-slate-500">Ayanamsha:</span>
+            <div className="flex items-center gap-1.5 text-xs text-[#9aa0cf]">
+              <span className="text-[10px] uppercase font-mono font-bold text-[#7b82b8]">Ayanamsha:</span>
               <select
                 value={currentAyanamsha}
                 onChange={(e) => onSettingChange && onSettingChange('ayanamsha', e.target.value)}
-                className="bg-slate-950 border border-slate-800 text-slate-200 rounded-lg px-2.5 py-1 text-xs outline-none focus:border-indigo-500 cursor-pointer"
+                className="bg-[#101336] border border-[#262a63] text-white rounded-lg px-2.5 py-1 text-xs outline-none focus:border-[#3858f6] cursor-pointer"
               >
                 <option value="lahiri">Lahiri (Chitrapaksha)</option>
                 <option value="raman">B.V. Raman</option>
@@ -77,12 +77,12 @@ export default function DualAstroView({
           )}
 
           {activeSystem !== 'vedic' && (
-            <div className="flex items-center gap-1.5 text-xs text-slate-400">
-              <span className="text-[10px] uppercase font-bold text-slate-500">Houses:</span>
+            <div className="flex items-center gap-1.5 text-xs text-[#9aa0cf]">
+              <span className="text-[10px] uppercase font-mono font-bold text-[#7b82b8]">Houses:</span>
               <select
                 value={currentHouseSystem}
                 onChange={(e) => onSettingChange && onSettingChange('house_system', e.target.value)}
-                className="bg-slate-950 border border-slate-800 text-slate-200 rounded-lg px-2.5 py-1 text-xs outline-none focus:border-purple-500 cursor-pointer"
+                className="bg-[#101336] border border-[#262a63] text-white rounded-lg px-2.5 py-1 text-xs outline-none focus:border-[#3858f6] cursor-pointer"
               >
                 <option value="placidus">Placidus</option>
                 <option value="whole_sign">Whole Sign</option>
@@ -93,7 +93,7 @@ export default function DualAstroView({
           {onRecalculate && (
             <button
               onClick={onRecalculate}
-              className="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition cursor-pointer"
+              className="btn-secondary text-xs"
             >
               Edit Birth Data
             </button>
@@ -113,12 +113,12 @@ export default function DualAstroView({
             transition={{ duration: 0.3 }}
             className="space-y-6"
           >
-            <div className="p-6 rounded-3xl bg-slate-900/90 border border-purple-500/20 backdrop-blur-xl shadow-xl text-center">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider text-purple-300 bg-purple-950/60 border border-purple-500/30 rounded-full mb-3">
+            <div className="dashboard-card p-6 text-center space-y-4">
+              <div className="badge-status bg-[#101336] text-[#00d2ff] border border-[#262a63]">
                 ☀️ Western Tropical Wheel Chart
               </div>
               <h3 className="text-xl font-black text-white">Geocentric Ecliptic Chart</h3>
-              <p className="text-xs text-slate-400 mt-1 mb-4">
+              <p className="text-xs text-[#7b82b8]">
                 House System: {western.house_system} &bull; Ascendant: {western.ascendant.formatted}
               </p>
               <WesternWheelChart westernData={western} />
@@ -126,7 +126,7 @@ export default function DualAstroView({
 
             {/* Planetary Placements Table */}
             <div className="space-y-2">
-              <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400">
+              <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#7b82b8]">
                 Tropical Planetary Placements
               </h4>
               <PlanetaryMatrix planets={western.planets} isVedic={false} />
@@ -144,18 +144,18 @@ export default function DualAstroView({
             transition={{ duration: 0.3 }}
             className="space-y-6"
           >
-            <div className="p-6 rounded-3xl bg-slate-900/90 border border-indigo-500/20 backdrop-blur-xl shadow-xl text-center">
-              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider text-indigo-300 bg-indigo-950/60 border border-indigo-500/30 rounded-full">
+            <div className="dashboard-card p-6 text-center space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#262a63] pb-3">
+                <div className="badge-status bg-[#101336] text-[#00d2ff] border border-[#262a63]">
                   🌙 Vedic Sidereal (Jyotish) Kundali
                 </div>
 
                 {/* Chart Style Toggle (North vs South Indian) */}
-                <div className="inline-flex p-1 rounded-lg bg-slate-950 border border-slate-800">
+                <div className="inline-flex p-1 rounded-lg bg-[#101336] border border-[#262a63]">
                   <button
                     onClick={() => setVedicChartStyle('north')}
                     className={`px-2.5 py-1 rounded text-xs font-semibold cursor-pointer ${
-                      vedicChartStyle === 'north' ? 'bg-indigo-600 text-white' : 'text-slate-400'
+                      vedicChartStyle === 'north' ? 'bg-[#3858f6] text-white' : 'text-[#7b82b8]'
                     }`}
                   >
                     North Indian (Diamond)
@@ -163,7 +163,7 @@ export default function DualAstroView({
                   <button
                     onClick={() => setVedicChartStyle('south')}
                     className={`px-2.5 py-1 rounded text-xs font-semibold cursor-pointer ${
-                      vedicChartStyle === 'south' ? 'bg-indigo-600 text-white' : 'text-slate-400'
+                      vedicChartStyle === 'south' ? 'bg-[#3858f6] text-white' : 'text-[#7b82b8]'
                     }`}
                   >
                     South Indian (Square)
@@ -180,14 +180,18 @@ export default function DualAstroView({
 
             {/* Planetary Placements Table */}
             <div className="space-y-2">
-              <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400">
-                Sidereal Planetary Placements ({vedic.ayanamsha.name})
+              <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#7b82b8]">
+                Sidereal Planetary Placements & Nakshatras
               </h4>
               <PlanetaryMatrix planets={vedic.planets} isVedic={true} />
             </div>
 
-            {/* Vimshottari Dasha Periods */}
-            <VimshottariTimeline dashaData={vedic.vimshottari_dashas} />
+            {/* Vimshottari Dasha Timeline */}
+            {vedic.vimshottari_dasha && (
+              <div className="dashboard-card p-6">
+                <VimshottariTimeline dashaData={vedic.vimshottari_dasha} />
+              </div>
+            )}
           </motion.div>
         )}
 
@@ -201,38 +205,83 @@ export default function DualAstroView({
             transition={{ duration: 0.3 }}
             className="space-y-6"
           >
-            {/* Comparative Precession Breakdown */}
-            <ComparativeDossier dualData={dualData} />
+            {/* Comparative Dossier */}
+            <ComparativeDossier comparisonData={comparison} />
 
-            {/* Dual Visual Charts Grid */}
+            {/* Side-by-Side Planetary Matrices */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Western Wheel */}
-              <div className="p-5 rounded-3xl bg-slate-900/80 border border-purple-500/20 shadow-xl backdrop-blur-xl flex flex-col items-center">
-                <div className="text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
-                  Western Tropical Wheel
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#00d2ff]">
+                    Western (Tropical)
+                  </h4>
+                  <span className="text-[10px] font-mono text-[#7b82b8]">
+                    Placidus &bull; Geocentric
+                  </span>
+                </div>
+                <PlanetaryMatrix planets={western.planets} isVedic={false} />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#3858f6]">
+                    Vedic (Sidereal)
+                  </h4>
+                  <span className="text-[10px] font-mono text-[#7b82b8]">
+                    {vedic.meta.ayanamsha} Ayanamsha
+                  </span>
+                </div>
+                <PlanetaryMatrix planets={vedic.planets} isVedic={true} />
+              </div>
+            </div>
+
+            {/* Charts Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="dashboard-card p-6 text-center space-y-4">
+                <div className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                  Western Ecliptic Wheel
                 </div>
                 <WesternWheelChart westernData={western} />
               </div>
 
-              {/* Vedic North Indian */}
-              <div className="p-5 rounded-3xl bg-slate-900/80 border border-indigo-500/20 shadow-xl backdrop-blur-xl flex flex-col items-center">
-                <div className="text-xs font-bold uppercase tracking-wider text-indigo-300 mb-2">
-                  Vedic Sidereal Kundali
+              <div className="dashboard-card p-6 text-center space-y-4">
+                <div className="flex items-center justify-between border-b border-[#262a63] pb-2">
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                    Vedic Kundali
+                  </span>
+                  <div className="inline-flex p-0.5 rounded bg-[#101336] border border-[#262a63]">
+                    <button
+                      onClick={() => setVedicChartStyle('north')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-semibold cursor-pointer ${
+                        vedicChartStyle === 'north' ? 'bg-[#3858f6] text-white' : 'text-[#7b82b8]'
+                      }`}
+                    >
+                      North
+                    </button>
+                    <button
+                      onClick={() => setVedicChartStyle('south')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-semibold cursor-pointer ${
+                        vedicChartStyle === 'south' ? 'bg-[#3858f6] text-white' : 'text-[#7b82b8]'
+                      }`}
+                    >
+                      South
+                    </button>
+                  </div>
                 </div>
-                <NorthIndianChart vedicData={vedic} />
+                {vedicChartStyle === 'north' ? (
+                  <NorthIndianChart vedicData={vedic} />
+                ) : (
+                  <SouthIndianChart vedicData={vedic} />
+                )}
               </div>
             </div>
 
-            {/* Complete Planetary Matrix (Vedic with Nakshatras & States) */}
-            <div className="space-y-2">
-              <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400">
-                Sidereal Planetary Matrix & Dignities
-              </h4>
-              <PlanetaryMatrix planets={vedic.planets} isVedic={true} />
-            </div>
-
-            {/* Vimshottari Dasha Timeline */}
-            <VimshottariTimeline dashaData={vedic.vimshottari_dashas} />
+            {/* Vimshottari Timeline */}
+            {vedic.vimshottari_dasha && (
+              <div className="dashboard-card p-6">
+                <VimshottariTimeline dashaData={vedic.vimshottari_dasha} />
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
