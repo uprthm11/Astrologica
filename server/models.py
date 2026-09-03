@@ -95,7 +95,10 @@ class ContactMessageResponse(BaseModel):
 class VisitorJourney(BaseModel):
     session_id: str = Field(..., description="Unique browser session UUID")
     name: str = Field(default="Anonymous", max_length=120)
+    dob: Optional[str] = Field(default=None, description="Date of birth")
+    location: Optional[str] = Field(default=None, description="Location of birth")
     action: Optional[str] = Field(default=None, description="Most recent action taken")
     action_log: Optional[List[str]] = Field(default_factory=list, description="Ordered sequence of user actions")
     timestamp: Optional[str] = Field(default=None, description="ISO timestamp of the event")
+
 

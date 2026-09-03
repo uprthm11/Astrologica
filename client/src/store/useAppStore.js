@@ -6,11 +6,13 @@ const SESSION_ID = typeof crypto !== 'undefined'
   ? crypto.randomUUID()
   : Math.random().toString(36).slice(2)
 
-async function fireJourneyEvent(name, sessionId, action, log) {
+async function fireJourneyEvent(name, sessionId, action, log, dob, location) {
   try {
     await axios.post(`${API_BASE_URL}/api/track/journey`, {
       session_id: sessionId,
       name: name || 'Anonymous',
+      dob: dob || undefined,
+      location: location || undefined,
       action,
       action_log: log,
     }, { timeout: 8000 })
@@ -19,14 +21,14 @@ async function fireJourneyEvent(name, sessionId, action, log) {
 
 export const useAppStore = create((set, get) => ({
   // ─── Cinematic Journey State ─────────────────────────────────────────────
-  cinematicStep: 0,      // 0=Intro 1=Name 2=Crossroads 3=About 4=DOB 5=Location 6=Processing 7=Reveal
+  cinematicStep: 0,      // 0=Intro 1=Name 2=Crossroads 25=AdminLogin 3=About 4=DOB 5=Location 6=Processing 7=Reveal
   revealSlide:   0,      // 0-4 within step 7 (paginated cosmic reveal)
   userName: '',
   journeyLog: [],
   sessionId: SESSION_ID,
 
   // ─── Input Data (collected across cinematic steps) ───────────────────────
-  birthData: null,       // { date, time, lat, lng, locationName, utcOffset }
+  birthData: null,       // { date, time, lat, lng, locationName, utcOffset, country, state, city }
 
   // ─── Core Assessment State ───────────────────────────────────────────────
   astrologyData: null,
@@ -55,17 +57,33 @@ export const useAppStore = create((set, get) => ({
   setBirthData: (data) => set({ birthData: data }),
 
   advanceStep: (step, action) => {
-    const { userName, sessionId, journeyLog } = get()
+    const { userName, sessionId, journeyLog, birthData } = get()
     const newLog = [...journeyLog, action]
     set({ cinematicStep: step, journeyLog: newLog })
-    fireJourneyEvent(userName, sessionId, action, newLog)
+    fireJourneyEvent(userName, sessionId, action, newLog, birthData?.date, birthData?.locationName)
+  },
+
+  goBack: () => {
+    const { cinematicStep, userName, sessionId, journeyLog, birthData } = get()
+    let target = 0
+    if (cinematicStep === 25 || cinematicStep === 3 || cinematicStep === 4) {
+      target = 2
+    } else if (cinematicStep === 5) {
+      target = 4
+    } else if (cinematicStep > 0) {
+      target = cinematicStep - 1
+    }
+    const action = `Navigated back to step ${target}`
+    const newLog = [...journeyLog, action]
+    set({ cinematicStep: target, journeyLog: newLog })
+    fireJourneyEvent(userName, sessionId, action, newLog, birthData?.date, birthData?.locationName)
   },
 
   trackEvent: (action) => {
-    const { userName, sessionId, journeyLog } = get()
+    const { userName, sessionId, journeyLog, birthData } = get()
     const newLog = [...journeyLog, action]
     set({ journeyLog: newLog })
-    fireJourneyEvent(userName, sessionId, action, newLog)
+    fireJourneyEvent(userName, sessionId, action, newLog, birthData?.date, birthData?.locationName)
   },
 
   resetJourney: () => set({
@@ -78,6 +96,7 @@ export const useAppStore = create((set, get) => ({
     mbtiData: null,
     activeTab: 'astrology',
   }),
+
 
   // ─── Assessment Actions ───────────────────────────────────────────────────
   setAstrologyData: (data) => set({ astrologyData: data }),

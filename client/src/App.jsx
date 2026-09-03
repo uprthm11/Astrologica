@@ -14,13 +14,13 @@ import {
 } from './components/cinematic/CinematicPrimitives'
 
 // ─── Lazy imports ──────────────────────────────────────────────────────────────
-const UniverseCanvas         = lazy(() => import('./components/canvas/UniverseCanvas'))
-const SharedDossier          = lazy(() => import('./components/SharedDossier'))
-const AdminLogin             = lazy(() => import('./components/admin/AdminLogin'))
-const AdminDashboard         = lazy(() => import('./components/admin/AdminDashboard'))
-const CinematicReveal        = lazy(() => import('./components/cinematic/CinematicReveal'))
+const UniverseCanvas          = lazy(() => import('./components/canvas/UniverseCanvas'))
+const SharedDossier           = lazy(() => import('./components/SharedDossier'))
+const AdminLogin              = lazy(() => import('./components/admin/AdminLogin'))
+const AdminDashboard          = lazy(() => import('./components/admin/AdminDashboard'))
+const CinematicReveal         = lazy(() => import('./components/cinematic/CinematicReveal'))
 const CinematicLocationSearch = lazy(() => import('./components/cinematic/CinematicLocationSearch'))
-const AboutPanel             = lazy(() => import('./components/cinematic/AboutPanel'))
+const AboutPanel              = lazy(() => import('./components/cinematic/AboutPanel'))
 
 // ─── Step text drop-shadow for visibility on stars ───────────────────────────
 const TS = { textShadow: '0 2px 24px rgba(0,0,0,0.9), 0 0 40px rgba(0,0,0,0.8)' }
@@ -35,24 +35,21 @@ function IntroStep() {
       {/* Eyebrow */}
       <motion.div
         variants={fadeIn} custom={0} initial="hidden" animate="visible"
-        style={{ ...TS, color: 'rgba(160,200,255,0.45)', fontSize: '10px',
+        style={{ ...TS, color: 'rgba(160,200,255,0.5)', fontSize: '10px',
           letterSpacing: '0.6em', textTransform: 'uppercase', marginBottom: '1.5rem' }}
       >
         a cosmic journey awaits
       </motion.div>
 
-      {/* Logotype */}
+      {/* Logotype: Pure white with bright ethereal cyan glow */}
       <motion.h1
         variants={fadeUp} custom={1} initial="hidden" animate="visible"
         style={{
-          ...TS,
+          color: '#ffffff',
+          textShadow: '0 0 20px rgba(0, 210, 255, 0.7), 0 0 40px rgba(0, 210, 255, 0.4), 0 2px 24px rgba(0,0,0,0.9)',
           fontSize: 'clamp(3rem, 11vw, 7.5rem)',
           fontWeight: 900,
           letterSpacing: '0.18em',
-          background: 'linear-gradient(90deg, #a8c4ff 0%, #ffffff 40%, #c0e0ff 80%, #6090ff 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
           lineHeight: 1.05,
           userSelect: 'none',
         }}
@@ -63,8 +60,8 @@ function IntroStep() {
       {/* Developer credit — exact text per spec */}
       <motion.p
         variants={fadeUp} custom={2} initial="hidden" animate="visible"
-        style={{ ...TS, color: 'rgba(200,220,255,0.55)', fontSize: '13px',
-          fontWeight: 300, letterSpacing: '0.2em', marginTop: '1.2rem' }}
+        style={{ ...TS, color: 'rgba(200,220,255,0.7)', fontSize: '13px',
+          fontWeight: 300, letterSpacing: '0.2em', marginTop: '1.4rem' }}
       >
         Developed by Pratham Upadhyay
       </motion.p>
@@ -119,22 +116,21 @@ function NameStep() {
 // STEP 2 — CROSSROADS
 // ═══════════════════════════════════════════════════════════════════════════════
 function CrossroadsStep() {
-  const { userName, advanceStep, adminToken } = useAppStore()
-  const navigate  = useNavigate()
-  const isAdmin   = userName.toLowerCase() === 'admin'
+  const { userName, advanceStep, goBack } = useAppStore()
+  const isAdmin = userName.toLowerCase() === 'admin'
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-14">
-      {/* Eyebrow greeting */}
+    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-12">
+      {/* Personalized Welcome Eyebrow */}
       <motion.div
         variants={fadeIn} custom={0} initial="hidden" animate="visible"
-        style={{ ...TS, color: 'rgba(160,200,255,0.4)', fontSize: '11px',
-          letterSpacing: '0.4em', textTransform: 'uppercase' }}
+        style={{ ...TS, color: 'rgba(160,200,255,0.6)', fontSize: '12px',
+          letterSpacing: '0.45em', textTransform: 'uppercase' }}
       >
-        {userName}
+        WELCOME, {userName.toUpperCase()}
       </motion.div>
 
-      {/* Main question — exact text per spec */}
+      {/* Main question */}
       <motion.h2
         variants={fadeUp} custom={1} initial="hidden" animate="visible"
         style={{ ...TS, color: 'white', fontSize: 'clamp(1.5rem,4.5vw,2.8rem)',
@@ -143,8 +139,8 @@ function CrossroadsStep() {
         What seeks you in the cosmos?
       </motion.h2>
 
-      {/* Choices — exact button text per spec */}
-      <div className="flex flex-col items-center gap-8">
+      {/* Choices */}
+      <div className="flex flex-col items-center gap-7">
         <CinematicButton
           onClick={() => advanceStep(4, `${userName} chose astro calculation`)}
           delay={0.2}
@@ -154,27 +150,40 @@ function CrossroadsStep() {
 
         <CinematicGhostButton
           onClick={() => advanceStep(3, `${userName} explored About`)}
-          delay={0.5}
+          delay={0.4}
         >
           About the web
         </CinematicGhostButton>
 
-        {/* Admin Trap */}
+        {/* Admin Trap -> Step 25 (Admin Login) */}
         {isAdmin && (
           <motion.div variants={fadeIn} custom={2} initial="hidden" animate="visible">
             <CinematicGhostButton
-              onClick={() => {
-                advanceStep(99, 'Admin entered console')
-                navigate(adminToken ? '/admin/dashboard' : '/admin')
-              }}
-              delay={0.8}
+              onClick={() => advanceStep(25, 'Admin selected login prompt')}
+              delay={0.6}
             >
               ∞ Admin Console
             </CinematicGhostButton>
           </motion.div>
         )}
+
+        {/* Universal Back Button */}
+        <CinematicGhostButton onClick={goBack} delay={0.8}>
+          ← BACK
+        </CinematicGhostButton>
       </div>
     </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// STEP 25 — ADMIN LOGIN (WebGL Cinematic Flow)
+// ═══════════════════════════════════════════════════════════════════════════════
+function AdminLoginStep() {
+  return (
+    <Suspense fallback={null}>
+      <AdminLogin />
+    </Suspense>
   )
 }
 
@@ -182,7 +191,7 @@ function CrossroadsStep() {
 // STEP 3 — ABOUT
 // ═══════════════════════════════════════════════════════════════════════════════
 function AboutStep() {
-  const { advanceStep } = useAppStore()
+  const { goBack } = useAppStore()
   return (
     <div className="flex flex-col items-center justify-start min-h-screen px-4 py-16 gap-8">
       <motion.h2
@@ -197,13 +206,11 @@ function AboutStep() {
         <AboutPanel />
       </Suspense>
 
-      <div className="flex gap-10 pt-4">
-        <CinematicGhostButton onClick={() => advanceStep(2, 'Back to Crossroads')} delay={0}>
-          ← Back
+      {/* Universal Back Button as ONLY navigation out */}
+      <div className="pt-4">
+        <CinematicGhostButton onClick={goBack} delay={0}>
+          ← BACK
         </CinematicGhostButton>
-        <CinematicButton onClick={() => advanceStep(4, 'From About to Chart')} delay={0.3}>
-          Calculate Blueprint
-        </CinematicButton>
       </div>
     </div>
   )
@@ -213,7 +220,7 @@ function AboutStep() {
 // STEP 4 — DATE OF BIRTH
 // ═══════════════════════════════════════════════════════════════════════════════
 function DobStep() {
-  const { advanceStep, setBirthData, birthData } = useAppStore()
+  const { advanceStep, setBirthData, birthData, goBack } = useAppStore()
   const [date, setDate] = useState(birthData?.date || '')
   const [time, setTime] = useState(birthData?.time || '12:00')
   const [err,  setErr]  = useState('')
@@ -225,8 +232,7 @@ function DobStep() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-12">
-      {/* Question — exact text per spec */}
+    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
       <motion.h2
         variants={fadeUp} custom={0} initial="hidden" animate="visible"
         style={{ ...TS, color: 'white', fontSize: 'clamp(1.5rem,4vw,2.4rem)',
@@ -236,12 +242,10 @@ function DobStep() {
       </motion.h2>
 
       <div className="flex flex-col items-center gap-6 w-full max-w-xs">
-        {/* Date */}
         <CinematicDateInput value={date} onChange={e => { setDate(e.target.value); setErr('') }} autoFocus />
 
-        {/* Time — subtle label above */}
         <motion.div variants={fadeIn} custom={2} initial="hidden" animate="visible"
-          style={{ color: 'rgba(160,200,255,0.3)', fontSize: '10px', letterSpacing: '0.35em',
+          style={{ color: 'rgba(160,200,255,0.4)', fontSize: '10px', letterSpacing: '0.35em',
             textTransform: 'uppercase', marginBottom: '-0.5rem' }}>
           Birth time
         </motion.div>
@@ -250,25 +254,26 @@ function DobStep() {
 
       {err && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          style={{ color: 'rgba(255,150,150,0.7)', fontSize: '12px', letterSpacing: '0.2em' }}>
+          style={{ color: 'rgba(255,150,150,0.85)', fontSize: '12px', letterSpacing: '0.2em' }}>
           {err}
         </motion.div>
       )}
 
-      <CinematicButton onClick={submit} delay={0.3}>Continue</CinematicButton>
-
-      <CinematicGhostButton onClick={() => advanceStep(2, 'Back to Crossroads from DOB')} delay={0.6}>
-        ← Back
-      </CinematicGhostButton>
+      <div className="flex flex-col items-center gap-5 pt-2">
+        <CinematicButton onClick={submit} delay={0.3}>Continue</CinematicButton>
+        <CinematicGhostButton onClick={goBack} delay={0.5}>
+          ← BACK
+        </CinematicGhostButton>
+      </div>
     </div>
   )
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 5 — LOCATION
+// STEP 5 — LOCATION (3-Tier Progressive Flow)
 // ═══════════════════════════════════════════════════════════════════════════════
 function LocationStep() {
-  const { advanceStep, setBirthData, birthData } = useAppStore()
+  const { advanceStep, setBirthData, birthData, goBack } = useAppStore()
 
   const handleSelect = (locationResult) => {
     setBirthData({ ...birthData, ...locationResult })
@@ -276,29 +281,28 @@ function LocationStep() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-12">
-      {/* Question — exact text per spec */}
+    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
       <motion.h2
         variants={fadeUp} custom={0} initial="hidden" animate="visible"
-        style={{ ...TS, color: 'white', fontSize: 'clamp(1.5rem,4vw,2.4rem)',
-          fontWeight: 300, letterSpacing: '0.07em' }}
+        style={{ ...TS, color: 'white', fontSize: 'clamp(1.4rem,3.8vw,2.2rem)',
+          fontWeight: 300, letterSpacing: '0.06em' }}
       >
-        Where did the stars greet you?
+        Where did the stars greet you? (Birthplace)
       </motion.h2>
 
       <Suspense fallback={null}>
         <CinematicLocationSearch onSelect={handleSelect} />
       </Suspense>
 
-      <CinematicGhostButton onClick={() => advanceStep(4, 'Back to DOB')} delay={0.4}>
-        ← Back
+      <CinematicGhostButton onClick={goBack} delay={0.4}>
+        ← BACK
       </CinematicGhostButton>
     </div>
   )
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 6 — PROCESSING
+// STEP 6 — PROCESSING (Strict Payload Calculation)
 // ═══════════════════════════════════════════════════════════════════════════════
 function ProcessingStep() {
   const { birthData, userName, setAstrologyData, advanceStep, setRevealSlide } = useAppStore()
@@ -311,22 +315,15 @@ function ProcessingStep() {
 
     const compute = async () => {
       try {
-        const [y, mo, d] = (birthData?.date || '2000-01-01').split('-').map(Number)
-        const [h, mi]    = (birthData?.time || '12:00').split(':').map(Number)
-
+        // Construct payload strictly matching DualRequest Pydantic schema
         const payload = {
-          year:        y,
-          month:       mo,
-          day:         d,
-          hour:        h,
-          minute:      mi,
-          second:      0,
-          latitude:    birthData?.lat   ?? 0,
-          longitude:   birthData?.lng   ?? 0,
-          altitude:    0,
-          utc_offset:  birthData?.utcOffset ?? 0,
-          house_system: 'P',
-          ayanamsha:   'lahiri',
+          date:         birthData?.date || '2000-01-01',
+          time:         birthData?.time || '12:00',
+          utc_offset:   birthData?.utcOffset || '+00:00',
+          lat:          parseFloat(birthData?.lat ?? 0.0),
+          lon:          parseFloat(birthData?.lng ?? 0.0),
+          ayanamsha:    'lahiri',
+          house_system: 'placidus',
         }
 
         const result = await calculateDual(payload)
@@ -335,7 +332,7 @@ function ProcessingStep() {
         advanceStep(7, `${userName} received ephemeris`)
       } catch (e) {
         setErrorMsg('The ephemeris could not be aligned. Please try again.')
-        console.error(e)
+        console.error('Calculation payload error:', e)
       }
     }
 
@@ -345,7 +342,6 @@ function ProcessingStep() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
       {!errorMsg ? (
-        /* ── Pulsating processing message — exact text per spec ── */
         <motion.div
           animate={{ opacity: [0.35, 1, 0.35] }}
           transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
@@ -358,7 +354,7 @@ function ProcessingStep() {
         <>
           <motion.div
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            style={{ color: 'rgba(255,150,150,0.75)', fontSize: '14px', letterSpacing: '0.15em' }}
+            style={{ color: 'rgba(255,150,150,0.85)', fontSize: '14px', letterSpacing: '0.15em' }}
           >
             {errorMsg}
           </motion.div>
@@ -388,7 +384,6 @@ function RevealStep() {
 function CinematicRoot() {
   const { cinematicStep, setBackendStatus, setBackendReady, setSiteConfig } = useAppStore()
 
-  // Server health with cold-start retries
   const checkServer = async (attempt = 0) => {
     try {
       if (attempt > 0) setBackendStatus({ state: 'waking', retries: attempt })
@@ -411,19 +406,20 @@ function CinematicRoot() {
     getPublicConfig().then(cfg => { if (cfg) setSiteConfig(cfg) }).catch(() => {})
   }, [])
 
-  const STEPS = [
-    <IntroStep      key="s0" />,
-    <NameStep       key="s1" />,
-    <CrossroadsStep key="s2" />,
-    <AboutStep      key="s3" />,
-    <DobStep        key="s4" />,
-    <LocationStep   key="s5" />,
-    <ProcessingStep key="s6" />,
-    <RevealStep     key="s7" />,
-  ]
-
-  const step    = Math.min(Math.max(cinematicStep, 0), STEPS.length - 1)
-  const current = STEPS[step]
+  const renderCurrentStep = () => {
+    switch (cinematicStep) {
+      case 0:  return <IntroStep key="s0" />
+      case 1:  return <NameStep key="s1" />
+      case 2:  return <CrossroadsStep key="s2" />
+      case 25: return <AdminLoginStep key="s25" />
+      case 3:  return <AboutStep key="s3" />
+      case 4:  return <DobStep key="s4" />
+      case 5:  return <LocationStep key="s5" />
+      case 6:  return <ProcessingStep key="s6" />
+      case 7:  return <RevealStep key="s7" />
+      default: return <IntroStep key="s0" />
+    }
+  }
 
   return (
     <div className="relative min-h-screen text-white overflow-x-hidden">
@@ -441,12 +437,12 @@ function CinematicRoot() {
       <div className="relative z-10">
         <AnimatePresence mode="wait">
           <motion.div
-            key={`cinematic-step-${step}`}
+            key={`cinematic-step-${cinematicStep}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { duration: 1.0 } }}
             exit={{ opacity: 0, transition: { duration: 0.6 } }}
           >
-            {current}
+            {renderCurrentStep()}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -463,7 +459,6 @@ function AdminShell({ children, centered = false }) {
       className="relative min-h-screen text-white overflow-x-hidden"
       style={{ background: 'radial-gradient(ellipse at 30% 20%, #0d1145 0%, #07081a 60%, #020308 100%)' }}
     >
-      {/* Subtle grid */}
       <div
         className="pointer-events-none fixed inset-0 opacity-[0.04]"
         style={{

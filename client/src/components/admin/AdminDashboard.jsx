@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   getAdminConfig,
   updateAdminConfig,
-  getAdminMessages,
-  deleteAdminMessage,
   getAdminVisitors,
 } from '../../services/api'
 import { useAppStore } from '../../store/useAppStore'
@@ -13,16 +11,6 @@ import { useAppStore } from '../../store/useAppStore'
 const BellIcon = ({ className = 'w-4 h-4' }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-  </svg>
-)
-const MailIcon = ({ className = 'w-4 h-4' }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-  </svg>
-)
-const TrashIcon = ({ className = 'w-4 h-4' }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
   </svg>
 )
 const UsersIcon = ({ className = 'w-4 h-4' }) => (
@@ -37,7 +25,6 @@ export default function AdminDashboard() {
 
   const [activeTab, setActiveTab] = useState('banner')
   const [config, setConfig] = useState({ banner_message: '', show_banner: true, maintenance_mode: false })
-  const [messages, setMessages] = useState([])
   const [visitors, setVisitors] = useState([])
   const [loading, setLoading] = useState(true)
   const [saveSuccess, setSaveSuccess] = useState(false)
@@ -48,13 +35,11 @@ export default function AdminDashboard() {
     const load = async () => {
       setLoading(true); setError(null)
       try {
-        const [cfg, msgs, vis] = await Promise.all([
+        const [cfg, vis] = await Promise.all([
           getAdminConfig(adminToken),
-          getAdminMessages(adminToken),
           getAdminVisitors(adminToken),
         ])
         setConfig(cfg); setSiteConfig(cfg)
-        setMessages(msgs)
         setVisitors(vis)
       } catch (err) {
         if (err.response?.status === 401) { logoutAdmin(); navigate('/admin') }
@@ -73,11 +58,6 @@ export default function AdminDashboard() {
     } catch (err) { setError(err.response?.data?.detail || 'Failed to save configuration.') }
   }
 
-  const handleDeleteMessage = async (id) => {
-    try { await deleteAdminMessage(id, adminToken); setMessages(p => p.filter(m => m.id !== id)) }
-    catch (e) { console.error(e) }
-  }
-
   if (loading) return (
     <div className="w-full max-w-xl mx-auto text-center p-12 dashboard-card space-y-4">
       <div className="w-12 h-12 mx-auto rounded-2xl bg-[#3858f6]/15 border border-[#3858f6]/30 flex items-center justify-center animate-spin text-xl text-[#00d2ff]">✦</div>
@@ -87,7 +67,6 @@ export default function AdminDashboard() {
 
   const TABS = [
     { id: 'banner',   icon: BellIcon,  label: 'Site Banner' },
-    { id: 'messages', icon: MailIcon,  label: `Inquiries (${messages.length})` },
     { id: 'visitors', icon: UsersIcon, label: `Visitors (${visitors.length})` },
   ]
 
@@ -177,43 +156,6 @@ export default function AdminDashboard() {
         </motion.div>
       )}
 
-      {/* TAB: Messages */}
-      {activeTab === 'messages' && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 space-y-6">
-          <div className="flex items-center justify-between border-b border-[#262a63] pb-4">
-            <div>
-              <h2 className="text-base font-bold text-white">Contact Inquiries</h2>
-              <p className="text-xs text-[#7b82b8]">Messages submitted via consultation forms.</p>
-            </div>
-            <span className="badge-status bg-[#101336] text-[#00d2ff] border border-[#262a63]">{messages.length} Messages</span>
-          </div>
-          {messages.length === 0 ? (
-            <div className="p-8 text-center text-xs text-[#6b729f] italic">No inquiries found.</div>
-          ) : (
-            <div className="space-y-3">
-              {messages.map(msg => (
-                <div key={msg.id} className="p-4 rounded-xl bg-[#101336] border border-[#262a63] space-y-2 text-xs">
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#262a63] pb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-white">{msg.name}</span>
-                      <span className="text-[#00d2ff] font-mono">({msg.email})</span>
-                      <span className="badge-status bg-[#161942] text-[#3858f6] border border-[#262a63]">{msg.category}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-mono text-[#7b82b8]">{new Date(msg.created_at).toLocaleString()}</span>
-                      <button onClick={() => handleDeleteMessage(msg.id)} className="p-1 rounded-lg text-rose-400 hover:bg-rose-950/50 cursor-pointer transition">
-                        <TrashIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                  <p className="text-[#c5c9f5] leading-relaxed pt-1">"{msg.message}"</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </motion.div>
-      )}
-
       {/* TAB: Visitors */}
       {activeTab === 'visitors' && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="dashboard-card p-6 space-y-6">
@@ -234,14 +176,22 @@ export default function AdminDashboard() {
               {visitors.map(v => (
                 <div key={v.session_id} className="p-4 rounded-xl bg-[#101336] border border-[#262a63] space-y-3 text-xs">
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#262a63] pb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-[#3858f6]/20 border border-[#3858f6]/30 flex items-center justify-center text-[#00d2ff] font-bold text-[10px]">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-lg bg-[#3858f6]/20 border border-[#3858f6]/30 flex items-center justify-center text-[#00d2ff] font-bold text-[11px]">
                         {(v.name || 'A')[0].toUpperCase()}
                       </div>
-                      <span className="font-bold text-white">{v.name || 'Anonymous'}</span>
-                      <span className="font-mono text-[#7b82b8] text-[10px]">{v.session_id?.slice(0, 8)}...</span>
+                      <div>
+                        <div className="font-bold text-white text-sm">{v.name || 'Anonymous'}</div>
+                        <div className="flex items-center gap-3 text-[11px] text-[#00d2ff]/80 font-mono mt-0.5">
+                          <span>DOB: <strong className="text-white">{v.dob || '—'}</strong></span>
+                          <span>·</span>
+                          <span>Location: <strong className="text-white">{v.location || '—'}</strong></span>
+                        </div>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 text-[10px] font-mono text-[#7b82b8]">
+                      <span>ID: {v.session_id?.slice(0, 8)}…</span>
+                      <span>·</span>
                       <span>Started: {v.started_at ? new Date(v.started_at).toLocaleString() : '—'}</span>
                     </div>
                   </div>

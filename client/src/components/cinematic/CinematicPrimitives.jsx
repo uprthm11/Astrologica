@@ -21,7 +21,7 @@ export const fadeIn = {
 }
 
 // ─── Primary CinematicButton — pure pulsating text, no background ────────────
-// Matches the spec: tracking-widest, infinite slow star-pulse, glow on hover
+// Matches spec: tracking-widest, base opacity 0.75 -> 1.0 pulse, glowing bottom border/bracket on hover
 export function CinematicButton({
   onClick,
   children,
@@ -33,28 +33,39 @@ export function CinematicButton({
     <motion.button
       initial={{ opacity: 0 }}
       animate={{
-        opacity: [0.45, 1, 0.45],
+        opacity: [0.75, 1.0, 0.75],
         transition: {
           delay,
-          duration: 3,
+          duration: 3.5,
           repeat: Infinity,
           ease: 'easeInOut',
         },
       }}
       whileHover={{
-        opacity: 1,
+        opacity: 1.0,
         scale: 1.04,
         transition: { duration: 0.15 },
       }}
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
       disabled={disabled}
-      onMouseEnter={e => { e.currentTarget.style.textShadow = '0 0 18px rgba(200,220,255,0.9)' }}
-      onMouseLeave={e => { e.currentTarget.style.textShadow = 'none' }}
-      style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+      onMouseEnter={e => {
+        e.currentTarget.style.textShadow = '0 0 20px rgba(0, 210, 255, 0.9), 0 0 35px rgba(0, 210, 255, 0.5)'
+        e.currentTarget.style.borderBottom = '1px solid rgba(0, 210, 255, 0.8)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.textShadow = 'none'
+        e.currentTarget.style.borderBottom = '1px solid transparent'
+      }}
+      style={{
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        borderBottom: '1px solid transparent',
+        paddingBottom: '2px',
+        transition: 'border-color 0.25s, text-shadow 0.25s',
+      }}
       className={`
         bg-transparent border-0 outline-none
-        text-white/90 font-light
+        text-white font-light
         text-sm tracking-[0.35em] uppercase
         disabled:opacity-30 select-none
         ${className}
@@ -65,7 +76,7 @@ export function CinematicButton({
   )
 }
 
-// ─── Ghost / secondary text button — same pulse, slightly dimmer base ────────
+// ─── Ghost / secondary text button — base opacity 0.75 -> 1.0 pulse ───────────
 export function CinematicGhostButton({
   onClick,
   children,
@@ -76,28 +87,40 @@ export function CinematicGhostButton({
     <motion.button
       initial={{ opacity: 0 }}
       animate={{
-        opacity: [0.3, 0.75, 0.3],
+        opacity: [0.65, 0.95, 0.65],
         transition: {
           delay,
-          duration: 3.5,
+          duration: 4,
           repeat: Infinity,
           ease: 'easeInOut',
         },
       }}
       whileHover={{
-        opacity: 1,
+        opacity: 1.0,
         scale: 1.04,
         transition: { duration: 0.15 },
       }}
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
-      onMouseEnter={e => { e.currentTarget.style.textShadow = '0 0 12px rgba(160,200,255,0.7)' }}
-      onMouseLeave={e => { e.currentTarget.style.textShadow = 'none' }}
+      onMouseEnter={e => {
+        e.currentTarget.style.textShadow = '0 0 16px rgba(160,200,255,0.8)'
+        e.currentTarget.style.borderBottom = '1px solid rgba(160,200,255,0.6)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.textShadow = 'none'
+        e.currentTarget.style.borderBottom = '1px solid transparent'
+      }}
+      style={{
+        cursor: 'pointer',
+        borderBottom: '1px solid transparent',
+        paddingBottom: '2px',
+        transition: 'border-color 0.25s, text-shadow 0.25s',
+      }}
       className={`
         bg-transparent border-0 outline-none
-        text-blue-200/70 font-light
+        text-blue-100 font-light
         text-sm tracking-[0.3em] uppercase
-        cursor-pointer select-none
+        select-none
         ${className}
       `}
     >
@@ -105,6 +128,7 @@ export function CinematicGhostButton({
     </motion.button>
   )
 }
+
 
 // ─── Cinematic text input — thin underline only, no box ──────────────────────
 export function CinematicInput({

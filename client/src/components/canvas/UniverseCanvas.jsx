@@ -10,9 +10,11 @@ const STEP_Z = [120, 95, 68, 48, 58, 42, 30, 22]
 const REVEAL_Z = [22, 18, 15, 12, 8]
 
 function getCameraTarget(step, revealSlide) {
+  if (step === 25) return 45
   if (step === 7) return REVEAL_Z[Math.min(revealSlide, REVEAL_Z.length - 1)]
   return STEP_Z[Math.min(step, STEP_Z.length - 1)]
 }
+
 
 // ─── Star particle field ──────────────────────────────────────────────────────
 function StarField() {

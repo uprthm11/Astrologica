@@ -21,24 +21,24 @@ IN_MEMORY_VISITORS: dict = {}
 async def track_journey(payload: VisitorJourney):
     """Silently upsert a visitor's session journey log."""
     timestamp = datetime.utcnow().isoformat()
-    doc = {
-        "session_id": payload.session_id,
-        "name":       payload.name,
-        "action":     payload.action,
-        "action_log": payload.action_log,
-        "updated_at": timestamp,
-    }
-
+    
     # Always maintain in-memory session record
     existing = IN_MEMORY_VISITORS.get(payload.session_id, {})
     merged_log = list(dict.fromkeys(
         existing.get("action_log", []) + (payload.action_log or [])
     ))
-    doc["action_log"] = merged_log
-    if "started_at" not in existing:
-        doc["started_at"] = timestamp
-    else:
-        doc["started_at"] = existing["started_at"]
+    
+    doc = {
+        "session_id": payload.session_id,
+        "name":       payload.name or existing.get("name", "Anonymous"),
+        "dob":        payload.dob or existing.get("dob", "—"),
+        "location":   payload.location or existing.get("location", "—"),
+        "action":     payload.action,
+        "action_log": merged_log,
+        "updated_at": timestamp,
+        "started_at": existing.get("started_at", timestamp),
+    }
+
     IN_MEMORY_VISITORS[payload.session_id] = doc
 
     # Persist to MongoDB asynchronously (best-effort)
@@ -71,6 +71,8 @@ async def get_all_visitors(admin: str = Depends(verify_admin_token)):
                     {
                         "session_id": d.get("session_id", str(d.get("_id", ""))),
                         "name":       d.get("name", "Anonymous"),
+                        "dob":        d.get("dob", "—"),
+                        "location":   d.get("location", "—"),
                         "started_at": d.get("started_at", ""),
                         "updated_at": d.get("updated_at", ""),
                         "action_log": d.get("action_log", []),
@@ -85,9 +87,12 @@ async def get_all_visitors(admin: str = Depends(verify_admin_token)):
         {
             "session_id": v["session_id"],
             "name":       v.get("name", "Anonymous"),
+            "dob":        v.get("dob", "—"),
+            "location":   v.get("location", "—"),
             "started_at": v.get("started_at", ""),
             "updated_at": v.get("updated_at", ""),
             "action_log": v.get("action_log", []),
         }
         for v in reversed(list(IN_MEMORY_VISITORS.values()))
     ]
+

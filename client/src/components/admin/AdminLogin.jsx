@@ -1,132 +1,103 @@
 import React, { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { adminLogin } from '../../services/api'
 import { useAppStore } from '../../store/useAppStore'
+import { CinematicButton, CinematicGhostButton, fadeUp } from '../cinematic/CinematicPrimitives'
 
-const LockIcon = ({ className = 'w-5 h-5' }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-  </svg>
-)
+const TS = { textShadow: '0 2px 24px rgba(0,0,0,0.9), 0 0 40px rgba(0,0,0,0.8)' }
 
 export default function AdminLogin() {
   const navigate = useNavigate()
   const setAdminToken = useAppStore((state) => state.setAdminToken)
+  const goBack = useAppStore((state) => state.goBack)
 
-  const [username, setUsername] = useState('admin')
   const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState(null)
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    if (e) e.preventDefault()
+    if (!password) return
     setLoading(true)
     setError(null)
 
     try {
-      const data = await adminLogin({ username: username.trim(), password: password.trim() })
+      const data = await adminLogin({ username: 'admin', password: password.trim() })
       if (data && data.access_token) {
         setAdminToken(data.access_token)
         navigate('/admin/dashboard')
       } else {
-        setError('Authentication response did not contain access token.')
+        setError('Authorization failed.')
       }
-    } catch (err) {
-      console.error('Admin Login Error:', err)
-      setError(
-        err.response?.data?.detail || 'Authentication failed. Please verify admin credentials.'
-      )
+    } catch (_) {
+      setError('INVALID AUTHORIZATION CODE')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="w-full max-w-md mx-auto py-8 text-left">
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="dashboard-card p-8 space-y-6"
+    <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 gap-10">
+      {/* Title */}
+      <motion.h2
+        variants={fadeUp} custom={0} initial="hidden" animate="visible"
+        style={{
+          ...TS,
+          color: 'white',
+          fontSize: 'clamp(1.5rem, 4.5vw, 2.5rem)',
+          fontWeight: 300,
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase',
+        }}
       >
-        {/* Header */}
-        <div className="text-center space-y-2 border-b border-[#262a63] pb-6">
-          <div className="w-12 h-12 mx-auto rounded-2xl bg-[#3858f6]/15 border border-[#3858f6]/30 flex items-center justify-center text-[#00d2ff] shadow-md shadow-[#3858f6]/20">
-            <LockIcon className="w-6 h-6" />
-          </div>
-          <h2 className="text-xl font-bold text-white tracking-tight">
-            Astrologica Admin Console
-          </h2>
-          <p className="text-xs text-[#7b82b8] font-mono">
-            Restricted Security Gateway & Telemetry Control
-          </p>
-        </div>
+        ENTER AUTHORIZATION CODE
+      </motion.h2>
+
+      {/* Minimalist borderless password input */}
+      <motion.div variants={fadeUp} custom={1} initial="hidden" animate="visible" className="w-full max-w-xs space-y-4">
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+          placeholder="authorization code…"
+          autoFocus
+          style={{
+            background: 'transparent',
+            border: 'none',
+            borderBottom: '1px solid rgba(160,200,255,0.3)',
+            outline: 'none',
+            color: 'white',
+            textAlign: 'center',
+            textShadow: '0 0 12px rgba(160,200,255,0.4)',
+            caretColor: 'rgba(160,200,255,0.7)',
+            width: '100%',
+          }}
+          className="text-xl font-light tracking-[0.3em] py-3 placeholder-white/20"
+        />
 
         {error && (
-          <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-            <span>⚠️</span>
-            <span>{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-mono font-bold uppercase tracking-wider text-[#9aa0cf] mb-1.5">
-              Admin Username
-            </label>
-            <input
-              type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="dashboard-input w-full font-mono text-sm"
-              placeholder="admin"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-mono font-bold uppercase tracking-wider text-[#9aa0cf] mb-1.5">
-              Admin Password
-            </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="dashboard-input w-full font-mono text-sm"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <div className="pt-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full !py-3 font-bold"
-            >
-              {loading ? (
-                <span>Authenticating Terminal...</span>
-              ) : (
-                <span>Enter Admin Console →</span>
-              )}
-            </button>
-          </div>
-        </form>
-
-        {/* Demo Credentials Helper */}
-        <div className="p-3 rounded-xl bg-[#101336] border border-[#262a63] text-[11px] font-mono text-[#7b82b8] text-center">
-          Default Credentials: <strong className="text-white">admin</strong> / <strong className="text-white">admin123</strong>
-        </div>
-
-        <div className="text-center pt-2">
-          <Link
-            to="/"
-            className="text-xs font-mono text-[#7b82b8] hover:text-[#00d2ff] transition"
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            style={{ color: 'rgba(255,140,140,0.85)', fontSize: '11px', letterSpacing: '0.2em' }}
+            className="font-mono"
           >
-            ← Return to Public Assessment
-          </Link>
-        </div>
+            {error}
+          </motion.div>
+        )}
       </motion.div>
+
+      {/* Buttons */}
+      <div className="flex flex-col items-center gap-6">
+        <CinematicButton onClick={handleSubmit} disabled={loading || !password}>
+          {loading ? 'AUTHENTICATING…' : 'AUTHENTICATE'}
+        </CinematicButton>
+
+        <CinematicGhostButton onClick={goBack}>
+          ← BACK
+        </CinematicGhostButton>
+      </div>
     </div>
   )
 }
