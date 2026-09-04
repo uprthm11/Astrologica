@@ -34,7 +34,8 @@ class StoryboardResponse(BaseModel):
 
 def format_chart_context(western_chart: Dict[str, Any], user_name: Optional[str] = None) -> str:
     """Formats raw ephemeris data into a concise textual prompt for the LLM."""
-    planets = western_chart.get("planets", [])
+    raw_planets = western_chart.get("planets", [])
+    planets = list(raw_planets.values()) if isinstance(raw_planets, dict) else raw_planets
     asc = western_chart.get("ascendant", {})
     mc = western_chart.get("midheaven", {})
     houses = western_chart.get("houses", [])
@@ -53,11 +54,21 @@ def format_chart_context(western_chart: Dict[str, Any], user_name: Optional[str]
             f"- {p.get('name')}: {p.get('sign')} {p.get('degrees', 0):.1f}°, House {p.get('house', 1)}{rx_str} ({p.get('element')} / {p.get('modality')})"
         )
 
-    lines.append("\nMajor Aspects:")
-    for asp in aspects[:12]:
-        lines.append(
-            f"- {asp.get('planet_1')} {asp.get('aspect')} {asp.get('planet_2')} (orb: {asp.get('orb', 0):.1f}°, nature: {asp.get('nature')})"
-        )
+    lines.append("\nTight Exact Aspects (Strict Orb <= 2.0° only):")
+    # Strict Aspect Pruning: ONLY pass aspects to the LLM that have an orb <= 2.0°
+    tight_aspects = [
+        asp for asp in aspects 
+        if float(asp.get("orb", 999.0)) <= 2.0
+    ]
+    tight_aspects.sort(key=lambda a: float(a.get("orb", 999.0)))
+
+    if tight_aspects:
+        for asp in tight_aspects:
+            lines.append(
+                f"- {asp.get('planet_1')} {asp.get('aspect')} {asp.get('planet_2')} (orb: {float(asp.get('orb', 0)):.2f}°, nature: {asp.get('nature')})"
+            )
+    else:
+        lines.append("- None (no aspects with orb <= 2.0° detected in this chart)")
 
     return "\n".join(lines)
 
@@ -88,8 +99,9 @@ Requirements:
 - Group reading into 6 to 8 'chapters'.
 - Chapter 1 must be 'The Big Three'.
 - Subsequent chapters must highlight the most important tensions or clusters in this specific chart.
+- STRICT ASPECT PRUNING: Focus ONLY on aspects in the 'Tight Exact Aspects (Strict Orb <= 2.0° only)' list. Completely ignore and never mention or highlight any aspects with orbs greater than 2.0°.
 - In each section:
-  * 'heading': e.g., 'Sun in Gemini (19.5°), House 2' or 'Moon Square Saturn (0.8°)'
+  * 'heading': e.g., 'Sun in Gemini (19.5°), House 2' or 'Mercury Square Mars (0.34°)'
   * 'body': Synthesized reading, tight, poetic, professional (MAXIMUM 60 WORDS per section).
   * 'icon_hint': lowercase keyword identifier (e.g. 'gemini', 'saturn', 'sun', 'moon', 'aspect_square', 'stellium').
 - Include a standard grounding astrology disclaimer.
@@ -128,6 +140,7 @@ def generate_with_openai(chart_summary: str, api_key: str) -> Optional[Dict[str,
 {chart_summary}
 
 Group reading into 6 to 8 chapters. Chapter 1 must be 'The Big Three'.
+STRICT ASPECT PRUNING: Focus ONLY on aspects with orb <= 2.0°. Completely ignore and never mention or highlight any aspects with orbs greater than 2.0°.
 Each section body must be strictly maximum 60 words.
 Provide valid icon_hint and disclaimer according to schema.
 """
@@ -164,10 +177,16 @@ def generate_fallback_storyboard(western_chart: Dict[str, Any], user_name: Optio
     Deterministic synthesis engine generating 6 to 8 compliant Storyboard chapters
     starting with 'The Big Three' and highlighting chart ruler, aspect tensions, and clusters.
     """
-    planets = {p.get("id"): p for p in western_chart.get("planets", [])}
+    raw_planets = western_chart.get("planets", [])
+    planets = raw_planets if isinstance(raw_planets, dict) else {p.get("id", p.get("name", "").lower()): p for p in raw_planets}
     asc = western_chart.get("ascendant", {})
     mc = western_chart.get("midheaven", {})
     aspects = western_chart.get("aspects", [])
+    tight_aspects = [
+        asp for asp in aspects 
+        if float(asp.get("orb", 999.0)) <= 2.0
+    ]
+    tight_aspects.sort(key=lambda a: float(a.get("orb", 999.0)))
 
     sun = planets.get("sun", {})
     moon = planets.get("moon", {})
@@ -249,21 +268,49 @@ def generate_fallback_storyboard(western_chart: Dict[str, Any], user_name: Optio
                 ),
             ]
         ),
-        # Chapter 4: Aspectual Tensions & Structural Crucible
+        # Chapter 4: Aspectual Tensions & Structural Crucible (Strict Orb <= 2.0°)
         StoryboardChapter(
             chapter_title="Aspectual Tensions & Clusters",
-            sections=[
-                StoryboardSection(
-                    heading=f"{aspects[0].get('planet_1') if aspects else 'Sun'} {aspects[0].get('aspect') if aspects else 'Square'} {aspects[0].get('planet_2') if aspects else 'Saturn'}",
-                    body=f"A tight {aspects[0].get('nature') if aspects else 'challenging'} aspect with an orb of {aspects[0].get('orb', 1.2) if aspects else 1.2}°. This friction serves as an evolutionary forge, transmuting self-doubt into mastery.",
-                    icon_hint="aspect_square"
-                ),
-                StoryboardSection(
-                    heading=f"{aspects[1].get('planet_1') if len(aspects) > 1 else 'Moon'} {aspects[1].get('aspect') if len(aspects) > 1 else 'Trine'} {aspects[1].get('planet_2') if len(aspects) > 1 else 'Jupiter'}",
-                    body=f"Harmonious flowing conduit with an orb of {aspects[1].get('orb', 1.5) if len(aspects) > 1 else 1.5}°. Provides psychological resilience, intuitive optimism, and innate protective grace under pressure.",
-                    icon_hint="aspect_trine"
-                ),
-            ]
+            sections=(
+                [
+                    StoryboardSection(
+                        heading=f"{tight_aspects[0].get('planet_1')} {tight_aspects[0].get('aspect')} {tight_aspects[0].get('planet_2')} ({float(tight_aspects[0].get('orb', 0)):.2f}°)",
+                        body=f"A tight {tight_aspects[0].get('nature', 'dynamic')} geometric alignment with an acute orb of {float(tight_aspects[0].get('orb', 0)):.2f}°. This exact aspect acts as an evolutionary focal point in your psychological architecture.",
+                        icon_hint=f"aspect_{str(tight_aspects[0].get('aspect', 'square')).lower()}"
+                    ),
+                    StoryboardSection(
+                        heading=f"{tight_aspects[1].get('planet_1')} {tight_aspects[1].get('aspect')} {tight_aspects[1].get('planet_2')} ({float(tight_aspects[1].get('orb', 0)):.2f}°)",
+                        body=f"A focused {tight_aspects[1].get('nature', 'flowing')} conduit with a tight orb of {float(tight_aspects[1].get('orb', 0)):.2f}°. Directs concentrated planetary momentum into tangible conscious expression.",
+                        icon_hint=f"aspect_{str(tight_aspects[1].get('aspect', 'trine')).lower()}"
+                    ),
+                ]
+                if len(tight_aspects) >= 2
+                else [
+                    StoryboardSection(
+                        heading=f"{tight_aspects[0].get('planet_1')} {tight_aspects[0].get('aspect')} {tight_aspects[0].get('planet_2')} ({float(tight_aspects[0].get('orb', 0)):.2f}°)",
+                        body=f"The primary acute geometric tension in your chart with an exact orb of {float(tight_aspects[0].get('orb', 0)):.2f}°. This intense alignment concentrates psychological focus, transmuting friction into mastery.",
+                        icon_hint=f"aspect_{str(tight_aspects[0].get('aspect', 'square')).lower()}"
+                    ),
+                    StoryboardSection(
+                        heading="Singular Harmonic Crucible",
+                        body="Without secondary acute collisions under 2°, your remaining planetary drives operate with broader breathing room rather than rigid systemic gridlock.",
+                        icon_hint="stellium"
+                    ),
+                ]
+                if len(tight_aspects) == 1
+                else [
+                    StoryboardSection(
+                        heading="Unhindered Planetary Matrix",
+                        body="This chart contains no rigid angular collisions under 2° orb. Planetary archetypes express with sovereign autonomy rather than acute internal friction.",
+                        icon_hint="stellium"
+                    ),
+                    StoryboardSection(
+                        heading="Harmonic Diffusion",
+                        body="Without harsh geometric gridlocks under 2°, psychological drives integrate fluidly across elemental boundaries without acute crisis points.",
+                        icon_hint="aspect_trine"
+                    ),
+                ]
+            )
         ),
         # Chapter 5: Career Signature & Calling
         StoryboardChapter(
