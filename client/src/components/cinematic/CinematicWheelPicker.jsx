@@ -1,6 +1,7 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useMemo } from 'react'
 
 export default function CinematicWheelPicker({
+  data,
   options = [],
   value = '',
   onChange,
@@ -10,41 +11,75 @@ export default function CinematicWheelPicker({
   const containerRef = useRef(null)
   const isUserScrolling = useRef(false)
   const scrollTimeout = useRef(null)
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
+
+  const rawItems = data || options || []
 
   // Normalize options to { label, value }
-  const normalizedOptions = options.map(opt =>
-    typeof opt === 'object' && opt !== null
-      ? { label: opt.label ?? opt.name ?? String(opt.value), value: String(opt.value) }
-      : { label: String(opt), value: String(opt) }
-  )
+  const normalizedOptions = useMemo(() => {
+    return rawItems.map(opt => {
+      if (typeof opt === 'object' && opt !== null) {
+        const label = opt.label ?? opt.name ?? String(opt.value ?? opt.isoCode ?? '')
+        const val = opt.value !== undefined
+          ? String(opt.value)
+          : (opt.isoCode !== undefined ? String(opt.isoCode) : String(opt.name ?? ''))
+        return { label, value: val }
+      }
+      return { label: String(opt), value: String(opt) }
+    })
+  }, [rawItems])
 
   const selectedIndex = normalizedOptions.findIndex(o => o.value === String(value))
 
-  // Scroll to selected item on mount or external value change
+  // Wheel Re-calculation: Reset to first item (index 0) when options array changes
+  // and ensure container scroll does not get stuck pointing to an out-of-bounds index
+  useEffect(() => {
+    if (normalizedOptions.length === 0) return
+
+    const currentIndex = normalizedOptions.findIndex(o => o.value === String(value))
+    if (currentIndex === -1) {
+      if (containerRef.current) {
+        containerRef.current.scrollTop = 0
+      }
+      const firstVal = normalizedOptions[0].value
+      if (firstVal !== String(value)) {
+        onChangeRef.current?.(firstVal)
+      }
+    } else {
+      if (containerRef.current && !isUserScrolling.current) {
+        containerRef.current.scrollTop = currentIndex * itemHeight
+      }
+    }
+  }, [normalizedOptions, itemHeight, value])
+
+  // Scroll to selected item on external value change or mount
   useEffect(() => {
     if (containerRef.current && selectedIndex >= 0 && !isUserScrolling.current) {
       const targetScroll = selectedIndex * itemHeight
-      containerRef.current.scrollTo({
-        top: targetScroll,
-        behavior: 'smooth',
-      })
+      if (Math.abs(containerRef.current.scrollTop - targetScroll) > 1) {
+        containerRef.current.scrollTo({
+          top: targetScroll,
+          behavior: 'smooth',
+        })
+      }
     }
   }, [selectedIndex, itemHeight])
 
   const handleScroll = () => {
-    if (!containerRef.current) return
+    if (!containerRef.current || normalizedOptions.length === 0) return
     isUserScrolling.current = true
     clearTimeout(scrollTimeout.current)
 
     scrollTimeout.current = setTimeout(() => {
-      if (!containerRef.current) return
+      if (!containerRef.current || normalizedOptions.length === 0) return
       const currentScroll = containerRef.current.scrollTop
       const targetIndex = Math.round(currentScroll / itemHeight)
       const clampedIndex = Math.max(0, Math.min(targetIndex, normalizedOptions.length - 1))
       const targetOption = normalizedOptions[clampedIndex]
 
       if (targetOption && targetOption.value !== String(value)) {
-        onChange?.(targetOption.value)
+        onChangeRef.current?.(targetOption.value)
       }
       isUserScrolling.current = false
     }, 90)
@@ -57,10 +92,13 @@ export default function CinematicWheelPicker({
         behavior: 'smooth',
       })
     }
-    onChange?.(optValue)
+    onChangeRef.current?.(optValue)
   }
 
-  // Vertical mask gradient to fade top and bottom smoothly
+  if (normalizedOptions.length === 0) {
+    return null
+  }
+
   const maskStyle = {
     maskImage: 'linear-gradient(to bottom, transparent, black 25%, black 75%, transparent)',
     WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 25%, black 75%, transparent)',
