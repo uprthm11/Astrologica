@@ -301,7 +301,21 @@ function LocationStep() {
 function ProcessingStep() {
   const { birthData, userName, setAstrologyData, advanceStep, setRevealSlide } = useAppStore()
   const [errorMsg, setErrorMsg] = useState(null)
+  const [loaderIndex, setLoaderIndex] = useState(0)
   const called = React.useRef(false)
+
+  const LOADER_PHRASES = [
+    "Aligning Swiss Ephemeris coordinates…",
+    "Synthesizing planetary architectures…",
+    "AI Cosmic Reader weaving storyboard…",
+  ]
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLoaderIndex(i => (i + 1) % LOADER_PHRASES.length)
+    }, 2200)
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     if (called.current) return
@@ -319,10 +333,13 @@ function ProcessingStep() {
           house_system: 'placidus',
         }
 
+        // Hold warp tunnel until AI Cosmic Reader payload fully resolves
         const result = await calculateDual(payload)
+        
+        // Instantaneous load into Chapter 1 (Slide 1)
         setAstrologyData(result)
         setRevealSlide(0)
-        advanceStep(7, `${userName} received ephemeris`)
+        advanceStep(7, `${userName} received ephemeris storyboard`)
       } catch (e) {
         setErrorMsg('The ephemeris could not be aligned. Please try again.')
         console.error('Calculation payload error:', e)
@@ -335,14 +352,27 @@ function ProcessingStep() {
   return (
     <div className="min-h-screen w-full flex flex-col justify-center items-center overflow-hidden px-4 md:px-8 text-center gap-10">
       {!errorMsg ? (
-        <motion.div
-          animate={{ opacity: [0.35, 1, 0.35] }}
-          transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ ...TS, color: 'rgba(200,220,255,0.9)', fontSize: 'clamp(1rem,3vw,1.4rem)',
-            fontWeight: 300, letterSpacing: '0.15em' }}
-        >
-          Aligning the ephemeris…
-        </motion.div>
+        <div className="flex flex-col items-center gap-4">
+          <motion.div
+            key={loaderIndex}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.8 }}
+            style={{
+              ...TS,
+              color: 'rgba(200,220,255,0.95)',
+              fontSize: 'clamp(1.1rem,3.5vw,1.6rem)',
+              fontWeight: 300,
+              letterSpacing: '0.15em'
+            }}
+          >
+            {LOADER_PHRASES[loaderIndex]}
+          </motion.div>
+          <div className="text-xs font-mono tracking-[0.3em] uppercase text-blue-200/40">
+            Hold for cosmic calibration
+          </div>
+        </div>
       ) : (
         <>
           <motion.div
