@@ -72,15 +72,14 @@ def format_chart_context(western_chart: Dict[str, Any], user_name: Optional[str]
 
     return "\n".join(lines)
 
-SYSTEM_PROMPT = (
-    "You are a master astrologer. Analyze the provided raw ephemeris data. "
-    "Do not give generic, isolated definitions. Synthesize the chart. "
-    "Look for standout features: Stelliums, exact tight aspects (under 2° orb), "
-    "chart rulers, and mutual receptions. Group your reading into 6 to 8 'chapters'. "
-    "Chapter 1 must be 'The Big Three'. Subsequent chapters should highlight the most "
-    "important tensions or clusters in this specific chart. Keep the tone sharp, psychological, "
-    "and highly specific to the degrees and house placements."
-)
+SYSTEM_PROMPT = """You are a master psychological astrologer. Your goal is to synthesize the provided chart into concrete, behavioral reality. 
+
+STRICT RULES FOR WRITING:
+1. NO ASTROLOGY WORD SALAD: Never use decorative, abstract phrases like 'conscious solar core,' 'navigational mask,' 'karmic responsibility,' or 'vibrational frequency.' Speak normally.
+2. BE CONCRETE: Describe specific scenarios the reader can test against their own week. Instead of writing 'You communicate with poise,' write 'People probably clock you as a talker before they learn anything else.'
+3. ACCURACY OVER VIBES: Never hallucinate traits. Taurus is steady, sensory, and resists being rushed; it is NEVER about 'unexplored frontiers.' 
+4. SYNTHESIS IS REQUIRED: Do not read a planet and a house separately. If the Sun is in Gemini (curious, scattered) but sitting in the 2nd House (resources, stability), you must explain how the house grounds the sign (e.g., 'Your need to explain things is in service of building a specific skill that is genuinely yours. You want to own what you know.'). 
+5. TONE: Keep the tone sharp, direct, empathetic, and highly specific. Write as if you are talking to a smart friend across a table."""
 
 # ─── Gemini Structured Outputs Invocation ────────────────────────────────────
 
@@ -98,11 +97,11 @@ def generate_with_gemini(chart_summary: str, api_key: str) -> Optional[Dict[str,
 Requirements:
 - Group reading into 6 to 8 'chapters'.
 - Chapter 1 must be 'The Big Three'.
-- Subsequent chapters must highlight the most important tensions or clusters in this specific chart.
+- Subsequent chapters should highlight the most important tensions or clusters in this specific chart.
 - STRICT ASPECT PRUNING: Focus ONLY on aspects in the 'Tight Exact Aspects (Strict Orb <= 2.0° only)' list. Completely ignore and never mention or highlight any aspects with orbs greater than 2.0°.
 - In each section:
   * 'heading': e.g., 'Sun in Gemini (19.5°), House 2' or 'Mercury Square Mars (0.34°)'
-  * 'body': Synthesized reading, tight, poetic, professional (MAXIMUM 60 WORDS per section).
+  * 'body': Concrete behavioral synthesis following the strict writing rules (MAXIMUM 60 WORDS per section).
   * 'icon_hint': lowercase keyword identifier (e.g. 'gemini', 'saturn', 'sun', 'moon', 'aspect_square', 'stellium').
 - Include a standard grounding astrology disclaimer.
 """
@@ -123,7 +122,7 @@ Requirements:
         if response and response.text:
             parsed = json.loads(response.text)
             validated = StoryboardResponse.model_validate(parsed)
-            logger.info("Successfully generated AI Storyboard via Gemini with master astrologer system prompt")
+            logger.info("Successfully generated AI Storyboard via Gemini with behavioral psychologist prompt")
             return validated.model_dump()
     except Exception as exc:
         logger.error(f"Gemini AI Reader invocation error: {exc}")
@@ -141,7 +140,7 @@ def generate_with_openai(chart_summary: str, api_key: str) -> Optional[Dict[str,
 
 Group reading into 6 to 8 chapters. Chapter 1 must be 'The Big Three'.
 STRICT ASPECT PRUNING: Focus ONLY on aspects with orb <= 2.0°. Completely ignore and never mention or highlight any aspects with orbs greater than 2.0°.
-Each section body must be strictly maximum 60 words.
+Each section body must be strictly maximum 60 words and adhere to the strict behavioral writing rules (no word salad, concrete, synthesized).
 Provide valid icon_hint and disclaimer according to schema.
 """
 
@@ -221,17 +220,17 @@ def generate_fallback_storyboard(western_chart: Dict[str, Any], user_name: Optio
             sections=[
                 StoryboardSection(
                     heading=f"Sun in {sun_sign} ({sun_deg:.1f}°), House {sun_house}",
-                    body=f"Your conscious solar core burns through {sun_sign} in the {sun_house} house. You organize identity around purpose, mastering direct assertion while grounding vitality into tangible reality.",
+                    body=f"Your core drive in {sun_sign} plays out directly in house {sun_house}. Rather than getting lost in theory, you test your identity through tangible output, focusing energy where you can build real, measurable traction.",
                     icon_hint=sun_sign.lower()
                 ),
                 StoryboardSection(
                     heading=f"Moon in {moon_sign} ({moon_deg:.1f}°), House {moon_house}",
-                    body=f"Subconscious sanctuary calibrated in {moon_sign} within the {moon_house} house. Emotional restoration requires visceral safety, tactile grounding, and cyclic private retreat away from collective noise.",
+                    body=f"With your Moon in {moon_sign} in house {moon_house}, your emotional reset button is sensory and private. When stressed, you pull back from collective noise to decompress in a predictable, calm space before deciding what to do next.",
                     icon_hint=moon_sign.lower()
                 ),
                 StoryboardSection(
                     heading=f"Ascendant in {asc_sign} ({asc_deg:.1f}°)",
-                    body=f"The eastern horizon projects {asc_sign} as your navigational mask. First impressions communicate immediate alertness, communicative poise, and instinctual curiosity toward unexplored frontiers.",
+                    body=f"With {asc_sign} rising, people clock your immediate presence and conversational pace before learning anything else. You enter unfamiliar rooms with an instinctual radar, sizing up dynamics before committing.",
                     icon_hint=asc_sign.lower()
                 ),
             ]
@@ -242,12 +241,12 @@ def generate_fallback_storyboard(western_chart: Dict[str, Any], user_name: Optio
             sections=[
                 StoryboardSection(
                     heading=f"Navigational Gravity: Mercury in {mercury.get('sign', 'Gemini')} ({mercury.get('degrees', 0):.1f}°), House {mercury.get('house', 3)}",
-                    body=f"Guiding the Ascendant's horizon, your mental frequency translates intuition into articulate strategy. Cognitive faculties synthesize disparate data swiftly into lucid vision.",
+                    body=f"Mercury in {mercury.get('sign', 'Gemini')} in house {mercury.get('house', 3)} shapes how you break down problems. You process facts quickly, cutting through fluff to translate raw data into clear, functional steps.",
                     icon_hint="mercury"
                 ),
                 StoryboardSection(
                     heading=f"Mars in {mars.get('sign', 'Aries')} ({mars.get('degrees', 0):.1f}°), House {mars.get('house', 1)}",
-                    body=f"Volitional drive and autonomous initiative operate without hesitation. Your vital engine thrives on decisive breakthroughs and catalytic challenges.",
+                    body=f"Mars in {mars.get('sign', 'Aries')} in house {mars.get('house', 1)} is your operational engine. You get restless when initiatives stall in discussion, preferring to take direct action and iterate in real time.",
                     icon_hint="mars"
                 ),
             ]
@@ -258,12 +257,12 @@ def generate_fallback_storyboard(western_chart: Dict[str, Any], user_name: Optio
             sections=[
                 StoryboardSection(
                     heading=f"Venus in {venus.get('sign', 'Taurus')} ({venus.get('degrees', 0):.1f}°), House {venus.get('house', 2)}",
-                    body=f"Affection and aesthetic resonance operate through loyalty and somatic luxury. You attract sustainable bonds through mutual integrity and unwavering presence.",
+                    body=f"Venus in {venus.get('sign', 'Taurus')} in house {venus.get('house', 2)} defines how you build trust. In relationships and work, you prioritize consistency and follow-through over performative promises, valuing bonds that hold up under pressure.",
                     icon_hint="venus"
                 ),
                 StoryboardSection(
                     heading=f"Jupiter in {jupiter.get('sign', 'Sagittarius')} ({jupiter.get('degrees', 0):.1f}°), House {jupiter.get('house', 9)}",
-                    body=f"Philosophical fortune expands through foreign horizons and unconstrained inquiries. Faith generates serendipity when embracing intellectual exploration.",
+                    body=f"Jupiter in {jupiter.get('sign', 'Sagittarius')} in house {jupiter.get('house', 9)} points to where you take calculated risks. You broaden your perspective by testing assumptions against firsthand experience rather than taking conventional wisdom at face value.",
                     icon_hint="jupiter"
                 ),
             ]
@@ -275,12 +274,12 @@ def generate_fallback_storyboard(western_chart: Dict[str, Any], user_name: Optio
                 [
                     StoryboardSection(
                         heading=f"{tight_aspects[0].get('planet_1')} {tight_aspects[0].get('aspect')} {tight_aspects[0].get('planet_2')} ({float(tight_aspects[0].get('orb', 0)):.2f}°)",
-                        body=f"A tight {tight_aspects[0].get('nature', 'dynamic')} geometric alignment with an acute orb of {float(tight_aspects[0].get('orb', 0)):.2f}°. This exact aspect acts as an evolutionary focal point in your psychological architecture.",
+                        body=f"This tight alignment ({float(tight_aspects[0].get('orb', 0)):.2f}° orb) creates an acute behavioral trigger. When stress hits, you instinctively turn that internal tension into decisive focus rather than letting it sit idle.",
                         icon_hint=f"aspect_{str(tight_aspects[0].get('aspect', 'square')).lower()}"
                     ),
                     StoryboardSection(
                         heading=f"{tight_aspects[1].get('planet_1')} {tight_aspects[1].get('aspect')} {tight_aspects[1].get('planet_2')} ({float(tight_aspects[1].get('orb', 0)):.2f}°)",
-                        body=f"A focused {tight_aspects[1].get('nature', 'flowing')} conduit with a tight orb of {float(tight_aspects[1].get('orb', 0)):.2f}°. Directs concentrated planetary momentum into tangible conscious expression.",
+                        body=f"A focused {tight_aspects[1].get('nature', 'flowing')} link ({float(tight_aspects[1].get('orb', 0)):.2f}° orb). This operates like reflexive muscle memory, letting you bridge these two areas smoothly without second-guessing yourself.",
                         icon_hint=f"aspect_{str(tight_aspects[1].get('aspect', 'trine')).lower()}"
                     ),
                 ]
@@ -288,12 +287,12 @@ def generate_fallback_storyboard(western_chart: Dict[str, Any], user_name: Optio
                 else [
                     StoryboardSection(
                         heading=f"{tight_aspects[0].get('planet_1')} {tight_aspects[0].get('aspect')} {tight_aspects[0].get('planet_2')} ({float(tight_aspects[0].get('orb', 0)):.2f}°)",
-                        body=f"The primary acute geometric tension in your chart with an exact orb of {float(tight_aspects[0].get('orb', 0)):.2f}°. This intense alignment concentrates psychological focus, transmuting friction into mastery.",
+                        body=f"This primary tension ({float(tight_aspects[0].get('orb', 0)):.2f}° orb) is your central psychological checkpoint. It forces you to balance assertion with patience during high-stakes moments.",
                         icon_hint=f"aspect_{str(tight_aspects[0].get('aspect', 'square')).lower()}"
                     ),
                     StoryboardSection(
                         heading="Singular Harmonic Crucible",
-                        body="Without secondary acute collisions under 2°, your remaining planetary drives operate with broader breathing room rather than rigid systemic gridlock.",
+                        body="Without secondary acute collisions under 2°, your other habits operate with room to breathe rather than compounding into repetitive internal gridlock.",
                         icon_hint="stellium"
                     ),
                 ]
@@ -301,12 +300,12 @@ def generate_fallback_storyboard(western_chart: Dict[str, Any], user_name: Optio
                 else [
                     StoryboardSection(
                         heading="Unhindered Planetary Matrix",
-                        body="This chart contains no rigid angular collisions under 2° orb. Planetary archetypes express with sovereign autonomy rather than acute internal friction.",
+                        body="This chart has no rigid angular collisions under 2° orb. Your day-to-day decisions operate with clean autonomy rather than chronic internal friction.",
                         icon_hint="stellium"
                     ),
                     StoryboardSection(
                         heading="Harmonic Diffusion",
-                        body="Without harsh geometric gridlocks under 2°, psychological drives integrate fluidly across elemental boundaries without acute crisis points.",
+                        body="Without harsh geometric gridlocks under 2°, your habits adjust smoothly across different settings instead of locking into acute conflict.",
                         icon_hint="aspect_trine"
                     ),
                 ]
@@ -318,12 +317,12 @@ def generate_fallback_storyboard(western_chart: Dict[str, Any], user_name: Optio
             sections=[
                 StoryboardSection(
                     heading=f"Midheaven (MC) in {mc_sign} ({mc_deg:.1f}°)",
-                    body=f"Your vocational zenith culminates in {mc_sign}. Public recognition and societal legacy materialize when aligning professional expertise with empathetic vision.",
+                    body=f"Your vocational signature culminates in {mc_sign}. People respect you for delivering steady results, especially when untangling messy, ambiguous problems that overwhelm others.",
                     icon_hint=mc_sign.lower()
                 ),
                 StoryboardSection(
                     heading=f"Saturn in {saturn.get('sign', 'Capricorn')} ({saturn.get('degrees', 0):.1f}°), House {saturn.get('house', 10)}",
-                    body=f"Karmic responsibility and architectural discipline build lasting foundations. Mastery demands endurance, rewarding sustained focus with unassailable authority.",
+                    body=f"Saturn in {saturn.get('sign', 'Capricorn')} in house {saturn.get('house', 10)} is about compound discipline. You do not rely on shortcuts; you build standing and authority through demonstrable competence and earned respect.",
                     icon_hint="saturn"
                 ),
             ]
@@ -334,12 +333,12 @@ def generate_fallback_storyboard(western_chart: Dict[str, Any], user_name: Optio
             sections=[
                 StoryboardSection(
                     heading=f"Uranus in {uranus.get('sign', 'Aquarius')} ({uranus.get('degrees', 0):.1f}°), House {uranus.get('house', 11)}",
-                    body=f"The lightning bolt of individual liberation strikes through visionary communities. You shatter obsolete dogmas to anchor forward-thinking innovation.",
+                    body=f"Uranus in {uranus.get('sign', 'Aquarius')} in house {uranus.get('house', 11)} kicks in when you spot outdated procedures. You naturally advocate for cleaner, more practical systems that help groups move faster.",
                     icon_hint="uranus"
                 ),
                 StoryboardSection(
                     heading=f"Pluto in {pluto.get('sign', 'Scorpio')} ({pluto.get('degrees', 0):.1f}°), House {pluto.get('house', 6)}",
-                    body=f"Subterranean catalytic power demands radical honesty and somatic purification. You navigate the underworld to emerge with sovereign psychological clarity.",
+                    body=f"Pluto in {pluto.get('sign', 'Scorpio')} in house {pluto.get('house', 6)} shapes your working standard. You have low patience for superficial patches, digging into root causes until the underlying system actually functions.",
                     icon_hint="pluto"
                 ),
             ]
