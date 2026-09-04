@@ -134,8 +134,9 @@ async def calculate_western_endpoint(request: WesternRequest):
         lon_f = float(request.lon)
         hsys = request.house_system or "placidus"
         
+        tz_name = getattr(request, "timezone", None)
         result = calculate_western_chart(
-            request.date, request.time, request.utc_offset, lat_f, lon_f, hsys
+            request.date, request.time, request.utc_offset, lat_f, lon_f, hsys, tz_str=tz_name
         )
         return {"status": "success", **result}
     except Exception as exc:
@@ -155,9 +156,10 @@ async def calculate_vedic_endpoint(request: VedicRequest):
         lat_f = float(request.lat)
         lon_f = float(request.lon)
         ay_name = request.ayanamsha or "lahiri"
+        tz_name = getattr(request, "timezone", None)
         
         result = calculate_vedic_chart(
-            request.date, request.time, request.utc_offset, lat_f, lon_f, ay_name
+            request.date, request.time, request.utc_offset, lat_f, lon_f, ay_name, tz_str=tz_name
         )
         return {"status": "success", **result}
     except Exception as exc:
@@ -178,9 +180,10 @@ async def calculate_dual_endpoint(request: DualRequest):
         lon_f = float(request.lon)
         ay_name = request.ayanamsha or "lahiri"
         hsys = request.house_system or "placidus"
+        tz_name = getattr(request, "timezone", None)
         
         result = calculate_dual_chart(
-            request.date, request.time, request.utc_offset, lat_f, lon_f, ay_name, hsys
+            request.date, request.time, request.utc_offset, lat_f, lon_f, ay_name, hsys, tz_str=tz_name
         )
         # Synthesize AI Storyboard directly into response
         ai_storyboard = synthesize_chart_storyboard(result.get("western", {}))
@@ -209,7 +212,8 @@ async def interpret_chart_endpoint(request: InterpretChartRequest):
                 request.time or "12:00",
                 request.utc_offset or "+00:00",
                 float(request.lat),
-                float(request.lon)
+                float(request.lon),
+                tz_str=getattr(request, "timezone", None)
             )
         if not chart:
             raise HTTPException(
@@ -235,8 +239,9 @@ async def calculate_blueprint_legacy(request: BaseBirthDataRequest):
     try:
         lat_f = float(request.lat)
         lon_f = float(request.lon)
+        tz_name = getattr(request, "timezone", None)
         dual_res = calculate_dual_chart(
-            request.date, request.time, request.utc_offset, lat_f, lon_f
+            request.date, request.time, request.utc_offset, lat_f, lon_f, tz_str=tz_name
         )
         
         sun_p = next(p for p in dual_res["western"]["planets"] if p["id"] == "sun")

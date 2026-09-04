@@ -2,7 +2,7 @@
 Western (Tropical) Astrological Calculation Service
 """
 import swisseph as swe
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from .astro_core import (
     PLANET_DEFS,
     ZODIAC_SIGNS,
@@ -40,13 +40,14 @@ def calculate_western_chart(
     utc_offset_str: str,
     lat: float,
     lon: float,
-    house_system: str = "placidus"
+    house_system: str = "placidus",
+    tz_str: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Computes full Western (Tropical) Astrological Chart with planetary positions,
     houses (Placidus or Whole Sign), and major aspects.
     """
-    jd, dt_obj = parse_julian_day(date_str, time_str, utc_offset_str)
+    jd, dt_obj = parse_julian_day(date_str, time_str, utc_offset_str, lat=lat, lon=lon, tz_str=tz_str)
     
     # House System code: 'P' = Placidus, 'W' = Whole Sign
     hsys_code = b"W" if house_system.lower() in ["whole_sign", "wholesign", "w"] else b"P"

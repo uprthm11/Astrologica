@@ -1,7 +1,7 @@
 """
 Dual Comparative Astrological Calculation Service (Western + Vedic Synthesis)
 """
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from .astro_western import calculate_western_chart
 from .astro_vedic import calculate_vedic_chart
 
@@ -12,17 +12,18 @@ def calculate_dual_chart(
     lat: float,
     lon: float,
     ayanamsha_name: str = "lahiri",
-    house_system: str = "placidus"
+    house_system: str = "placidus",
+    tz_str: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Computes both Western (Tropical) and Vedic (Sidereal) charts side-by-side
     along with precession shift analytical commentary.
     """
     western = calculate_western_chart(
-        date_str, time_str, utc_offset_str, lat, lon, house_system
+        date_str, time_str, utc_offset_str, lat, lon, house_system, tz_str=tz_str
     )
     vedic = calculate_vedic_chart(
-        date_str, time_str, utc_offset_str, lat, lon, ayanamsha_name
+        date_str, time_str, utc_offset_str, lat, lon, ayanamsha_name, tz_str=tz_str
     )
     
     # Extract Key Dual Placements

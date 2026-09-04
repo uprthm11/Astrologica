@@ -3,7 +3,7 @@ Vedic (Sidereal / Jyotish) Astrological Calculation Service
 """
 import swisseph as swe
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 from .astro_core import (
     PLANET_DEFS,
     ZODIAC_SIGNS,
@@ -86,7 +86,7 @@ def calculate_vimshottari_dashas(birth_dt: datetime, moon_sid_lon: float) -> Dic
     
     timeline = []
     current_start = birth_dt
-    now = datetime.utcnow()
+    now = datetime.now(birth_dt.tzinfo) if birth_dt.tzinfo is not None else datetime.utcnow()
     current_active_dasha = None
     
     # 1st Mahadasha (balance at birth)
@@ -133,13 +133,14 @@ def calculate_vedic_chart(
     utc_offset_str: str,
     lat: float,
     lon: float,
-    ayanamsha_name: str = "lahiri"
+    ayanamsha_name: str = "lahiri",
+    tz_str: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Computes full Vedic (Sidereal / Jyotish) Astrological Chart with Rashis,
     Nakshatras, Padas, 12 Bhavas from Lagna, Navamsha (D9), and Vimshottari Dashas.
     """
-    jd, dt_obj = parse_julian_day(date_str, time_str, utc_offset_str)
+    jd, dt_obj = parse_julian_day(date_str, time_str, utc_offset_str, lat=lat, lon=lon, tz_str=tz_str)
     
     # Configure Sidereal Ayanamsha
     ay_key = ayanamsha_name.lower().strip()

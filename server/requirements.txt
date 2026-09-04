@@ -7,3 +7,6 @@ flatlib
 pyswisseph
 pyjwt
 google-genai
+timezonefinder
+pytz
+tzdata

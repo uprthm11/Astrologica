@@ -107,22 +107,28 @@ export default function CinematicLocationSearch({ onSelect }) {
         }
       }
 
-      const utcOffset = formatUtcOffset(lon)
+      const tzObj = selectedCountryObj?.timezones?.[0]
+      const timezoneName = tzObj?.zoneName || null
+      const preciseOffset = tzObj?.gmtOffsetName ? tzObj.gmtOffsetName.replace(/^UTC/i, '').trim() : formatUtcOffset(lon)
+
       onSelect({
         lat,
         lng: lon,
         locationName,
-        utcOffset,
+        utcOffset: preciseOffset,
+        timezone: timezoneName,
         country: countryName,
         state: stateName,
         city: cityName,
       })
     } catch (_) {
+      const tzObj = selectedCountryObj?.timezones?.[0]
       onSelect({
         lat: 0.0,
         lng: 0.0,
         locationName,
-        utcOffset: "+00:00",
+        utcOffset: tzObj?.gmtOffsetName ? tzObj.gmtOffsetName.replace(/^UTC/i, '').trim() : "+00:00",
+        timezone: tzObj?.zoneName || null,
         country: countryName,
         state: stateName,
         city: cityName,

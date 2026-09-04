@@ -327,6 +327,7 @@ function ProcessingStep() {
           date:         birthData?.date || '2000-01-01',
           time:         birthData?.time || '12:00',
           utc_offset:   birthData?.utcOffset || '+00:00',
+          timezone:     birthData?.timezone || null,
           lat:          parseFloat(birthData?.lat ?? 0.0),
           lon:          parseFloat(birthData?.lng ?? 0.0),
           ayanamsha:    'lahiri',

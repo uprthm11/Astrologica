@@ -10,7 +10,8 @@ from datetime import datetime
 class BaseBirthDataRequest(BaseModel):
     date: str = Field(..., description="Date of birth in YYYY/MM/DD or YYYY-MM-DD format", example="2003/06/11")
     time: str = Field(..., description="Time of birth in HH:MM or HH:MM:SS format (24h)", example="12:00")
-    utc_offset: str = Field(default="+05:30", description="UTC time offset string, e.g. '+05:30'", example="+05:30")
+    utc_offset: Optional[str] = Field(default="+05:30", description="UTC time offset string, e.g. '+05:30'", example="+05:30")
+    timezone: Optional[str] = Field(default=None, description="IANA timezone name, e.g. 'Asia/Kolkata'", example="Asia/Kolkata")
     lat: float = Field(..., description="Latitude in decimal degrees", example=22.7196)
     lon: float = Field(..., description="Longitude in decimal degrees", example=75.8577)
 
@@ -108,6 +109,7 @@ class InterpretChartRequest(BaseModel):
     date: Optional[str] = Field(default=None, description="Birth date in YYYY-MM-DD")
     time: Optional[str] = Field(default=None, description="Birth time in HH:MM")
     utc_offset: Optional[str] = Field(default="+00:00", description="UTC offset")
+    timezone: Optional[str] = Field(default=None, description="IANA timezone name, e.g. 'Asia/Kolkata'")
     lat: Optional[float] = Field(default=None, description="Latitude")
     lon: Optional[float] = Field(default=None, description="Longitude")
     user_name: Optional[str] = Field(default=None, description="Traveler name")

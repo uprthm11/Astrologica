@@ -2,11 +2,54 @@
 Core Astrological Constants, Swiss Ephemeris Utilities, and Dignities Matrix
 """
 import swisseph as swe
-from datetime import datetime
-from typing import Tuple, Dict, Any, List
+import re
+from datetime import datetime, timezone, timedelta
+from typing import Tuple, Dict, Any, List, Optional
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    ZoneInfo = None
+import pytz
+from timezonefinder import TimezoneFinder
 
 # Initialize Swiss Ephemeris built-in path
 swe.set_ephe_path("")
+
+_tf: Optional[TimezoneFinder] = None
+
+def get_timezone_finder() -> TimezoneFinder:
+    global _tf
+    if _tf is None:
+        _tf = TimezoneFinder()
+    return _tf
+
+def parse_offset_to_hours(offset_str: str) -> float:
+    """
+    Parses any offset format like '+05:30', '-04:00', '+5.5', '5.5', '+0530', 'UTC+05:30'
+    into precise fractional hours, e.g. 5.5 for +05:30.
+    """
+    s = str(offset_str).strip()
+    s = re.sub(r'^(UTC|GMT)', '', s, flags=re.IGNORECASE).strip()
+    sign = -1.0 if s.startswith('-') else 1.0
+    s_clean = s.lstrip('+-')
+    
+    if ':' in s_clean:
+        parts = s_clean.split(':')
+        h = float(parts[0])
+        m = float(parts[1]) if len(parts) > 1 else 0.0
+        s_sec = float(parts[2]) if len(parts) > 2 else 0.0
+        return sign * (h + m / 60.0 + s_sec / 3600.0)
+    elif '.' in s_clean:
+        return sign * float(s_clean)
+    elif len(s_clean) == 4 and s_clean.isdigit():
+        h = float(s_clean[:2])
+        m = float(s_clean[2:])
+        return sign * (h + m / 60.0)
+    else:
+        try:
+            return sign * float(s_clean)
+        except ValueError:
+            return 0.0
 
 ZODIAC_SIGNS: List[Dict[str, Any]] = [
     {"index": 1, "name": "Aries", "sanskrit": "Mesha", "glyph": "♈", "element": "Fire", "modality": "Cardinal", "ruler": "Mars"},
@@ -110,9 +153,18 @@ def to_sign_and_degree(longitude: float) -> Dict[str, Any]:
         "dms": format_dms(deg_in_sign),
     }
 
-def parse_julian_day(date_str: str, time_str: str, utc_offset_str: str) -> Tuple[float, datetime]:
+def parse_julian_day(
+    date_str: str,
+    time_str: str,
+    utc_offset_str: Optional[str] = None,
+    lat: Optional[float] = None,
+    lon: Optional[float] = None,
+    tz_str: Optional[str] = None
+) -> Tuple[float, datetime]:
     """
-    Parse date, time, and UTC offset string into Julian Day (UT) and localized datetime object.
+    Parse date, time, and timezone/UTC offset into Julian Day (UT) and localized datetime object.
+    Overhauled to use pytz and zoneinfo with geographical timezone resolution (e.g. Asia/Kolkata)
+    to prevent fractional timezone truncation and accurately compute time-dependent house cusps.
     """
     clean_date = str(date_str).strip().replace("-", "/")
     parts_date = [int(p) for p in clean_date.split("/")]
@@ -123,20 +175,84 @@ def parse_julian_day(date_str: str, time_str: str, utc_offset_str: str) -> Tuple
     hour = int(parts_time[0])
     minute = int(parts_time[1])
     second = int(parts_time[2]) if len(parts_time) > 2 else 0
+
+    resolved_tz = None
+    tz_name = None
+
+    # 1. Attempt explicit IANA timezone name if provided
+    if tz_str and str(tz_str).strip():
+        cand = str(tz_str).strip()
+        if ZoneInfo:
+            try:
+                resolved_tz = ZoneInfo(cand)
+                tz_name = cand
+            except Exception:
+                pass
+        if resolved_tz is None:
+            try:
+                resolved_tz = pytz.timezone(cand)
+                tz_name = cand
+            except Exception:
+                pass
+
+    # 2. Attempt geographical timezone lookup from latitude & longitude
+    if resolved_tz is None and lat is not None and lon is not None:
+        try:
+            tf = get_timezone_finder()
+            cand = tf.timezone_at(lat=float(lat), lng=float(lon))
+            if cand:
+                if ZoneInfo:
+                    try:
+                        resolved_tz = ZoneInfo(cand)
+                        tz_name = cand
+                    except Exception:
+                        pass
+                if resolved_tz is None:
+                    try:
+                        resolved_tz = pytz.timezone(cand)
+                        tz_name = cand
+                    except Exception:
+                        pass
+        except Exception:
+            resolved_tz = None
+
+    # 3. If IANA timezone was resolved, localize and compute exact UTC datetime
+    if resolved_tz is not None:
+        try:
+            if ZoneInfo and isinstance(resolved_tz, ZoneInfo):
+                dt_local = datetime(year, month, day, hour, minute, second, tzinfo=resolved_tz)
+                dt_utc = dt_local.astimezone(timezone.utc)
+            else:
+                dt_naive = datetime(year, month, day, hour, minute, second)
+                dt_local = resolved_tz.localize(dt_naive)
+                dt_utc = dt_local.astimezone(pytz.utc)
+
+            ut_decimal_hour = (
+                dt_utc.hour 
+                + (dt_utc.minute / 60.0) 
+                + (dt_utc.second / 3600.0) 
+                + (dt_utc.microsecond / 3600000000.0)
+            )
+            jd = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day, ut_decimal_hour)
+            return jd, dt_local
+        except Exception:
+            pass
+
+    # 4. Fallback: Parse explicit fractional UTC offset string
+    if utc_offset_str is not None and str(utc_offset_str).strip():
+        total_offset_hours = parse_offset_to_hours(str(utc_offset_str))
+    else:
+        total_offset_hours = 0.0
+
+    dt_local = datetime(year, month, day, hour, minute, second)
+    dt_utc = dt_local - timedelta(hours=total_offset_hours)
     
-    # Parse UTC offset, e.g. "+05:30", "-04:00", "+00:00"
-    raw_offset = str(utc_offset_str).strip()
-    sign = -1.0 if raw_offset.startswith("-") else 1.0
-    cleaned_offset = raw_offset.lstrip("+-")
-    offset_parts = cleaned_offset.split(":")
-    offset_hours = float(offset_parts[0])
-    offset_mins = float(offset_parts[1]) if len(offset_parts) > 1 else 0.0
-    total_offset_hours = sign * (offset_hours + (offset_mins / 60.0))
+    ut_decimal_hour = (
+        dt_utc.hour 
+        + (dt_utc.minute / 60.0) 
+        + (dt_utc.second / 3600.0) 
+        + (dt_utc.microsecond / 3600000000.0)
+    )
+    jd = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day, ut_decimal_hour)
     
-    local_decimal_hour = hour + (minute / 60.0) + (second / 3600.0)
-    ut_decimal_hour = local_decimal_hour - total_offset_hours
-    
-    jd = swe.julday(year, month, day, ut_decimal_hour)
-    dt_obj = datetime(year, month, day, hour, minute, second)
-    
-    return jd, dt_obj
+    return jd, dt_local
