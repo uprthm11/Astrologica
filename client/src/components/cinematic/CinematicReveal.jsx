@@ -148,6 +148,122 @@ const SLIDE_TRANSITION = {
   exit:    { opacity: 0, y: -20, transition: { duration: 0.4 } },
 }
 
+// ─── Dynamic Storyboard Icon & Glow Resolvers ──────────────────────────────────
+function StoryboardIcon({ hint = '', className = 'w-20 h-20' }) {
+  const clean = safeLower(hint).trim()
+  const capitalizedSign = clean.charAt(0).toUpperCase() + clean.slice(1)
+  if (ZODIAC_SVG_COMPONENTS[capitalizedSign]) {
+    const IconComp = ZODIAC_SVG_COMPONENTS[capitalizedSign]
+    return <IconComp className={className} />
+  }
+
+  if (clean.includes('sun')) {
+    return (
+      <svg className={className} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <circle cx="50" cy="50" r="22" />
+        <circle cx="50" cy="50" r="4" fill="currentColor" />
+        <path d="M50 14 V20 M50 80 V86 M14 50 H20 M80 50 H86 M25 25 L30 30 M70 70 L75 75 M25 75 L30 70 M70 30 L75 25" strokeLinecap="round" />
+      </svg>
+    )
+  }
+  if (clean.includes('moon')) {
+    return (
+      <svg className={className} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+        <path d="M60 20 C40 25 30 45 35 65 C40 85 60 88 72 80 C48 78 44 42 60 20 Z" />
+      </svg>
+    )
+  }
+  if (clean.includes('saturn')) {
+    return (
+      <svg className={className} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+        <path d="M45 18 V78 M45 42 C65 32 75 52 62 68 M32 32 H58" />
+        <ellipse cx="50" cy="50" rx="34" ry="12" strokeDasharray="3 3" />
+      </svg>
+    )
+  }
+  if (clean.includes('mars')) {
+    return (
+      <svg className={className} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="44" cy="56" r="20" />
+        <line x1="58" y1="42" x2="80" y2="20" />
+        <polyline points="65 20 80 20 80 35" />
+      </svg>
+    )
+  }
+  if (clean.includes('venus')) {
+    return (
+      <svg className={className} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="50" cy="38" r="20" />
+        <line x1="50" y1="58" x2="50" y2="86" />
+        <line x1="36" y1="72" x2="64" y2="72" />
+      </svg>
+    )
+  }
+  if (clean.includes('mercury')) {
+    return (
+      <svg className={className} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+        <path d="M38 22 C38 32 62 32 62 22" />
+        <circle cx="50" cy="46" r="16" />
+        <line x1="50" y1="62" x2="50" y2="86" />
+        <line x1="38" y1="74" x2="62" y2="74" />
+      </svg>
+    )
+  }
+  if (clean.includes('jupiter')) {
+    return (
+      <svg className={className} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+        <path d="M30 35 C30 25 45 25 50 35 V75 M50 60 H75 M68 50 V75" />
+      </svg>
+    )
+  }
+  if (clean.includes('square')) {
+    return (
+      <svg className={className} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <rect x="25" y="25" width="50" height="50" rx="4" />
+      </svg>
+    )
+  }
+  if (clean.includes('trine')) {
+    return (
+      <svg className={className} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round">
+        <polygon points="50,20 80,75 20,75" />
+      </svg>
+    )
+  }
+  if (clean.includes('stellium') || clean.includes('conjunction')) {
+    return (
+      <svg className={className} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <circle cx="38" cy="50" r="18" />
+        <circle cx="62" cy="50" r="18" />
+      </svg>
+    )
+  }
+
+  return (
+    <svg className={className} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <circle cx="50" cy="50" r="14" />
+      <path d="M50 16 V30 M50 70 V84 M16 50 H30 M70 50 H84" />
+    </svg>
+  )
+}
+
+function getStoryboardGlow(hint = '') {
+  const clean = safeLower(hint)
+  if (clean.includes('fire') || clean.includes('aries') || clean.includes('leo') || clean.includes('sagittarius') || clean.includes('mars') || clean.includes('sun')) {
+    return 'drop-shadow-[0_0_24px_rgba(249,115,22,0.85)] text-orange-400'
+  }
+  if (clean.includes('earth') || clean.includes('taurus') || clean.includes('virgo') || clean.includes('capricorn') || clean.includes('saturn')) {
+    return 'drop-shadow-[0_0_24px_rgba(16,185,129,0.85)] text-emerald-400'
+  }
+  if (clean.includes('air') || clean.includes('gemini') || clean.includes('libra') || clean.includes('aquarius') || clean.includes('mercury') || clean.includes('uranus')) {
+    return 'drop-shadow-[0_0_24px_rgba(6,182,212,0.85)] text-cyan-400'
+  }
+  if (clean.includes('water') || clean.includes('cancer') || clean.includes('scorpio') || clean.includes('pisces') || clean.includes('moon') || clean.includes('neptune')) {
+    return 'drop-shadow-[0_0_24px_rgba(56,88,246,0.85)] text-blue-400'
+  }
+  return 'drop-shadow-[0_0_24px_rgba(6,182,212,0.85)] text-cyan-300'
+}
+
 export default function CinematicReveal() {
   const { astrologyData, birthData, userName, revealSlide, setRevealSlide, advanceStep, goBack } = useAppStore()
   const [downloading, setDownloading] = useState(false)
@@ -215,7 +331,7 @@ export default function CinematicReveal() {
   // ═════════════════════════════════════════════════════════════════════════════
   // 11-SLIDE PSYCHOLOGICAL DEPTH PIPELINE
   // ═════════════════════════════════════════════════════════════════════════════
-  const SLIDES = [
+  const legacySlides = [
     // ── Slide 1 (The Sun Sign: Three-Tier Dossier) ──
     <div key="slide-1" className="flex flex-col items-center text-center max-w-2xl mx-auto w-full">
       {/* Top Indicator */}
@@ -606,7 +722,78 @@ export default function CinematicReveal() {
     </div>,
   ]
 
-  const currentSlide = SLIDES[Math.min(revealSlide, SLIDES.length - 1)]
+  // ═════════════════════════════════════════════════════════════════════════════
+  // DYNAMIC AI STORYBOARD PIPELINE (Border-free Cinematic Chapters)
+  // ═════════════════════════════════════════════════════════════════════════════
+  const rawStoryboard = astrologyData?.storyboard || []
+  const disclaimerText = astrologyData?.disclaimer || "Astrological interpretations offer symbolic perspectives on psychological themes and cycles and are intended solely for self-reflection and personal inquiry."
+
+  const dynamicSlides = rawStoryboard.map((chapter, cIdx) => {
+    const primaryHint = chapter.sections?.[0]?.icon_hint || sunSign
+    const glowClass = getStoryboardGlow(primaryHint)
+    const isLast = cIdx === rawStoryboard.length - 1
+
+    return (
+      <div key={`storyboard-chapter-${cIdx}`} className="flex flex-col items-center text-center max-w-2xl mx-auto w-full">
+        {/* Chapter Meta-Tracker */}
+        <div className="text-xs tracking-[0.4em] text-blue-300/60 uppercase mb-3">
+          Chapter {cIdx + 1} of {rawStoryboard.length}
+        </div>
+
+        {/* Dynamic AI Synthesized Chapter Title */}
+        <h2 className="text-2xl md:text-3xl font-light tracking-[0.2em] text-white drop-shadow-md mb-4">
+          {chapter.chapter_title}
+        </h2>
+
+        {/* Dynamic Celestial / Zodiac SVG Anchor */}
+        <div className="flex flex-col items-center justify-center mb-5">
+          <div className={`p-4 rounded-full ${glowClass} transition-transform hover:scale-105 duration-300`}>
+            <StoryboardIcon hint={primaryHint} className="w-16 h-16 md:w-20 md:h-20" />
+          </div>
+        </div>
+
+        {/* Borderless Floating Sections Stack */}
+        <div className="max-h-[46vh] md:max-h-[50vh] overflow-y-auto custom-scrollbar flex flex-col gap-6 text-center max-w-2xl px-4 scrollbar-thin">
+          {chapter.sections?.map((sec, sIdx) => (
+            <div key={sIdx} className="space-y-1.5">
+              <h3 className="text-sm md:text-base tracking-widest text-cyan-400 uppercase font-light drop-shadow-md">
+                {sec.heading}
+              </h3>
+              <p className="text-base md:text-lg font-light text-blue-50/90 leading-relaxed drop-shadow-md max-w-xl mx-auto">
+                {sec.body}
+              </p>
+            </div>
+          ))}
+
+          {isLast && (
+            <div className="pt-2 text-xs text-blue-200/40 italic max-w-md mx-auto">
+              {disclaimerText}
+            </div>
+          )}
+        </div>
+
+        {/* Navigation Controls */}
+        <div className="flex flex-wrap items-center justify-center gap-6 pt-6">
+          <CinematicGhostButton onClick={() => cIdx === 0 ? goBack() : setRevealSlide(cIdx - 1)}>
+            ← BACK
+          </CinematicGhostButton>
+
+          {!isLast ? (
+            <CinematicButton onClick={() => setRevealSlide(cIdx + 1)}>
+              Next →
+            </CinematicButton>
+          ) : (
+            <CinematicButton onClick={handleDownload} disabled={downloading}>
+              {downloading ? 'Generating Poster...' : 'Download Blueprint Poster'}
+            </CinematicButton>
+          )}
+        </div>
+      </div>
+    )
+  })
+
+  const SLIDES = dynamicSlides.length > 0 ? dynamicSlides : legacySlides
+  const currentSlide = SLIDES[Math.min(revealSlide, Math.max(0, SLIDES.length - 1))]
 
   return (
     <div className="min-h-screen w-full flex flex-col justify-center items-center overflow-hidden px-4 md:px-8 py-8 relative">

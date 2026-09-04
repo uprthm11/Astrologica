@@ -101,4 +101,15 @@ class VisitorJourney(BaseModel):
     action_log: Optional[List[str]] = Field(default_factory=list, description="Ordered sequence of user actions")
     timestamp: Optional[str] = Field(default=None, description="ISO timestamp of the event")
 
+# --- AI Interpret Chart Request ---
+
+class InterpretChartRequest(BaseModel):
+    western_chart: Optional[Dict[str, Any]] = Field(default=None, description="Raw ephemeris calculation dictionary")
+    date: Optional[str] = Field(default=None, description="Birth date in YYYY-MM-DD")
+    time: Optional[str] = Field(default=None, description="Birth time in HH:MM")
+    utc_offset: Optional[str] = Field(default="+00:00", description="UTC offset")
+    lat: Optional[float] = Field(default=None, description="Latitude")
+    lon: Optional[float] = Field(default=None, description="Longitude")
+    user_name: Optional[str] = Field(default=None, description="Traveler name")
+
 

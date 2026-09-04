@@ -44,6 +44,16 @@ export const calculateDual = async (payload) => {
   return response.data
 }
 
+export const calculateChart = async (payload) => {
+  const response = await apiClient.post('/api/calculate-chart', payload)
+  return response.data
+}
+
+export const interpretChart = async (payload) => {
+  const response = await apiClient.post('/api/interpret-chart', payload)
+  return response.data
+}
+
 export const getMbtiQuestions = async () => {
   const response = await apiClient.get('/api/mbti/questions', { timeout: 5000 })
   return response.data

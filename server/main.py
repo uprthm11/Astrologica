@@ -17,10 +17,17 @@ from models import (
     MBTIEvaluateRequest,
     SaveBlueprintRequest,
     SaveBlueprintResponse,
+    InterpretChartRequest,
 )
 from services.astro_western import calculate_western_chart
 from services.astro_vedic import calculate_vedic_chart
 from services.astro_dual import calculate_dual_chart
+from services.ai_reader import (
+    StoryboardResponse,
+    StoryboardChapter,
+    StoryboardSection,
+    synthesize_chart_storyboard,
+)
 from services.mbti_engine import (
     ASSESSMENT_QUESTIONS,
     evaluate_psychometric_assessment,
@@ -90,6 +97,8 @@ async def root():
             "calculate_western": "/api/calculate/western",
             "calculate_vedic": "/api/calculate/vedic",
             "calculate_dual": "/api/calculate/dual",
+            "interpret_chart": "/api/interpret-chart",
+            "calculate_chart": "/api/calculate-chart",
             "mbti_questions": "/api/mbti/questions",
             "mbti_evaluate": "/api/mbti/evaluate",
             "calculate_mbti": "/api/calculate-mbti",
@@ -173,12 +182,49 @@ async def calculate_dual_endpoint(request: DualRequest):
         result = calculate_dual_chart(
             request.date, request.time, request.utc_offset, lat_f, lon_f, ay_name, hsys
         )
+        # Synthesize AI Storyboard directly into response
+        ai_storyboard = synthesize_chart_storyboard(result.get("western", {}))
+        result["storyboard"] = ai_storyboard.get("storyboard", [])
+        result["disclaimer"] = ai_storyboard.get("disclaimer", "")
         return result
     except Exception as exc:
         logger.error(f"Dual calculation error: {exc}")
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Error calculating dual chart: {str(exc)}"
+        )
+
+@app.post("/api/interpret-chart", status_code=status.HTTP_200_OK, response_model=StoryboardResponse)
+@app.post("/api/calculate-chart", status_code=status.HTTP_200_OK, response_model=StoryboardResponse)
+async def interpret_chart_endpoint(request: InterpretChartRequest):
+    """
+    AI Cosmic Reader (System 2): Synthesizes raw ephemeris data into a structured
+    dynamic Storyboard Array using strict structured JSON schema.
+    """
+    try:
+        chart = request.western_chart
+        if not chart and request.date and request.lat is not None and request.lon is not None:
+            chart = calculate_western_chart(
+                request.date,
+                request.time or "12:00",
+                request.utc_offset or "+00:00",
+                float(request.lat),
+                float(request.lon)
+            )
+        if not chart:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Must provide either 'western_chart' data or birth parameters (date, time, lat, lon)."
+            )
+        ai_res = synthesize_chart_storyboard(chart, request.user_name)
+        return ai_res
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error(f"Error interpreting chart: {exc}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Chart interpretation failed: {str(exc)}"
         )
 
 @app.post("/api/calculate-blueprint", status_code=status.HTTP_200_OK)
