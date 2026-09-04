@@ -211,7 +211,8 @@ export default function CinematicReveal() {
   // PHASE 3 & 4: DYNAMIC CINEMATIC PRESENTER (MAPPING OVER CHART DATA STORYBOARD)
   // ═════════════════════════════════════════════════════════════════════════════
   const rawStoryboard = astrologyData?.storyboard || []
-  const disclaimerText = astrologyData?.disclaimer || "Astrological interpretations offer symbolic perspectives on psychological themes and cycles and are intended solely for self-reflection and personal inquiry."
+  const rawDisclaimer = astrologyData?.disclaimer || "Astrological interpretations offer symbolic perspectives on psychological themes and cycles and are intended solely for self-reflection and personal inquiry."
+  const disclaimerText = rawDisclaimer.replace(/elf-reflection/g, 'self-reflection')
 
   // If no chapters returned yet, provide an instantaneous default single chapter
   const chapters = rawStoryboard.length > 0 ? rawStoryboard : [
@@ -220,17 +221,17 @@ export default function CinematicReveal() {
       sections: [
         {
           heading: `Sun in ${sunSign}`,
-          body: "Conscious solar vitality and primary will organizing identity into coherent purpose.",
+          body: `Your core drive in ${sunSign} organizes identity around practical output rather than abstract theory.`,
           icon_hint: sunSign.toLowerCase(),
         },
         {
           heading: `Moon in ${moonSign}`,
-          body: "Subconscious emotional sanctuary demanding authentic comfort and cyclic restoration.",
+          body: `Your emotional reset button in ${moonSign} requires sensory downtime and predictable calm before moving forward.`,
           icon_hint: moonSign.toLowerCase(),
         },
         {
           heading: `Ascendant in ${ascSign}`,
-          body: "Eastern horizon persona shaping outward presentation and instinctive first impressions.",
+          body: `People clock your ${ascSign} rising presence and conversational pace before learning anything else.`,
           icon_hint: ascSign.toLowerCase(),
         }
       ]
@@ -341,18 +342,18 @@ export default function CinematicReveal() {
             {currentChapter.sections?.map((sec, sIdx) => (
               <div key={sIdx} className="text-center max-w-lg mx-auto w-full">
                 {/* Phase 3 Typography: Heading */}
-                <h3 className="text-md text-blue-200 font-semibold mb-1">
+                <h3 className="text-md text-blue-200 font-semibold mb-1 break-words">
                   {sec.heading}
                 </h3>
                 {/* Phase 3 Typography: Body */}
-                <p className="text-blue-50/80 font-light leading-relaxed mb-6 text-sm md:text-base">
+                <p className="text-blue-50/80 font-light leading-relaxed mb-6 text-sm md:text-base break-words">
                   {sec.body}
                 </p>
               </div>
             ))}
 
             {isLastSlide && (
-              <div className="pt-2 text-xs text-blue-200/40 italic max-w-md mx-auto">
+              <div className="pt-2 text-xs text-blue-200/40 italic max-w-md mx-auto break-words leading-relaxed">
                 {disclaimerText}
               </div>
             )}
