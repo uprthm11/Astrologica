@@ -173,7 +173,7 @@ const SLIDE_TRANSITION = {
 }
 
 export default function CinematicReveal() {
-  const { astrologyData, birthData, userName, revealSlide, setRevealSlide, advanceStep, goBack } = useAppStore()
+  const { astrologyData, birthData, userName, revealSlide, setRevealSlide } = useAppStore()
   const [downloading, setDownloading] = useState(false)
   const exportRef = useRef(null)
 
