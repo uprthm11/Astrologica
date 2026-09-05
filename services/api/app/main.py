@@ -99,8 +99,9 @@ def create_app(custom_settings=None) -> FastAPI:
     app.include_router(geocode_router)
     app.include_router(timezone_router)
 
-    # Mount Enabled Feature Modules from Registry
-    registry.mount_enabled_modules(app)
+    # Auto-Discover and Mount Enabled Feature Modules from Registry
+    registry.auto_discover(custom_settings=cfg)
+    registry.mount_enabled_modules(app, custom_settings=cfg)
 
     # --- Health & Readiness Probes ---
 
