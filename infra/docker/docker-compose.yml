@@ -1,8 +1,56 @@
-version: "3.8"
+version: '3.8'
+
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: astrologica-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: astrologica
+      POSTGRES_PASSWORD: astrologica_secret_pw
+      POSTGRES_DB: astrologica_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U astrologica -d astrologica_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: astrologica-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   api:
     build:
       context: ../..
       dockerfile: services/api/Dockerfile
+    container_name: astrologica-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://astrologica:astrologica_secret_pw@postgres:5432/astrologica_db
+      REDIS_URL: redis://redis:6379/0
+      PORT: 8000
     ports:
       - "8000:8000"
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -17,6 +17,8 @@ from app.core.config import settings
 from app.core.logging import setup_logging, logger, request_id_ctx
 from app.core.exceptions import setup_exception_handlers
 from app.core.module_registry import registry
+from app.core.cache import cache
+from app.db.session import ping_postgres
 
 # Database connection utilities
 try:
@@ -110,11 +112,13 @@ def create_app(custom_settings=None) -> FastAPI:
 
     @app.get("/readyz", status_code=status.HTTP_200_OK, tags=["Health"])
     async def readyz() -> Dict[str, Any]:
-        """Readiness probe: checks database and subsystems readiness."""
-        db_live = await ping_database()
+        """Readiness probe: checks Postgres and Redis readiness."""
+        postgres_live = await ping_postgres()
+        redis_live = await cache.ping()
         return {
-            "status": "ready" if db_live else "degraded",
-            "database": "connected" if db_live else "disconnected",
+            "status": "ready" if postgres_live else "degraded",
+            "postgres": "connected" if postgres_live else "disconnected",
+            "redis": "connected" if redis_live else "disconnected",
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "modules": registry.get_modules(),
         }
