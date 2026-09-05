@@ -3,6 +3,8 @@ uvicorn[standard]
 pymongo
 python-dotenv
 pydantic
+pydantic-settings
+slowapi
 pyjwt
 pytz
 tzdata
