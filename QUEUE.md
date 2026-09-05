@@ -5,7 +5,7 @@
 - [x] queue/06_backend_database.md
 - [x] queue/07_backend_infra_services.md
 - [x] queue/08_backend_plugin_contract.md
-- [ ] queue/09_frontend_restructure.md
+- [x] queue/09_frontend_restructure.md
 - [ ] queue/10_frontend_state_rebuild.md
 - [ ] queue/11_frontend_routing.md
 - [ ] queue/12_shared_ui_kit.md

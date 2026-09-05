@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@app/*": ["src/app/*"],
+      "@app": ["src/app"],
+      "@shell/*": ["src/shell/*"],
+      "@shell": ["src/shell"],
+      "@stores/*": ["src/stores/*"],
+      "@stores": ["src/stores"],
+      "@lib/*": ["src/lib/*"],
+      "@lib": ["src/lib"],
+      "@routes/*": ["src/routes/*"],
+      "@routes": ["src/routes"],
+      "@modules/*": ["../../modules/*/frontend", "../../modules/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "../../modules/*/frontend/**/*"
+  ]
+}
