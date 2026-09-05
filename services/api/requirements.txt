@@ -10,6 +10,8 @@ asyncpg
 alembic
 redis>=5.0.0
 aiosqlite
+timezonefinder
+httpx
 pyjwt
 pytz
 tzdata

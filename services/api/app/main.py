@@ -19,6 +19,8 @@ from app.core.exceptions import setup_exception_handlers
 from app.core.module_registry import registry
 from app.core.cache import cache
 from app.db.session import ping_postgres
+from app.infra.geocode_service import router as geocode_router
+from app.infra.timezone_service import router as timezone_router
 
 # Database connection utilities
 try:
@@ -94,6 +96,8 @@ def create_app(custom_settings=None) -> FastAPI:
     # Mount Core Platform Routers
     app.include_router(admin_router)
     app.include_router(tracking_router)
+    app.include_router(geocode_router)
+    app.include_router(timezone_router)
 
     # Mount Enabled Feature Modules from Registry
     registry.mount_enabled_modules(app)
