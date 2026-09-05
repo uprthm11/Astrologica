@@ -3,10 +3,6 @@ uvicorn[standard]
 pymongo
 python-dotenv
 pydantic
-flatlib
-pyswisseph
 pyjwt
-google-genai
-timezonefinder
 pytz
 tzdata

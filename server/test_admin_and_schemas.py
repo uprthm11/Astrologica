@@ -46,7 +46,7 @@ def test_admin_and_config_workflow():
 
     # 5. Admin Config update
     update_payload = {
-        "banner_message": "Swiss Ephemeris v2.2 active with KP & Raman Ayanamsha calibration!",
+        "banner_message": "Astrologica Platform Console active",
         "show_banner": True,
         "maintenance_mode": False
     }
