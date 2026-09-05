@@ -11,6 +11,8 @@
   "scripts": {
     "dev:web": "npm run --workspace=apps/web dev",
     "build:web": "npm run --workspace=apps/web build",
+    "test:web": "npm run --workspace=apps/web test",
+    "test": "npm run --workspace=apps/web test",
     "build": "npm run --workspaces --if-present build",
     "lint": "npm run --workspaces --if-present lint"
   }

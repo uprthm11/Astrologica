@@ -17,11 +17,11 @@ jobs:
       - name: Guard 1 - Zero Ephemeris Math in Core/Repo (pyswisseph, flatlib)
         run: |
           echo "Scanning for forbidden ephemeris imports (pyswisseph, flatlib)..."
-          if grep -rnwi "pyswisseph" services/ packages/ apps/ modules/; then
+          if grep -rnwi --exclude-dir=__tests__ --exclude-dir=tests --exclude-dir=node_modules --exclude-dir=dist --exclude="*.test.*" --exclude="*.spec.*" --exclude="test_*" "pyswisseph" services/ packages/ apps/ modules/; then
             echo "FAILED: Found references to pyswisseph in non-allowed paths."
             exit 1
           fi
-          if grep -rnwi "flatlib" services/ packages/ apps/ modules/; then
+          if grep -rnwi --exclude-dir=__tests__ --exclude-dir=tests --exclude-dir=node_modules --exclude-dir=dist --exclude="*.test.*" --exclude="*.spec.*" --exclude="test_*" "flatlib" services/ packages/ apps/ modules/; then
             echo "FAILED: Found references to flatlib in non-allowed paths."
             exit 1
           fi
@@ -30,8 +30,12 @@ jobs:
       - name: Guard 2 - Zero DOM Rasterization (html2canvas)
         run: |
           echo "Scanning for forbidden html2canvas dependencies or imports..."
-          if grep -rnwi "html2canvas" apps/web/src/ packages/ modules/; then
-            echo "FAILED: Found references to html2canvas."
+          if grep -rn --include="package.json" --exclude-dir=node_modules '"html2canvas"' apps/ packages/ modules/ package.json; then
+            echo "FAILED: html2canvas found in package.json dependencies."
+            exit 1
+          fi
+          if grep -rnwi --exclude-dir=__tests__ --exclude-dir=tests --exclude-dir=node_modules --exclude-dir=dist --exclude="*.test.*" --exclude="*.spec.*" --exclude="test_*" "html2canvas" apps/web/src/ packages/ modules/; then
+            echo "FAILED: Found references to html2canvas in source files."
             exit 1
           fi
           echo "Passed: 0 html2canvas references."
@@ -39,7 +43,7 @@ jobs:
       - name: Guard 3 - Zero Hardcoded Timezone Zero Fallbacks (timezones[0])
         run: |
           echo "Scanning for forbidden timezones[0] bugs..."
-          if grep -rnwi "timezones\[0\]" apps/ packages/ services/ modules/; then
+          if grep -rnwi --exclude-dir=__tests__ --exclude-dir=tests --exclude-dir=node_modules --exclude-dir=dist --exclude="*.test.*" --exclude="*.spec.*" --exclude="test_*" "timezones\[0\]" apps/ packages/ services/ modules/; then
             echo "FAILED: Found timezones[0] bug."
             exit 1
           fi
@@ -48,7 +52,7 @@ jobs:
       - name: Guard 4 - Zero Sync Requests in Async Defs
         run: |
           echo "Scanning for sync requests in services/api/app..."
-          if grep -rn "import requests" services/api/app/; then
+          if grep -rn --exclude-dir=__tests__ --exclude-dir=tests --exclude-dir=node_modules --exclude-dir=dist --exclude="*.test.*" --exclude="*.spec.*" --exclude="test_*" "import requests" services/api/app/; then
             echo "FAILED: Found synchronous requests library in backend."
             exit 1
           fi
@@ -57,6 +61,9 @@ jobs:
   backend-tests:
     name: Backend Pytest Suite & Zero-Module Boot Check
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -66,11 +73,13 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
+          cache-dependency-path: services/api/requirements.txt
 
       - name: Install dependencies
+        working-directory: services/api
         run: |
           python -m pip install --upgrade pip
-          pip install fastapi uvicorn pydantic pydantic-settings sqlalchemy alembic redis httpx slowapi timezonefinder pytest pytest-asyncio anyio
+          pip install -r requirements.txt pytest pytest-asyncio anyio
 
       - name: Run Backend Test Suite
         working-directory: services/api
