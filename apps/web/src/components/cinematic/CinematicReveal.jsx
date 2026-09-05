@@ -1,7 +1,7 @@
 import React, { useRef, useCallback, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import html2canvas from 'html2canvas'
-import { useAppStore } from '../../store/useAppStore'
+import { exportCardAsPNG } from '@export-core'
+import { useAppStore } from '@stores'
 import { CinematicButton, CinematicGhostButton } from './CinematicPrimitives'
 import { ZODIAC_SVG_COMPONENTS } from '../../utils/bigThreeData'
 
@@ -183,29 +183,27 @@ export default function CinematicReveal() {
   const moonSign = planets.find(p => p?.id === 'moon')?.sign || 'Taurus'
   const ascSign = astrologyData?.western?.ascendant?.sign || 'Gemini'
 
-  // Dedicated High-Res Poster Capture Handler
+  // Dedicated High-Res Poster Capture Handler using Canvas-native exporter
   const handleDownload = useCallback(async () => {
-    if (!exportRef.current) return
     setDownloading(true)
     try {
-      const canvas = await html2canvas(exportRef.current, {
-        backgroundColor: '#030712',
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        width: 800,
-        height: 1200,
+      const result = await exportCardAsPNG({
+        title: userName ? `${userName}'s Astrological Blueprint` : 'Celestial Blueprint',
+        subtitle: `Sun in ${sunSign} • Moon in ${moonSign} • Ascendant in ${ascSign}`,
+        sections: [
+          { heading: `Sun in ${sunSign}`, body: `Core identity and drive structured in ${sunSign}.` },
+          { heading: `Moon in ${moonSign}`, body: `Emotional processing and subconscious instinct in ${moonSign}.` },
+          { heading: `Ascendant in ${ascSign}`, body: `Rising archetype and navigational presence in ${ascSign}.` },
+        ],
+        filename: `astrologica-storyboard-${safeLower(userName || 'blueprint').replace(/\s+/g, '-')}.png`,
       })
-      const link = document.createElement('a')
-      link.download = `astrologica-storyboard-${safeLower(userName || 'blueprint').replace(/\s+/g, '-')}.png`
-      link.href = canvas.toDataURL('image/png')
-      link.click()
+      result.download()
     } catch (e) {
       console.error(e)
     } finally {
       setDownloading(false)
     }
-  }, [userName])
+  }, [userName, sunSign, moonSign, ascSign])
 
   // ═════════════════════════════════════════════════════════════════════════════
   // PHASE 3 & 4: DYNAMIC CINEMATIC PRESENTER (MAPPING OVER CHART DATA STORYBOARD)

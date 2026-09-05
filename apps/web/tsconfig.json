@@ -30,6 +30,8 @@
       "@ui-kit": ["../../packages/ui-kit/src/index.ts"],
       "@webgl-core/*": ["../../packages/webgl-core/src/*"],
       "@webgl-core": ["../../packages/webgl-core/src/index.ts"],
+      "@export-core/*": ["../../packages/export-core/src/*"],
+      "@export-core": ["../../packages/export-core/src/index.ts"],
       "@modules/*": ["../../modules/*/frontend", "../../modules/*"]
     }
   },
@@ -37,6 +39,7 @@
     "src/**/*",
     "../../packages/ui-kit/src/**/*",
     "../../packages/webgl-core/src/**/*",
+    "../../packages/export-core/src/**/*",
     "../../modules/*/frontend/**/*"
   ]
 }
