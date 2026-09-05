@@ -9,7 +9,7 @@
 - [x] queue/10_frontend_state_rebuild.md
 - [x] queue/11_frontend_routing.md
 - [x] queue/12_shared_ui_kit.md
-- [ ] queue/13_webgl_core_rebuild.md
+- [x] queue/13_webgl_core_rebuild.md
 - [ ] queue/14_onboarding_inputs.md
 - [ ] queue/15_export_pipeline.md
 - [ ] queue/16_cicd_verification.md
