@@ -17,14 +17,14 @@ const TECH_STACK = [
   { name: 'FastAPI Python',    role: 'Backend Calculation API', color: '#10b981' },
   { name: 'Swiss Ephemeris',   role: 'Sub-Arcsecond Astronomy', color: '#a855f7' },
   { name: 'MongoDB Atlas',     role: 'Persistent Journey Telemetry', color: '#4db33d' },
-  { name: 'html2canvas',       role: 'High-Res Poster Export', color: '#ec4899' },
+  { name: 'Native Canvas Exporter', role: 'High-Res Poster Export', color: '#ec4899' },
 ]
 
 const PROLOGUE_STEPS = [
   { step: '01', title: 'The Celestial Entry', desc: 'Awakening within a 3D WebGL starfield, setting an immersive interstellar tone.' },
   { step: '02', title: 'Identity Anchoring', desc: 'Auto-formatted full name input establishing personal resonance across the journey.' },
   { step: '03', title: 'Frictionless Chronology', desc: 'Strict, borderless date and time selectors eliminating invalid birth data.' },
-  { step: '04', title: 'Hierarchical Geocoding', desc: 'Country, State, and City selection with Nominatim backend latitude/longitude resolution.' },
+  { step: '04', title: 'Hierarchical Geocoding', desc: 'Backend geocoding proxy latitude/longitude resolution.' },
   { step: '05', title: 'Swiss Ephemeris Engine', desc: 'Server-side computation of geocentric planetary coordinates accurate to <1 arc-second.' },
   { step: '06', title: 'Psychological Depth Reveal', desc: 'A 9-slide interactive bubble dossier revealing core ego, geometry, and gemstone frequencies.' },
 ]
