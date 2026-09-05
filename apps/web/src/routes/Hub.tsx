@@ -1,8 +1,11 @@
 import React from 'react';
 import { getEnabledModules } from '@lib/moduleRegistry';
+import { useWebGLStore, DEFAULT_CAMERA_Z } from '@stores';
 
 export const Hub: React.FC = () => {
   const modules = getEnabledModules();
+  const setCameraTargetZ = useWebGLStore((s) => s.setCameraTargetZ);
+  const resetCameraTargetZ = useWebGLStore((s) => s.resetCameraTargetZ);
 
   return (
     <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-16 text-zinc-100 selection:bg-indigo-500/30">
@@ -33,7 +36,9 @@ export const Hub: React.FC = () => {
           <article
             key={mod.id}
             data-testid={`module-card-${mod.id}`}
-            className="group relative flex flex-col justify-between p-7 rounded-2xl bg-zinc-950/60 border border-white/[0.07] backdrop-blur-xl transition-all duration-300 hover:border-white/[0.18] hover:bg-zinc-900/40 hover:-translate-y-1 overflow-hidden"
+            onMouseEnter={() => setCameraTargetZ(85)}
+            onMouseLeave={() => resetCameraTargetZ()}
+            className="group relative flex flex-col justify-between p-7 rounded-2xl bg-zinc-950/60 border border-white/[0.07] backdrop-blur-xl transition-all duration-300 hover:border-white/[0.18] hover:bg-zinc-900/40 hover:-translate-y-1 overflow-hidden cursor-pointer"
           >
             {/* Subtle glow behind card */}
             <div

@@ -1,20 +1,7 @@
 import React, { useRef, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { useAppStore } from '../../store/useAppStore'
-
-// Camera Z targets per cinematic step (extended for 8 steps)
-// Step: 0=Intro 1=Name 2=Crossroads 3=About 4=DOB 5=Location 6=Processing 7=Reveal
-const STEP_Z = [120, 95, 68, 48, 58, 42, 30, 22]
-
-// Reveal sub-slide camera targets (steps 0-4 within step 7)
-const REVEAL_Z = [22, 18, 15, 12, 8]
-
-function getCameraTarget(step, revealSlide) {
-  if (step === 25) return 45
-  if (step === 7) return REVEAL_Z[Math.min(revealSlide, REVEAL_Z.length - 1)]
-  return STEP_Z[Math.min(step, STEP_Z.length - 1)]
-}
+import { useAppStore, DEFAULT_CAMERA_Z } from '@stores'
 
 
 // Generate circular alpha map texture to guarantee round particle spheres
@@ -120,11 +107,9 @@ function NebulaDust() {
   )
 }
 
-// ─── Camera rig: reads step + revealSlide and lerps toward target ─────────────
+// ─── Camera rig: reads cameraTargetZ and lerps toward target ─────────────
 function CameraRig() {
-  const cinematicStep = useAppStore(s => s.cinematicStep)
-  const revealSlide   = useAppStore(s => s.revealSlide)
-  const targetZ = getCameraTarget(cinematicStep, revealSlide)
+  const targetZ = useAppStore(s => s.cameraTargetZ ?? DEFAULT_CAMERA_Z)
 
   useFrame(state => {
     state.camera.position.z += (targetZ - state.camera.position.z) * 0.028
