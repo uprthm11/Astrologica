@@ -19,6 +19,8 @@ export default defineConfig({
       { find: '@stores', replacement: path.resolve(__dirname, 'src/stores') },
       { find: '@lib', replacement: path.resolve(__dirname, 'src/lib') },
       { find: '@routes', replacement: path.resolve(__dirname, 'src/routes') },
+      { find: /^@ui-kit\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/ui-kit/src/$1') },
+      { find: '@ui-kit', replacement: path.resolve(__dirname, '../../packages/ui-kit/src/index.ts') },
       { find: /^@modules\/([^/]+)$/, replacement: path.resolve(__dirname, '../../modules/$1/frontend') },
       { find: /^@modules\/([^/]+)\/(.*)$/, replacement: path.resolve(__dirname, '../../modules/$1/frontend/$2') },
       { find: /^@modules\/(.*)$/, replacement: path.resolve(__dirname, '../../modules/$1') }

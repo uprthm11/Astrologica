@@ -2,8 +2,33 @@
   "name": "@astrologica/ui-kit",
   "version": "1.0.0",
   "type": "module",
-  "main": "./src/index.js",
+  "main": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./tokens": {
+      "types": "./dist/tokens.d.ts",
+      "default": "./src/tokens.ts"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./src/*"
+    }
+  },
   "scripts": {
-    "build": "node -e \"console.log('ui-kit ready')\""
+    "build": "tsc -p tsconfig.json",
+    "storybook": "node ./scripts/demo-server.js"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "typescript": "^5.9.3"
   }
 }

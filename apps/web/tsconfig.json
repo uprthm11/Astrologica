@@ -26,11 +26,14 @@
       "@lib": ["src/lib"],
       "@routes/*": ["src/routes/*"],
       "@routes": ["src/routes"],
+      "@ui-kit/*": ["../../packages/ui-kit/src/*"],
+      "@ui-kit": ["../../packages/ui-kit/src/index.ts"],
       "@modules/*": ["../../modules/*/frontend", "../../modules/*"]
     }
   },
   "include": [
     "src/**/*",
+    "../../packages/ui-kit/src/**/*",
     "../../modules/*/frontend/**/*"
   ]
 }

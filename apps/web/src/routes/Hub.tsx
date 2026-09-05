@@ -1,6 +1,12 @@
 import React from 'react';
 import { getEnabledModules } from '@lib/moduleRegistry';
-import { useWebGLStore, DEFAULT_CAMERA_Z } from '@stores';
+import { useWebGLStore } from '@stores';
+import {
+  CinematicHeading,
+  CinematicBody,
+  CinematicCard,
+  GlowIcon,
+} from '@ui-kit';
 
 export const Hub: React.FC = () => {
   const modules = getEnabledModules();
@@ -22,30 +28,25 @@ export const Hub: React.FC = () => {
             Platform Engine v1.0
           </span>
         </div>
-        <h1 className="text-4xl sm:text-6xl font-extralight tracking-widest uppercase mb-4 text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-500">
+        <CinematicHeading level={1} tracking="widest" className="mb-4">
           Astrologica
-        </h1>
-        <p className="text-sm sm:text-base text-zinc-400 font-light max-w-md leading-relaxed">
+        </CinematicHeading>
+        <CinematicBody variant="lead" className="max-w-md text-zinc-400">
           High-precision astrological ephemeris computing, psychodynamic synthesis, and typological matrices.
-        </p>
+        </CinematicBody>
       </header>
 
-      {/* Dynamic Module Grid (Driven by Registry) */}
+      {/* Dynamic Module Grid (Driven by Registry & UI Kit Primitives) */}
       <main className="relative grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl w-full">
         {modules.map((mod) => (
-          <article
+          <CinematicCard
             key={mod.id}
             data-testid={`module-card-${mod.id}`}
+            glowColor={mod.glowColor}
             onMouseEnter={() => setCameraTargetZ(85)}
             onMouseLeave={() => resetCameraTargetZ()}
-            className="group relative flex flex-col justify-between p-7 rounded-2xl bg-zinc-950/60 border border-white/[0.07] backdrop-blur-xl transition-all duration-300 hover:border-white/[0.18] hover:bg-zinc-900/40 hover:-translate-y-1 overflow-hidden cursor-pointer"
+            className="cursor-pointer"
           >
-            {/* Subtle glow behind card */}
-            <div
-              className="pointer-events-none absolute -right-12 -top-12 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-              style={{ backgroundColor: mod.glowColor }}
-            />
-
             <div>
               {/* Category and Tag */}
               <div className="flex items-center justify-between gap-2 mb-4">
@@ -65,14 +66,19 @@ export const Hub: React.FC = () => {
               </div>
 
               {/* Title */}
-              <h2 className="text-xl font-light tracking-wide text-zinc-100 group-hover:text-white transition-colors mb-2.5">
+              <CinematicHeading
+                level={3}
+                tracking="wide"
+                gradient={false}
+                className="text-zinc-100 group-hover:text-white transition-colors mb-2.5"
+              >
                 {mod.name}
-              </h2>
+              </CinematicHeading>
 
               {/* Description */}
-              <p className="text-xs text-zinc-400 font-light leading-relaxed mb-6">
+              <CinematicBody variant="normal" className="text-zinc-400 mb-6">
                 {mod.description}
-              </p>
+              </CinematicBody>
             </div>
 
             {/* Footer Badge */}
@@ -85,15 +91,15 @@ export const Hub: React.FC = () => {
                 COMING SOON
               </span>
             </div>
-          </article>
+          </CinematicCard>
         ))}
       </main>
 
       {/* Footer */}
       <footer className="relative mt-16 text-center">
-        <p className="text-[11px] font-mono text-zinc-600 tracking-widest uppercase">
+        <CinematicBody variant="caption" className="text-zinc-600 font-mono tracking-widest uppercase">
           Autonomous Monorepo Architecture &bull; Pluggable Module System
-        </p>
+        </CinematicBody>
       </footer>
     </div>
   );
