@@ -1,0 +1,10 @@
+{
+  "name": "@astrologica/shared-types",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "scripts": {
+    "build": "node -e \"console.log('shared-types ready')\""
+  }
+}

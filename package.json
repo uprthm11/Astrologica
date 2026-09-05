@@ -1,0 +1,17 @@
+{
+  "name": "astrologica",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "modules/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run --workspace=apps/web dev",
+    "build:web": "npm run --workspace=apps/web build",
+    "build": "npm run --workspaces --if-present build",
+    "lint": "npm run --workspaces --if-present lint"
+  }
+}

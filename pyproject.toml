@@ -1,0 +1,13 @@
+[tool.uv.workspace]
+members = [
+    "services/api",
+    "modules/western-astrology",
+    "modules/vedic-astrology",
+    "modules/compatibility-checker",
+    "modules/mbti-checker",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["services/api", "modules"]
+python_files = ["test_*.py"]
+pythonpath = ["services/api", "modules"]

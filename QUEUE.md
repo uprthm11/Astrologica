@@ -1,6 +1,6 @@
 # Autonomous Execution Queue
 
-- [ ] queue/04_repo_restructure.md
+- [x] queue/04_repo_restructure.md
 - [ ] queue/05_backend_core.md
 - [ ] queue/06_backend_database.md
 - [ ] queue/07_backend_infra_services.md
