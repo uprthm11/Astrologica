@@ -1,7 +1,7 @@
 /**
  * Native Canvas Exporter
  * Renders directly to offscreen memory canvas using Canvas 2D API.
- * 100% independent of DOM rasterization or html2canvas.
+ * 100% independent of DOM rasterization.
  */
 
 export interface ExportSection {
@@ -247,7 +247,7 @@ export function renderCardToCanvas(config: ExportCardConfig): HTMLCanvasElement 
 
 /**
  * High-performance, canvas-native poster capture.
- * Completely eliminates html2canvas by rendering directly to canvas memory and exporting to Blob.
+ * Renders directly to canvas memory and exports to Blob.
  */
 export async function exportCardAsPNG(config: ExportCardConfig): Promise<ExportResult> {
   const canvas = renderCardToCanvas(config);

@@ -1,0 +1,114 @@
+name: CI/CD Pipeline & Architectural Regression Gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  regression-guards:
+    name: Anti-Regression Architectural Gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Guard 1 - Zero Ephemeris Math in Core/Repo (pyswisseph, flatlib)
+        run: |
+          echo "Scanning for forbidden ephemeris imports (pyswisseph, flatlib)..."
+          if grep -rnwi "pyswisseph" services/ packages/ apps/ modules/; then
+            echo "FAILED: Found references to pyswisseph in non-allowed paths."
+            exit 1
+          fi
+          if grep -rnwi "flatlib" services/ packages/ apps/ modules/; then
+            echo "FAILED: Found references to flatlib in non-allowed paths."
+            exit 1
+          fi
+          echo "Passed: 0 pyswisseph / flatlib references."
+
+      - name: Guard 2 - Zero DOM Rasterization (html2canvas)
+        run: |
+          echo "Scanning for forbidden html2canvas dependencies or imports..."
+          if grep -rnwi "html2canvas" apps/web/src/ packages/ modules/; then
+            echo "FAILED: Found references to html2canvas."
+            exit 1
+          fi
+          echo "Passed: 0 html2canvas references."
+
+      - name: Guard 3 - Zero Hardcoded Timezone Zero Fallbacks (timezones[0])
+        run: |
+          echo "Scanning for forbidden timezones[0] bugs..."
+          if grep -rnwi "timezones\[0\]" apps/ packages/ services/ modules/; then
+            echo "FAILED: Found timezones[0] bug."
+            exit 1
+          fi
+          echo "Passed: 0 timezones[0] references."
+
+      - name: Guard 4 - Zero Sync Requests in Async Defs
+        run: |
+          echo "Scanning for sync requests in services/api/app..."
+          if grep -rn "import requests" services/api/app/; then
+            echo "FAILED: Found synchronous requests library in backend."
+            exit 1
+          fi
+          echo "Passed: 0 sync requests calls."
+
+  backend-tests:
+    name: Backend Pytest Suite & Zero-Module Boot Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastapi uvicorn pydantic pydantic-settings sqlalchemy alembic redis httpx slowapi timezonefinder pytest pytest-asyncio anyio
+
+      - name: Run Backend Test Suite
+        working-directory: services/api
+        env:
+          DATABASE_URL: sqlite+aiosqlite:///test.db
+          FEATURE_WESTERN_ASTROLOGY: "false"
+          FEATURE_VEDIC_ASTROLOGY: "false"
+          FEATURE_COMPATIBILITY_CHECKER: "false"
+          FEATURE_MBTI_CHECKER: "false"
+        run: |
+          python -m pytest test_core.py test_db.py test_infra.py test_plugin_contract.py -v
+
+  frontend-build-and-test:
+    name: Frontend Monorepo Test & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Monorepo Dependencies
+        run: npm ci
+
+      - name: Typecheck Workspace Packages
+        run: |
+          npx tsc -p packages/ui-kit/tsconfig.json
+          npx tsc -p packages/webgl-core/tsconfig.json
+          npx tsc -p packages/export-core/tsconfig.json
+
+      - name: Run Frontend Vitest Suite
+        working-directory: apps/web
+        run: npm run test
+
+      - name: Build Web Application
+        working-directory: apps/web
+        run: npm run build

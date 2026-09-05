@@ -12,4 +12,4 @@
 - [x] queue/13_webgl_core_rebuild.md
 - [x] queue/14_onboarding_inputs.md
 - [x] queue/15_export_pipeline.md
-- [ ] queue/16_cicd_verification.md
+- [x] queue/16_cicd_verification.md
